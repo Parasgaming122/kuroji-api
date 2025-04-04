@@ -1,5 +1,5 @@
 import { BasicId } from '../../../shared/BasicId';
-import { Shikimori } from '../../shikimori/Shikimori';
+import { Shikimori } from '../../shikimori/model/Shikimori';
 import { BasicRelease } from './BasicRelease';
 
 export class Release {
