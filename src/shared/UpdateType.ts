@@ -1,0 +1,9 @@
+export enum UpdateType {
+  ANIWATCH = 'ANIWATCH',
+  ANIMEKAI = 'ANIMEKAI',
+  ANIMEPAHE = 'ANIMEPAHE',
+  ANILIST = 'ANILIST',
+  SHIKIMORI = 'SHIKIMORI',
+  TMDB = 'TMDB',
+  TVDB = 'TVDB',
+}

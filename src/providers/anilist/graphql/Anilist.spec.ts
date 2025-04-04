@@ -6,7 +6,6 @@ describe('Anilist', () => {
     const builder = new AnilistQueryBuilder();
     builder.setSearch('Naruto');
     const query: string = Anilist.getQueryBasic(builder);
-    console.log(query);
     expect(query).toContain('Naruto');
   });
 });

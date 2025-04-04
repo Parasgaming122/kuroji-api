@@ -1,9 +1,9 @@
 import { BasicId } from '../../shared/BasicId';
-import { AiredOn } from './others/AiredOn';
-import { ReleasedOn } from './others/ReleasedOn';
-import { Screenshot } from './others/Screenshot';
-import { Video } from './others/Video';
-import { Poster } from './Poster';
+import { AiredOn } from './model/others/AiredOn';
+import { ReleasedOn } from './model/others/ReleasedOn';
+import { Screenshot } from './model/others/Screenshot';
+import { Video } from './model/others/Video';
+import { Poster } from './model/Poster';
 
 export class Shikimori {
   public id!: string;

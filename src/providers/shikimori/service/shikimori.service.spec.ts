@@ -1,4 +1,7 @@
+import { HttpModule } from '@nestjs/axios';
 import { Test, TestingModule } from '@nestjs/testing';
+import { CustomHttpService } from '../../../http/http.service';
+import { PrismaService } from '../../../prisma.service';
 import { ShikimoriService } from './shikimori.service';
 
 describe('ShikimoriService', () => {
@@ -6,10 +9,16 @@ describe('ShikimoriService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ShikimoriService],
+      imports: [HttpModule],
+      providers: [ShikimoriService, PrismaService, CustomHttpService],
     }).compile();
 
     service = module.get<ShikimoriService>(ShikimoriService);
+  });
+
+  it('fetch shikimori from graphql', async () => {
+    const data = await service.getShikimori('21');
+    expect(data).toBeDefined();
   });
 
   it('should be defined', () => {

@@ -12,3 +12,238 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Shikimori {
+  id            String       @id
+  malId         String?
+  name          String?
+  russian       String?
+  licenseNameRu String?
+  english       String?
+  japanese      String?
+  synonyms      String[]
+  kind          String?
+  rating        String?
+  score         Float?
+  status        String?
+  episodes      Int?
+  episodesAired Int?
+  duration      Int?
+  airedOn       AiredOn?     @relation(fields: [airedOnId], references: [id])
+  airedOnId     Int?
+  releasedOn    ReleasedOn?  @relation(fields: [releasedOnId], references: [id])
+  releasedOnId  Int?
+  url           String?
+  season        String?
+  poster        Poster?      @relation(fields: [posterId], references: [id])
+  posterId      Int?
+  createdAt     DateTime?
+  updatedAt     DateTime?
+  nextEpisodeAt DateTime?
+  chronology    BasicId[]
+  videos        Video[]
+  screenshots   Screenshot[]
+}
+
+model AiredOn {
+  id        Int         @id @default(autoincrement())
+  year      Int?
+  month     Int?
+  day       Int?
+  date      String?
+  Shikimori Shikimori[]
+}
+
+model ReleasedOn {
+  id        Int         @id @default(autoincrement())
+  year      Int?
+  month     Int?
+  day       Int?
+  date      String?
+  Shikimori Shikimori[]
+}
+
+model BasicId {
+  id          Int        @id @default(autoincrement())
+  idMal       Int?
+  Shikimori   Shikimori? @relation(fields: [shikimoriId], references: [id])
+  shikimoriId String?
+}
+
+model Video {
+  id            Int        @id @default(autoincrement())
+  videoId       String?
+  videoImageUrl String?
+  kind          String?
+  videoName     String?
+  playerUrl     String?
+  videoUrl      String?
+  Shikimori     Shikimori? @relation(fields: [shikimoriId], references: [id])
+  shikimoriId   String?
+}
+
+model Screenshot {
+  id          Int        @id @default(autoincrement())
+  originalUrl String?
+  x166Url     String?
+  x332Url     String?
+  Shikimori   Shikimori? @relation(fields: [shikimoriId], references: [id])
+  shikimoriId String?
+}
+
+model BasicRelease {
+  id                  Int             @id @default(autoincrement())
+  idMal               Int?
+  siteUrl             String?
+  title               Title?          @relation(fields: [titleId], references: [id])
+  titleId             Int?
+  synonyms            String[]
+  bannerImage         String?
+  coverImage          CoverImage?     @relation(fields: [coverImageId], references: [id])
+  coverImageId        Int?
+  type                String?
+  format              String?
+  status              String?
+  description         String?
+  startDate           DateDetails?    @relation(fields: [startDateId], references: [id])
+  startDateId         Int?
+  season              String?
+  seasonYear          Int?
+  episodes            Int?
+  episodesAired       Int?
+  duration            Int?
+  countryOfOrigin     String?
+  popularity          Int?
+  favourites          Int?
+  averageScore        Int?
+  meanScore           Int?
+  isLocked            Boolean?
+  isAdult             Boolean?
+  genres              String[]
+  nextAiringEpisode   AiringEpisode?  @relation(fields: [nextAiringEpisodeId], references: [id])
+  nextAiringEpisodeId Int?
+  shikimori           BasicShikimori? @relation(fields: [shikimoriId], references: [id])
+  shikimoriId         Int?
+}
+
+model Title {
+  id           Int            @id @default(autoincrement())
+  romaji       String?
+  english      String?
+  native       String?
+  BasicRelease BasicRelease[]
+}
+
+model CoverImage {
+  id           Int            @id @default(autoincrement())
+  extraLarge   String?
+  large        String?
+  medium       String?
+  color        String?
+  BasicRelease BasicRelease[]
+}
+
+model DateDetails {
+  id           Int            @id @default(autoincrement())
+  year         Int?
+  month        Int?
+  day          Int?
+  BasicRelease BasicRelease[]
+}
+
+model AiringEpisode {
+  id              Int            @id @default(autoincrement())
+  airingAt        Int?
+  timeUntilAiring Int?
+  episode         Int?
+  BasicRelease    BasicRelease[]
+}
+
+model BasicShikimori {
+  id           Int            @id @default(autoincrement())
+  name         String?
+  url          String?
+  poster       Poster?        @relation(fields: [posterId], references: [id])
+  posterId     Int?
+  BasicRelease BasicRelease[]
+}
+
+model Poster {
+  id             Int              @id @default(autoincrement())
+  originalUrl    String?
+  mainUrl        String?
+  BasicShikimori BasicShikimori[]
+  Shikimori      Shikimori[]
+}
+
+model ReleaseFilter {
+  id                  Int      @id @default(autoincrement())
+  sort                String[]
+  perPage             Int?
+  page                Int?
+  sourceIn            String[]
+  popularityLesser    Int?
+  popularityGreater   Int?
+  popularityNot       Int?
+  averageScoreLesser  Int?
+  averageScoreGreater Int?
+  averageScoreNot     Int?
+  licensedByIdIn      String[]
+  licensedByIn        String[]
+  tagCategoryNotIn    String[]
+  tagCategoryIn       String[]
+  tagNotIn            String[]
+  tagIn               String[]
+  genreNotIn          String[]
+  genreIn             String[]
+  durationLesser      Int?
+  durationGreater     Int?
+  episodesLesser      Int?
+  episodesGreater     Int?
+  statusNotIn         String[]
+  statusNot           String?
+  statusIn            String[]
+  formatNotIn         String[]
+  formatNot           String?
+  formatIn            String[]
+  endDateLike         String?
+  endDateLesser       String?
+  endDateGreater      String?
+  startDateLike       String?
+  startDateLesser     String?
+  startDateGreater    String?
+  idMalNotIn          Int[]
+  idMalIn             Int[]
+  idMalNot            Int?
+  idNotIn             Int[]
+  idIn                Int[]
+  idNot               Int?
+  search              String?
+  isLicensed          Boolean?
+  countryOfOrigin     String?
+  isAdult             Boolean?
+  format              String?
+  type                String?
+  status              String?
+  season              String?
+  idMal               Int?
+}
+
+model ReleaseIndex {
+  id        String   @id
+  addedAt   DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Ids {
+  id   Int   @id @default(autoincrement())
+  sfw  Int[]
+  nsfw Int[]
+}
+
+model LastUpdated {
+  id        String   @id
+  entityId  String
+  type      String
+  createdAt DateTime @default(now())
+}
