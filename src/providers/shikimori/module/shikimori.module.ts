@@ -1,19 +1,22 @@
-import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
-import { CustomHttpService } from '../../../http/http.service';
-import { PrismaService } from '../../../prisma.service';
+import { HttpModule } from '@nestjs/axios';
 import { ShikimoriController } from '../controller/shikimori.controller';
 import { ShikimoriService } from '../service/shikimori.service';
-import { ShikimoriHelper } from '../utils/shikimori-helper';
+import { CustomHttpService } from '../../../http/http.service';
+import { PrismaService } from '../../../prisma.service';
+import { ShikimoriHelperModule } from './shikimori-helper.module';
 
 @Module({
-  imports: [HttpModule],
+  imports: [
+    HttpModule,
+    ShikimoriHelperModule
+  ],
   controllers: [ShikimoriController],
   providers: [
     ShikimoriService,
     PrismaService,
     CustomHttpService,
-    ShikimoriHelper,
   ],
+  exports: [ShikimoriService]
 })
 export class ShikimoriModule {}

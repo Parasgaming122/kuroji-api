@@ -139,7 +139,7 @@ model Shikimori {
 }
 
 model AiredOn {
-  id        String      @id
+  id        Int         @id @default(autoincrement())
   year      Int?
   month     Int?
   day       Int?
@@ -148,7 +148,7 @@ model AiredOn {
 }
 
 model ReleasedOn {
-  id        String      @id
+  id        Int         @id @default(autoincrement())
   year      Int?
   month     Int?
   day       Int?
@@ -157,14 +157,14 @@ model ReleasedOn {
 }
 
 model BasicIdShik {
-  id          String     @id
-  malId       String?
+  id          Int        @id @default(autoincrement())
+  malId       Int?
   Shikimori   Shikimori? @relation(fields: [shikimoriId], references: [id])
   shikimoriId String?
 }
 
 model Video {
-  id            Int        @id
+  id            Int        @id @default(autoincrement())
   videoId       String?
   videoImageUrl String?
   kind          String?
@@ -176,7 +176,7 @@ model Video {
 }
 
 model Screenshot {
-  id          String     @id
+  id          Int        @id @default(autoincrement())
   originalUrl String?
   x166Url     String?
   x332Url     String?
@@ -185,7 +185,7 @@ model Screenshot {
 }
 
 model BasicReleaseShikimori {
-  id                  String          @id
+  id                  Int             @id @default(autoincrement())
   idMal               Int?
   siteUrl             String?
   title               Title?          @relation(fields: [titleId], references: [id])

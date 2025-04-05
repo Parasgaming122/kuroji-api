@@ -3,7 +3,7 @@ import AnilistQueryBuilder from './query/AnilistQueryBuilder';
 
 type FieldTypeMap = { [key: string]: string };
 
-export default class Anilist {
+export default class AnilistQL {
   private static readonly FIELD_TYPE_MAP: FieldTypeMap = {
     page: 'Int',
     perPage: 'Int',
@@ -77,28 +77,32 @@ export default class Anilist {
     return this.FIELD_TYPE_MAP[fieldName] || 'String';
   }
 
-  public static getQuery(variables: AnilistQueryBuilder): string {
+  public static getQuery(): string {
     const fields = this.buildFullFields();
-    return JSON.stringify({
-      query: `query(${this.buildVariablesString(variables.build())}) { 
-                Page(page: $page, perPage: $perPage) { 
-                    media(${this.buildMediaVariablesString(variables.buildMedia())}) { ${fields} } 
-                    pageInfo { total perPage currentPage lastPage hasNextPage } 
-                } 
-            }`,
-      variables: variables.build(),
-    });
+    const query = `
+      query ($page: Int, $perPage: Int, $id: Int) {
+        Page(page: $page, perPage: $perPage) {
+          media(id: $id) {
+            ${fields}
+          }
+          pageInfo {
+            total
+            perPage
+            currentPage
+            lastPage
+            hasNextPage
+          }
+        }
+      }
+    `;
+
+    return query.trim();
   }
 
   public static getQueryBasic(variables: AnilistQueryBuilder): string {
     const fields = this.buildBasicFields();
     return JSON.stringify({
-      query: `query(${this.buildVariablesString(variables.build())}) { 
-                Page(page: $page, perPage: $perPage) { 
-                    media(${this.buildMediaVariablesString(variables.buildMedia())}) { ${fields} } 
-                    pageInfo { total perPage currentPage lastPage hasNextPage } 
-                } 
-            }`,
+      query: `query(${this.buildVariablesString(variables.build())}) { Page(page: $page, perPage: $perPage) { media(${this.buildMediaVariablesString(variables.buildMedia())}) { ${fields} } pageInfo { total perPage currentPage lastPage hasNextPage } }`,
       variables: variables.build(),
     });
   }
@@ -107,14 +111,8 @@ export default class Anilist {
     variables: AiringSchedulesQueryBuilder,
   ): string {
     const fields = this.buildScheduleFields();
-    console.log(variables.build());
     return JSON.stringify({
-      query: `query(${this.buildVariablesString(variables.build())}) { 
-                Page(page: $page, perPage: $perPage) { 
-                    airingSchedules(${this.buildMediaVariablesString(variables.buildMedia())}) { ${fields} } 
-                    pageInfo { total perPage currentPage lastPage hasNextPage } 
-                } 
-            }`,
+      query: `query(${this.buildVariablesString(variables.build())}) { Page(page: $page, perPage: $perPage) { airingSchedules(${this.buildMediaVariablesString(variables.buildMedia())}) { ${fields} } pageInfo { total perPage currentPage lastPage hasNextPage } }`,
       variables: variables.build(),
     });
   }
@@ -143,77 +141,154 @@ export default class Anilist {
   }
 
   private static buildFullFields(): string {
-    return [
-      'id',
-      'idMal',
-      'siteUrl',
-      'title { romaji english native }',
-      'status',
-      'type',
-      'format',
-      'updatedAt',
-      'coverImage { extraLarge large medium color }',
-      'recommendations(sort: RATING_DESC, perPage: 10) { edges { node { id rating mediaRecommendation { id idMal } } } }',
-      'description',
-      'startDate { year month day }',
-      'endDate { year month day }',
-      'season',
-      'seasonYear',
-      'episodes',
-      'duration',
-      'countryOfOrigin',
-      'isLicensed',
-      'source',
-      'hashtag',
-      'trailer { id site thumbnail }',
-      'genres',
-      'synonyms',
-      'averageScore',
-      'meanScore',
-      'popularity',
-      'isLocked',
-      'trending',
-      'favourites',
-      'tags { id name description category rank isGeneralSpoiler isMediaSpoiler isAdult userId }',
-      'characters(perPage: 10) { edges { node { id name { first middle last full native } image { large medium } gender age } id role } }',
-      'studios { edges { id isMain node { id name siteUrl } } }',
-      'isAdult',
-      'nextAiringEpisode { id airingAt timeUntilAiring episode mediaId }',
-      'airingSchedule { edges { id node { id airingAt timeUntilAiring episode mediaId } } }',
-      'externalLinks { id url site siteId type language color icon notes isDisabled }',
-      'streamingEpisodes { title thumbnail url site }',
-      'stats { scoreDistribution { score amount } statusDistribution { status amount } }',
-      'bannerImage',
-    ].join(' ');
-  }
+    return `
+      id
+      idMal
+      title {
+        romaji
+        english
+        native
+      }
+      status
+      type
+      format
+      updatedAt
+      coverImage {
+        extraLarge
+        large
+        medium
+        color
+      }
+      recommendations(sort: RATING_DESC, perPage: 10) {
+        edges {
+          node {
+            id
+            rating
+            mediaRecommendation {
+              id
+              idMal
+            }
+          }
+        }
+      }
+      description
+      startDate {
+        year
+        month
+        day
+      }
+      endDate {
+        year
+        month
+        day
+      }
+      season
+      seasonYear
+      episodes
+      duration
+      countryOfOrigin
+      isLicensed
+      source
+      hashtag
+      trailer {
+        id
+        site
+        thumbnail
+      }
+      genres
+      synonyms
+      averageScore
+      meanScore
+      popularity
+      isLocked
+      trending
+      favourites
+      tags {
+        id
+        name
+        description
+        category
+        rank
+        isGeneralSpoiler
+        isMediaSpoiler
+        isAdult
+      }
+      characters(perPage: 10) {
+        edges {
+          node {
+            id
+            name {
+              full
+            }
+            image {
+              medium
+            }
+          }
+        }
+      }
+      studios {
+        edges {
+          id
+          isMain
+          node {
+            id
+            name
+          }
+        }
+      }
+      isAdult
+      nextAiringEpisode {
+        id
+        airingAt
+        timeUntilAiring
+        episode
+      }
+      airingSchedule {
+        edges {
+          node {
+            id
+            airingAt
+            episode
+          }
+        }
+      }
+      externalLinks {
+        id
+        url
+        site
+        type
+      }
+      streamingEpisodes {
+        title
+        url
+        site
+      }
+      stats {
+        scoreDistribution {
+          score
+          amount
+        }
+      }
+      bannerImage
+    `.replace(/\s+/g, ' ').trim();
+  }  
 
   private static buildBasicFields(): string {
     return [
-      'siteUrl',
       'id',
-      'title { romaji english native }',
       'idMal',
+      'title{romaji english}',
       'type',
       'format',
       'status',
       'description',
-      'startDate { year month day }',
+      'startDate{year month}',
       'season',
-      'seasonYear',
       'episodes',
       'duration',
-      'countryOfOrigin',
-      'popularity',
-      'favourites',
-      'isLocked',
-      'synonyms',
-      'genres',
-      'isAdult',
-      'nextAiringEpisode { id airingAt timeUntilAiring episode mediaId }',
       'averageScore',
       'meanScore',
-      'bannerImage',
-      'coverImage { extraLarge large medium color }',
+      'coverImage{large}'
     ].join(' ');
   }
 }

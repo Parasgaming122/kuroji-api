@@ -7,9 +7,23 @@ import { CustomHttpService } from '../../../http/http.service';
 describe('AnilistService', () => {
   let service: AnilistService;
 
-  const mockPrismaService = {};
+  const mockPrismaService = {
+    anilist: {
+      findUnique: jest.fn(),
+      create: jest.fn()
+    }
+  };
+  
   const mockShikimoriService = {};
-  const mockCustomHttpService = {};
+  
+  const mockCustomHttpService = {
+    getGraphQL: jest.fn().mockResolvedValue({
+      media: [{
+        id: 21,
+        title: { romaji: 'Test Anime' }
+      }]
+    })
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -31,6 +45,17 @@ describe('AnilistService', () => {
     }).compile();
 
     service = module.get<AnilistService>(AnilistService);
+  });
+
+  it('fetch anilist', async () => {
+    const id = 21;
+    mockPrismaService.anilist.findUnique.mockResolvedValueOnce(null);
+    
+    const result = await service.getAnilist(id);
+    
+    expect(result).toBeDefined();
+    expect(result.id).toEqual(id);
+    expect(mockCustomHttpService.getGraphQL).toHaveBeenCalled();
   });
 
   it('should be defined', () => {

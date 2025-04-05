@@ -1,13 +1,23 @@
 import { Module } from '@nestjs/common';
+import { HttpModule } from '@nestjs/axios';
 import { AnilistController } from '../controller/anilist.controller';
 import { AnilistService } from '../service/anilist.service';
-import { HttpService } from '@nestjs/axios';
-import { CustomHttpService } from 'src/http/http.service';
-import { PrismaService } from 'src/prisma.service';
-import { ShikimoriService } from 'src/providers/shikimori/service/shikimori.service';
+import { CustomHttpService } from '../../../http/http.service';
+import { PrismaService } from '../../../prisma.service';
+import { ShikimoriService } from '../../shikimori/service/shikimori.service';
+import { ShikimoriHelperModule } from '../../shikimori/module/shikimori-helper.module';
 
 @Module({
+  imports: [
+    HttpModule,
+    ShikimoriHelperModule
+  ],
   controllers: [AnilistController],
-  providers: [AnilistService, ShikimoriService, PrismaService, CustomHttpService, HttpService],
+  providers: [
+    AnilistService,
+    ShikimoriService,
+    PrismaService,
+    CustomHttpService,
+  ],
 })
 export class AnilistModule {}

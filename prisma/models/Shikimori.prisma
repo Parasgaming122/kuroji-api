@@ -50,7 +50,7 @@ model ReleasedOn {
 
 model BasicIdShik {
   id          Int        @id @default(autoincrement())
-  idMal       Int?
+  malId       Int?
   Shikimori   Shikimori? @relation(fields: [shikimoriId], references: [id])
   shikimoriId String?
 }
