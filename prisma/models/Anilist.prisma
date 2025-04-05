@@ -1,0 +1,87 @@
+model Release {
+  id                Int      @id
+  idMal             Int?
+  siteUrl           String?
+  // Embedded objects stored as JSON
+  title             Json?       // corresponds to Release.Title
+  coverImage        Json?       // corresponds to Release.CoverImage
+  bannerImage       String?
+  status            String?
+  type              String?
+  format            String?
+  updatedAt         Int?
+  description       String?
+  startDate         Json?       // corresponds to Date (with start_year, start_month, start_day)
+  endDate           Json?       // corresponds to Date (with end_year, end_month, end_day)
+  season            String?
+  seasonYear        Int?
+  episodes          Int?
+  duration          Int?
+  countryOfOrigin   String?
+  isLicensed        Boolean?
+  source            String?
+  hashtag           String?
+  trailer           Json?       // corresponds to Trailer
+  isLocked          Boolean?
+  isAdult           Boolean?
+  averageScore      Int?
+  meanScore         Int?
+  popularity        Int?
+  trending          Int?
+  favourites        Int?
+  genres            String[]    // Element collection of strings
+  synonyms          String[]
+  // Complex embedded collections stored as JSON:
+  recommendations   Json?       // RecommendationEdgeWrapper<BasicId>
+  characters        Json?       // CharacterEdgeWrapper
+  studios           Json?       // StudioEdgeWrapper
+  airingSchedule    Json?       // AiringEdgeWrapper
+  nextAiringEpisode Json?       // AiringEpisode
+  stats             Json?       // Stats (including scoreDistribution and statusDistribution)
+
+  // Normalized collections (stored in separate tables)
+  tags              ReleaseTag[]
+  externalLinks     ReleaseExternalLink[]
+  streamingEpisodes ReleaseStreamingEpisode[]
+}
+
+model ReleaseTag {
+  id                Int     @id @default(autoincrement())
+  releaseId         Int
+  tagId             Int?
+  name              String?
+  description       String?
+  category          String?
+  rank              Int?
+  isGeneralSpoiler  Boolean?
+  isMediaSpoiler    Boolean?
+  isAdult           Boolean?
+  userId            Int?
+  release           Release @relation(fields: [releaseId], references: [id])
+}
+
+model ReleaseExternalLink {
+  id         Int     @id @default(autoincrement())
+  releaseId  Int
+  exLinkId   Int?
+  url        String?
+  site       String?
+  siteId     Int?
+  type       String?
+  language   String?
+  color      String?
+  icon       String?
+  notes      String?
+  isDisabled Boolean?
+  release    Release @relation(fields: [releaseId], references: [id])
+}
+
+model ReleaseStreamingEpisode {
+  id         Int     @id @default(autoincrement())
+  releaseId  Int
+  title      String?
+  thumbnail  String?
+  url        String?
+  site       String?
+  release    Release @relation(fields: [releaseId], references: [id])
+}
