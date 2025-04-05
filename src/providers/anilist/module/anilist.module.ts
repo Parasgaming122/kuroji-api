@@ -6,11 +6,13 @@ import { CustomHttpService } from '../../../http/http.service';
 import { PrismaService } from '../../../prisma.service';
 import { ShikimoriService } from '../../shikimori/service/shikimori.service';
 import { ShikimoriHelperModule } from '../../shikimori/module/shikimori-helper.module';
+import { AnilistHelperModule } from '../utils/anilist-helper.module';
 
 @Module({
   imports: [
     HttpModule,
-    ShikimoriHelperModule
+    ShikimoriHelperModule,
+    AnilistHelperModule
   ],
   controllers: [AnilistController],
   providers: [

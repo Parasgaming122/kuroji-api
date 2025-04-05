@@ -227,7 +227,7 @@ model Ids {
 }
 
 model LastUpdated {
-  id        String   @id
+  id        Int   @id @default(autoincrement())
   entityId  String
   type      String
   createdAt DateTime @default(now())

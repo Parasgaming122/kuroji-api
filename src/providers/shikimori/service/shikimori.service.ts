@@ -172,7 +172,6 @@ export class ShikimoriService {
   ): Promise<ShikimoriWithRelations> {
     await this.prisma.lastUpdated.create({
       data: {
-        id: anime.id,
         entityId: anime.id,
         type: UpdateType.SHIKIMORI,
       },
@@ -195,7 +194,6 @@ export class ShikimoriService {
 
   async saveShikimoris(shikimoris: ShikimoriWithRelations[]): Promise<void> {
     const lastUpdatedData = shikimoris.map((shikimori) => ({
-      id: shikimori.id,
       entityId: shikimori.id,
       type: UpdateType.SHIKIMORI,
     }));

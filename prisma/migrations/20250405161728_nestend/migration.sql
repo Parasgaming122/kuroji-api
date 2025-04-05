@@ -1,0 +1,31 @@
+-- CreateTable
+CREATE TABLE "BasicRelease" (
+    "id" INTEGER NOT NULL,
+    "idMal" INTEGER,
+    "siteUrl" TEXT,
+    "title" JSONB,
+    "synonyms" TEXT[],
+    "bannerImage" TEXT,
+    "coverImage" JSONB,
+    "type" TEXT,
+    "format" TEXT,
+    "status" TEXT,
+    "description" TEXT,
+    "startDate" JSONB,
+    "season" TEXT,
+    "seasonYear" INTEGER,
+    "episodes" INTEGER,
+    "episodesAired" INTEGER,
+    "duration" INTEGER,
+    "countryOfOrigin" TEXT,
+    "popularity" INTEGER,
+    "favourites" INTEGER,
+    "averageScore" INTEGER,
+    "meanScore" INTEGER,
+    "isLocked" BOOLEAN,
+    "isAdult" BOOLEAN,
+    "genres" TEXT[],
+    "nextAiringEpisode" JSONB,
+
+    CONSTRAINT "BasicRelease_pkey" PRIMARY KEY ("id")
+);
