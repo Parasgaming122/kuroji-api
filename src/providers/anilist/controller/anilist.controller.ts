@@ -1,17 +1,20 @@
-import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
-import { AnilistService } from '../service/anilist.service'
+import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
+import { AnilistService } from '../service/anilist.service';
+import AnilistQueryBuilder from '../graphql/query/AnilistQueryBuilder';
+import { MediaSort } from '../graphql/types/MediaEnums';
 
 @Controller('anilist')
 export class AnilistController {
-  constructor( private readonly service: AnilistService ) {}
+  constructor(private readonly service: AnilistService) {}
 
-  @Get(':id')
+  @Get('info/:id')
   async getAnilist(@Param('id', ParseIntPipe) id: number) {
-    return this.service.getAnilist(id)
+    return this.service.getAnilist(id);
   }
 
-  @Get('test')
-  async test() {
-    return "Test"
+  @Get('search')
+  async searchAnilist(@Query() query: any) {
+    const builder = new AnilistQueryBuilder();
+    return this.service.getAnilists(builder.getByQuery(query));
   }
 }

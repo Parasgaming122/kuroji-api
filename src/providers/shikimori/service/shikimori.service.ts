@@ -41,7 +41,7 @@ export class ShikimoriService {
     const existingShikimori = await this.prisma.shikimori.findUnique({
       where: { id },
       include: {
-        chronology: true, // Include the relation field
+        chronology: true,
         screenshots: true,
         airedOn: true,
         releasedOn: true,
@@ -60,19 +60,8 @@ export class ShikimoriService {
       throw new NotFoundException(`No Shikimori data found for ID: ${id}`);
     }
 
-    const animeShik = shikimoriList.animes[0] as Shikimori;
     const anime = shikimoriList.animes[0];
-    const savedShikimori = await this.prisma.shikimori.create({
-      data: this.helper.getDataForPrisma(anime),
-      include: {
-        chronology: true, // Include the relation field
-        screenshots: true,
-        airedOn: true,
-        releasedOn: true,
-        poster: true,
-        videos: true,
-      },
-    });
+    const savedShikimori = await this.saveShikimori(anime);
     return this.adjustShikimori(savedShikimori);
   }
 
@@ -125,17 +114,25 @@ export class ShikimoriService {
     return shikimori.chronology || [];
   }
 
-  async saveMultipleShikimori(ids: string): Promise<Shikimori[]> {
-    const idList = ids.split(',');
+  async saveMultipleShikimori(ids: string): Promise<ShikimoriWithRelations[]> {
+    const idList = ids.split(',').map(id => id.trim()).filter(id => id !== '');
 
     const existingShikimoriList = await this.prisma.shikimori.findMany({
       where: { id: { in: idList } },
+      include: {
+        chronology: true,
+        screenshots: true,
+        airedOn: true,
+        releasedOn: true,
+        poster: true,
+        videos: true,
+      },
     });
 
     const existingIds = existingShikimoriList.map((shikimori) => shikimori.id);
     const idsToFetch = idList.filter((id) => !existingIds.includes(id));
 
-    const shikimoriList = [...existingShikimoriList];
+    const shikimoriList: ShikimoriWithRelations[] = [...existingShikimoriList];
 
     if (idsToFetch.length) {
       const fetchedShikimoriList = (await this.fetchShikimoriFromGraphQL(
@@ -145,9 +142,7 @@ export class ShikimoriService {
       )) as ShikimoriResponse;
 
       if (!fetchedShikimoriList.animes.length) {
-        throw new NotFoundException(
-          'No Shikimori data found for the provided IDs.',
-        );
+        throw new NotFoundException('No Shikimori data found for the provided IDs.');
       }
 
       const newShikimoriList: ShikimoriWithRelations[] =
@@ -177,19 +172,23 @@ export class ShikimoriService {
       },
     });
 
-    return await this.prisma.shikimori.upsert({
+    const data = this.helper.getDataForPrisma(anime);
+    const { id, ...updateData } = data;
+    const savedShikimori = await this.prisma.shikimori.upsert({
       where: { id: anime.id },
-      update: this.helper.getDataForPrisma(anime),
+      update: updateData,
+      create: data,
       include: {
-        chronology: true, // Include the relation field
+        chronology: true,
         screenshots: true,
         airedOn: true,
         releasedOn: true,
         poster: true,
         videos: true,
       },
-      create: this.helper.getDataForPrisma(anime),
     });
+
+    return savedShikimori;
   }
 
   async saveShikimoris(shikimoris: ShikimoriWithRelations[]): Promise<void> {
@@ -199,11 +198,21 @@ export class ShikimoriService {
     }));
 
     await this.prisma.lastUpdated.createMany({ data: lastUpdatedData });
-    for (const anime of shikimoris) {
-      await this.prisma.shikimori.create({
-        data: this.helper.getDataForPrisma(anime),
+
+    // Deduplicate by 'id'
+    const uniqueShikimoris = Array.from(
+      new Map(shikimoris.map((s) => [s.id, s])).values()
+    );
+
+    for (const anime of uniqueShikimoris) {
+      const data = this.helper.getDataForPrisma(anime);
+      const { id, ...updateData } = data; // remove id from update data
+      await this.prisma.shikimori.upsert({
+        where: { id: anime.id },
+        update: updateData,
+        create: data,
         include: {
-          chronology: true, // Include the relation field
+          chronology: true,
           screenshots: true,
           airedOn: true,
           releasedOn: true,

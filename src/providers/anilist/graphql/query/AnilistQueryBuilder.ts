@@ -67,6 +67,87 @@ export default class AnilistQueryBuilder {
     };
   }
 
+  public getByQuery(query: any): this {
+    // Pagination
+    if (query.page) this.setPage(+query.page);
+    if (query.perPage) this.setPerPage(+query.perPage);
+
+    // Basic filters
+    if (query.search) this.setSearch(query.search);
+    if (query.type) this.setType(query.type);
+    if (query.status) this.setStatus(query.status);
+    if (query.format) this.setFormat(query.format);
+    if (query.season) this.setSeason(query.season);
+    if (query.isAdult !== undefined) this.setIsAdult(query.isAdult === 'true');
+    if (query.isLicensed !== undefined) this.setIsLicensed(query.isLicensed === 'true');
+    if (query.countryOfOrigin) this.setCountryOfOrigin(query.countryOfOrigin);
+
+    // ID filters
+    if (query.id) this.setId(+query.id);
+    if (query.idMal) this.setIdMal(+query.idMal);
+    if (query.idNot) this.setIdNot(+query.idNot);
+    if (query.idIn) this.setIdIn(query.idIn.split(',').map(Number));
+    if (query.idNotIn) this.setIdNotIn(query.idNotIn.split(',').map(Number));
+    if (query.idMalNot) this.setIdMalNot(+query.idMalNot);
+    if (query.idMalIn) this.setIdMalIn(query.idMalIn.split(',').map(Number));
+    if (query.idMalNotIn) this.setIdMalNotIn(query.idMalNotIn.split(',').map(Number));
+
+    // Date filters
+    if (query.startDateGreater) this.setStartDateGreater(query.startDateGreater);
+    if (query.startDateLesser) this.setStartDateLesser(query.startDateLesser);
+    if (query.startDateLike) this.setStartDateLike(query.startDateLike);
+    if (query.endDateGreater) this.setEndDateGreater(query.endDateGreater);
+    if (query.endDateLesser) this.setEndDateLesser(query.endDateLesser);
+    if (query.endDateLike) this.setEndDateLike(query.endDateLike);
+
+    // Format filters
+    if (query.formatIn) this.setFormatIn(query.formatIn.split(','));
+    if (query.formatNotIn) this.setFormatNotIn(query.formatNotIn.split(','));
+    if (query.formatNot) this.setFormatNot(query.formatNot);
+
+    // Status filters
+    if (query.statusIn) this.setStatusIn(query.statusIn.split(','));
+    if (query.statusNotIn) this.setStatusNotIn(query.statusNotIn.split(','));
+    if (query.statusNot) this.setStatusNot(query.statusNot);
+
+    // Episode and duration filters
+    if (query.episodesGreater) this.setEpisodesGreater(+query.episodesGreater);
+    if (query.episodesLesser) this.setEpisodesLesser(+query.episodesLesser);
+    if (query.durationGreater) this.setDurationGreater(+query.durationGreater);
+    if (query.durationLesser) this.setDurationLesser(+query.durationLesser);
+
+    // Genre and tag filters
+    if (query.genreIn) this.setGenreIn(query.genreIn.split(','));
+    if (query.genreNotIn) this.setGenreNotIn(query.genreNotIn.split(','));
+    if (query.tagIn) this.setTagIn(query.tagIn.split(','));
+    if (query.tagNotIn) this.setTagNotIn(query.tagNotIn.split(','));
+    if (query.tagCategoryIn) this.setTagCategoryIn(query.tagCategoryIn.split(','));
+    if (query.tagCategoryNotIn) this.setTagCategoryNotIn(query.tagCategoryNotIn.split(','));
+
+    // License filters
+    if (query.licensedByIn) this.setLicensedByIn(query.licensedByIn.split(','));
+    if (query.licensedByIdIn) this.setLicensedByIdIn(query.licensedByIdIn.split(','));
+
+    // Score and popularity filters
+    if (query.averageScoreGreater) this.setAverageScoreGreater(+query.averageScoreGreater);
+    if (query.averageScoreLesser) this.setAverageScoreLesser(+query.averageScoreLesser);
+    if (query.averageScoreNot) this.setAverageScoreNot(+query.averageScoreNot);
+    if (query.popularityGreater) this.setPopularityGreater(+query.popularityGreater);
+    if (query.popularityLesser) this.setPopularityLesser(+query.popularityLesser);
+    if (query.popularityNot) this.setPopularityNot(+query.popularityNot);
+
+    // Source filters
+    if (query.sourceIn) this.setSourceIn(query.sourceIn.split(','));
+
+    // Sort
+    if (query.sort) {
+      const sortArray = query.sort.split(',') as MediaSort[];
+      this.setSort(sortArray);
+    }
+    
+    return this;
+  }
+
   public setSort(sort: MediaSort[] | null): this {
     if (sort !== null) this.variables.sort = sort;
     return this;

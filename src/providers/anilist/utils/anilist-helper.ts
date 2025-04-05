@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common'
-import { Prisma } from '@prisma/client'
+import { Anilist, Prisma, Shikimori } from '@prisma/client'
+import { AnilistWithRelations } from '../service/anilist.service'
+import { BasicAnilist, BasicShikimori } from '../model/BasicAnilist'
+import { ShikimoriWithRelations } from 'src/providers/shikimori/service/shikimori.service'
 
 @Injectable()
 export class AnilistHelper {
@@ -83,6 +86,51 @@ export class AnilistHelper {
           idMal: edge.node.mediaRecommendation.idMal
         })) || []
       }
+    }
+  }
+
+  public convertAnilistToBasic(anilist: AnilistWithRelations): BasicAnilist {
+    return {
+      id: anilist.id,
+      idMal: anilist.idMal ?? undefined,
+      siteUrl: anilist.siteUrl ?? undefined,
+      title: anilist.title ?? undefined,
+      synonyms: anilist.synonyms ?? undefined,
+      bannerImage: anilist.bannerImage ?? undefined,
+      coverImage: anilist.coverImage ?? undefined,
+      type: anilist.type ?? undefined,
+      format: anilist.format ?? undefined,
+      status: anilist.status ?? undefined,
+      description: anilist.description ?? undefined,
+      startDate: anilist.startDate ?? undefined,
+      season: anilist.season ?? undefined,
+      seasonYear: anilist.seasonYear ?? undefined,
+      episodes: anilist.episodes ?? undefined,
+      // If your Anilist model does not have episodesAired explicitly, you can omit or map it if available.
+      episodesAired: (anilist as any).episodesAired ?? undefined,
+      duration: anilist.duration ?? undefined,
+      countryOfOrigin: anilist.countryOfOrigin ?? undefined,
+      popularity: anilist.popularity ?? undefined,
+      favourites: anilist.favourites ?? undefined,
+      averageScore: anilist.averageScore ?? undefined,
+      meanScore: anilist.meanScore ?? undefined,
+      isLocked: anilist.isLocked ?? undefined,
+      isAdult: anilist.isAdult ?? undefined,
+      genres: anilist.genres ?? undefined,
+      nextAiringEpisode: anilist.nextAiringEpisode ?? undefined,
+      shikimori: this.convertShikimoriToBasic(anilist.shikimori)
+    }
+  }
+
+  public convertShikimoriToBasic(shikimori?: ShikimoriWithRelations): BasicShikimori | undefined {
+    if (!shikimori) {
+      return undefined;
+    }
+    return {
+      id: shikimori.id,
+      malId: shikimori.malId ?? undefined,
+      url: shikimori.url ?? undefined,
+      poster: shikimori.poster ?? undefined
     }
   }
 }
