@@ -8,21 +8,21 @@ datasource db {
 }
 
 // Anilist.prisma
-model Release {
+model Anilist {
   id                Int      @id
   idMal             Int?
   siteUrl           String?
   // Embedded objects stored as JSON
-  title             Json?       // corresponds to Release.Title
-  coverImage        Json?       // corresponds to Release.CoverImage
+  title             Json? // corresponds to Release.Title
+  coverImage        Json? // corresponds to Release.CoverImage
   bannerImage       String?
   status            String?
   type              String?
   format            String?
   updatedAt         Int?
   description       String?
-  startDate         Json?       // corresponds to Date (with start_year, start_month, start_day)
-  endDate           Json?       // corresponds to Date (with end_year, end_month, end_day)
+  startDate         Json? // corresponds to Date (with start_year, start_month, start_day)
+  endDate           Json? // corresponds to Date (with end_year, end_month, end_day)
   season            String?
   seasonYear        Int?
   episodes          Int?
@@ -31,7 +31,7 @@ model Release {
   isLicensed        Boolean?
   source            String?
   hashtag           String?
-  trailer           Json?       // corresponds to Trailer
+  trailer           Json? // corresponds to Trailer
   isLocked          Boolean?
   isAdult           Boolean?
   averageScore      Int?
@@ -39,39 +39,40 @@ model Release {
   popularity        Int?
   trending          Int?
   favourites        Int?
-  genres            String[]    // Element collection of strings
+  genres            String[] // Element collection of strings
   synonyms          String[]
   // Complex embedded collections stored as JSON:
-  recommendations   Json?       // RecommendationEdgeWrapper<BasicId>
-  characters        Json?       // CharacterEdgeWrapper
-  studios           Json?       // StudioEdgeWrapper
-  airingSchedule    Json?       // AiringEdgeWrapper
-  nextAiringEpisode Json?       // AiringEpisode
-  stats             Json?       // Stats (including scoreDistribution and statusDistribution)
+  recommendations   Json? // RecommendationEdgeWrapper<BasicId>
+  characters        Json? // CharacterEdgeWrapper
+  studios           Json? // StudioEdgeWrapper
+  airingSchedule    Json? // AiringEdgeWrapper
+  nextAiringEpisode Json? // AiringEpisode
+  stats             Json? // Stats (including scoreDistribution and statusDistribution)
 
   // Normalized collections (stored in separate tables)
-  tags              ReleaseTag[]
-  externalLinks     ReleaseExternalLink[]
-  streamingEpisodes ReleaseStreamingEpisode[]
+  tags              AnilistTag[]
+  externalLinks     AnilistExternalLink[]
+  streamingEpisodes AnilistStreamingEpisode[]
+  BasicIdAni        BasicIdAni[]
 }
 
-model ReleaseTag {
-  id                Int     @id @default(autoincrement())
-  releaseId         Int
-  tagId             Int?
-  name              String?
-  description       String?
-  category          String?
-  rank              Int?
-  isGeneralSpoiler  Boolean?
-  isMediaSpoiler    Boolean?
-  isAdult           Boolean?
-  userId            Int?
-  release           Release @relation(fields: [releaseId], references: [id])
+model AnilistTag {
+  id               Int      @id @default(autoincrement())
+  releaseId        Int
+  tagId            Int?
+  name             String?
+  description      String?
+  category         String?
+  rank             Int?
+  isGeneralSpoiler Boolean?
+  isMediaSpoiler   Boolean?
+  isAdult          Boolean?
+  userId           Int?
+  release          Anilist  @relation(fields: [releaseId], references: [id])
 }
 
-model ReleaseExternalLink {
-  id         Int     @id @default(autoincrement())
+model AnilistExternalLink {
+  id         Int      @id @default(autoincrement())
   releaseId  Int
   exLinkId   Int?
   url        String?
@@ -83,22 +84,30 @@ model ReleaseExternalLink {
   icon       String?
   notes      String?
   isDisabled Boolean?
-  release    Release @relation(fields: [releaseId], references: [id])
+  release    Anilist  @relation(fields: [releaseId], references: [id])
 }
 
-model ReleaseStreamingEpisode {
-  id         Int     @id @default(autoincrement())
-  releaseId  Int
-  title      String?
-  thumbnail  String?
-  url        String?
-  site       String?
-  release    Release @relation(fields: [releaseId], references: [id])
+model AnilistStreamingEpisode {
+  id        Int     @id @default(autoincrement())
+  releaseId Int
+  title     String?
+  thumbnail String?
+  url       String?
+  site      String?
+  release   Anilist @relation(fields: [releaseId], references: [id])
 }
+
+model BasicIdAni {
+  id        Int      @id @default(autoincrement())
+  idMal     Int?
+  release   Anilist? @relation(fields: [releaseId], references: [id])
+  releaseId Int?
+}
+
 
 // Shikimori.prisma
 model Shikimori {
-  id            String       @id
+  id            String        @id
   malId         String?
   name          String?
   russian       String?
@@ -113,24 +122,24 @@ model Shikimori {
   episodes      Int?
   episodesAired Int?
   duration      Int?
-  airedOn       AiredOn?     @relation(fields: [airedOnId], references: [id])
+  airedOn       AiredOn?      @relation(fields: [airedOnId], references: [id])
   airedOnId     Int?
-  releasedOn    ReleasedOn?  @relation(fields: [releasedOnId], references: [id])
+  releasedOn    ReleasedOn?   @relation(fields: [releasedOnId], references: [id])
   releasedOnId  Int?
   url           String?
   season        String?
-  poster        Poster?      @relation(fields: [posterId], references: [id])
+  poster        Poster?       @relation(fields: [posterId], references: [id])
   posterId      Int?
   createdAt     DateTime?
   updatedAt     DateTime?
   nextEpisodeAt DateTime?
-  chronology    BasicId[]
+  chronology    BasicIdShik[]
   videos        Video[]
   screenshots   Screenshot[]
 }
 
 model AiredOn {
-  id        Int         @id @default(autoincrement())
+  id        String      @id
   year      Int?
   month     Int?
   day       Int?
@@ -139,7 +148,7 @@ model AiredOn {
 }
 
 model ReleasedOn {
-  id        Int         @id @default(autoincrement())
+  id        String      @id
   year      Int?
   month     Int?
   day       Int?
@@ -147,15 +156,15 @@ model ReleasedOn {
   Shikimori Shikimori[]
 }
 
-model BasicId {
-  id          Int        @id @default(autoincrement())
-  idMal       Int?
+model BasicIdShik {
+  id          String     @id
+  malId       String?
   Shikimori   Shikimori? @relation(fields: [shikimoriId], references: [id])
   shikimoriId String?
 }
 
 model Video {
-  id            Int        @id @default(autoincrement())
+  id            Int        @id
   videoId       String?
   videoImageUrl String?
   kind          String?
@@ -167,7 +176,7 @@ model Video {
 }
 
 model Screenshot {
-  id          Int        @id @default(autoincrement())
+  id          String     @id
   originalUrl String?
   x166Url     String?
   x332Url     String?
@@ -176,7 +185,7 @@ model Screenshot {
 }
 
 model BasicReleaseShikimori {
-  id                  Int             @id @default(autoincrement())
+  id                  String          @id
   idMal               Int?
   siteUrl             String?
   title               Title?          @relation(fields: [titleId], references: [id])
@@ -211,7 +220,7 @@ model BasicReleaseShikimori {
 }
 
 model Title {
-  id           Int            @id @default(autoincrement())
+  id           Int                     @id @default(autoincrement())
   romaji       String?
   english      String?
   native       String?
@@ -219,7 +228,7 @@ model Title {
 }
 
 model CoverImage {
-  id           Int            @id @default(autoincrement())
+  id           Int                     @id @default(autoincrement())
   extraLarge   String?
   large        String?
   medium       String?
@@ -228,7 +237,7 @@ model CoverImage {
 }
 
 model DateDetails {
-  id           Int            @id @default(autoincrement())
+  id           Int                     @id @default(autoincrement())
   year         Int?
   month        Int?
   day          Int?
@@ -236,7 +245,7 @@ model DateDetails {
 }
 
 model AiringEpisode {
-  id              Int            @id @default(autoincrement())
+  id              Int                     @id @default(autoincrement())
   airingAt        Int?
   timeUntilAiring Int?
   episode         Int?
@@ -244,10 +253,10 @@ model AiringEpisode {
 }
 
 model BasicShikimori {
-  id           Int            @id @default(autoincrement())
+  id           Int                     @id @default(autoincrement())
   name         String?
   url          String?
-  poster       Poster?        @relation(fields: [posterId], references: [id])
+  poster       Poster?                 @relation(fields: [posterId], references: [id])
   posterId     Int?
   BasicRelease BasicReleaseShikimori[]
 }

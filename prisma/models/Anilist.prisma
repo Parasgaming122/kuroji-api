@@ -1,18 +1,18 @@
-model Release {
+model Anilist {
   id                Int      @id
   idMal             Int?
   siteUrl           String?
   // Embedded objects stored as JSON
-  title             Json?       // corresponds to Release.Title
-  coverImage        Json?       // corresponds to Release.CoverImage
+  title             Json? // corresponds to Release.Title
+  coverImage        Json? // corresponds to Release.CoverImage
   bannerImage       String?
   status            String?
   type              String?
   format            String?
   updatedAt         Int?
   description       String?
-  startDate         Json?       // corresponds to Date (with start_year, start_month, start_day)
-  endDate           Json?       // corresponds to Date (with end_year, end_month, end_day)
+  startDate         Json? // corresponds to Date (with start_year, start_month, start_day)
+  endDate           Json? // corresponds to Date (with end_year, end_month, end_day)
   season            String?
   seasonYear        Int?
   episodes          Int?
@@ -21,7 +21,7 @@ model Release {
   isLicensed        Boolean?
   source            String?
   hashtag           String?
-  trailer           Json?       // corresponds to Trailer
+  trailer           Json? // corresponds to Trailer
   isLocked          Boolean?
   isAdult           Boolean?
   averageScore      Int?
@@ -29,39 +29,40 @@ model Release {
   popularity        Int?
   trending          Int?
   favourites        Int?
-  genres            String[]    // Element collection of strings
+  genres            String[] // Element collection of strings
   synonyms          String[]
   // Complex embedded collections stored as JSON:
-  recommendations   Json?       // RecommendationEdgeWrapper<BasicId>
-  characters        Json?       // CharacterEdgeWrapper
-  studios           Json?       // StudioEdgeWrapper
-  airingSchedule    Json?       // AiringEdgeWrapper
-  nextAiringEpisode Json?       // AiringEpisode
-  stats             Json?       // Stats (including scoreDistribution and statusDistribution)
+  recommendations   Json? // RecommendationEdgeWrapper<BasicId>
+  characters        Json? // CharacterEdgeWrapper
+  studios           Json? // StudioEdgeWrapper
+  airingSchedule    Json? // AiringEdgeWrapper
+  nextAiringEpisode Json? // AiringEpisode
+  stats             Json? // Stats (including scoreDistribution and statusDistribution)
 
   // Normalized collections (stored in separate tables)
-  tags              ReleaseTag[]
-  externalLinks     ReleaseExternalLink[]
-  streamingEpisodes ReleaseStreamingEpisode[]
+  tags              AnilistTag[]
+  externalLinks     AnilistExternalLink[]
+  streamingEpisodes AnilistStreamingEpisode[]
+  BasicIdAni        BasicIdAni[]
 }
 
-model ReleaseTag {
-  id                Int     @id @default(autoincrement())
-  releaseId         Int
-  tagId             Int?
-  name              String?
-  description       String?
-  category          String?
-  rank              Int?
-  isGeneralSpoiler  Boolean?
-  isMediaSpoiler    Boolean?
-  isAdult           Boolean?
-  userId            Int?
-  release           Release @relation(fields: [releaseId], references: [id])
+model AnilistTag {
+  id               Int      @id @default(autoincrement())
+  releaseId        Int
+  tagId            Int?
+  name             String?
+  description      String?
+  category         String?
+  rank             Int?
+  isGeneralSpoiler Boolean?
+  isMediaSpoiler   Boolean?
+  isAdult          Boolean?
+  userId           Int?
+  release          Anilist  @relation(fields: [releaseId], references: [id])
 }
 
-model ReleaseExternalLink {
-  id         Int     @id @default(autoincrement())
+model AnilistExternalLink {
+  id         Int      @id @default(autoincrement())
   releaseId  Int
   exLinkId   Int?
   url        String?
@@ -73,15 +74,22 @@ model ReleaseExternalLink {
   icon       String?
   notes      String?
   isDisabled Boolean?
-  release    Release @relation(fields: [releaseId], references: [id])
+  release    Anilist  @relation(fields: [releaseId], references: [id])
 }
 
-model ReleaseStreamingEpisode {
-  id         Int     @id @default(autoincrement())
-  releaseId  Int
-  title      String?
-  thumbnail  String?
-  url        String?
-  site       String?
-  release    Release @relation(fields: [releaseId], references: [id])
+model AnilistStreamingEpisode {
+  id        Int     @id @default(autoincrement())
+  releaseId Int
+  title     String?
+  thumbnail String?
+  url       String?
+  site      String?
+  release   Anilist @relation(fields: [releaseId], references: [id])
+}
+
+model BasicIdAni {
+  id        Int      @id @default(autoincrement())
+  idMal     Int?
+  release   Anilist? @relation(fields: [releaseId], references: [id])
+  releaseId Int?
 }

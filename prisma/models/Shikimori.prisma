@@ -1,5 +1,5 @@
 model Shikimori {
-  id            String       @id
+  id            String        @id
   malId         String?
   name          String?
   russian       String?
@@ -14,18 +14,18 @@ model Shikimori {
   episodes      Int?
   episodesAired Int?
   duration      Int?
-  airedOn       AiredOn?     @relation(fields: [airedOnId], references: [id])
+  airedOn       AiredOn?      @relation(fields: [airedOnId], references: [id])
   airedOnId     Int?
-  releasedOn    ReleasedOn?  @relation(fields: [releasedOnId], references: [id])
+  releasedOn    ReleasedOn?   @relation(fields: [releasedOnId], references: [id])
   releasedOnId  Int?
   url           String?
   season        String?
-  poster        Poster?      @relation(fields: [posterId], references: [id])
+  poster        Poster?       @relation(fields: [posterId], references: [id])
   posterId      Int?
   createdAt     DateTime?
   updatedAt     DateTime?
   nextEpisodeAt DateTime?
-  chronology    BasicId[]
+  chronology    BasicIdShik[]
   videos        Video[]
   screenshots   Screenshot[]
 }
@@ -48,7 +48,7 @@ model ReleasedOn {
   Shikimori Shikimori[]
 }
 
-model BasicId {
+model BasicIdShik {
   id          Int        @id @default(autoincrement())
   idMal       Int?
   Shikimori   Shikimori? @relation(fields: [shikimoriId], references: [id])
@@ -112,7 +112,7 @@ model BasicReleaseShikimori {
 }
 
 model Title {
-  id           Int            @id @default(autoincrement())
+  id           Int                     @id @default(autoincrement())
   romaji       String?
   english      String?
   native       String?
@@ -120,7 +120,7 @@ model Title {
 }
 
 model CoverImage {
-  id           Int            @id @default(autoincrement())
+  id           Int                     @id @default(autoincrement())
   extraLarge   String?
   large        String?
   medium       String?
@@ -129,7 +129,7 @@ model CoverImage {
 }
 
 model DateDetails {
-  id           Int            @id @default(autoincrement())
+  id           Int                     @id @default(autoincrement())
   year         Int?
   month        Int?
   day          Int?
@@ -137,7 +137,7 @@ model DateDetails {
 }
 
 model AiringEpisode {
-  id              Int            @id @default(autoincrement())
+  id              Int                     @id @default(autoincrement())
   airingAt        Int?
   timeUntilAiring Int?
   episode         Int?
@@ -145,10 +145,10 @@ model AiringEpisode {
 }
 
 model BasicShikimori {
-  id           Int            @id @default(autoincrement())
+  id           Int                     @id @default(autoincrement())
   name         String?
   url          String?
-  poster       Poster?        @relation(fields: [posterId], references: [id])
+  poster       Poster?                 @relation(fields: [posterId], references: [id])
   posterId     Int?
   BasicRelease BasicReleaseShikimori[]
 }

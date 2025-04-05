@@ -2,6 +2,7 @@ import { HttpModule } from '@nestjs/axios';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CustomHttpService } from '../../../http/http.service';
 import { PrismaService } from '../../../prisma.service';
+import { ShikimoriHelper } from '../utils/shikimori-helper';
 import { ShikimoriService } from './shikimori.service';
 
 describe('ShikimoriService', () => {
@@ -10,7 +11,12 @@ describe('ShikimoriService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [HttpModule],
-      providers: [ShikimoriService, PrismaService, CustomHttpService],
+      providers: [
+        ShikimoriService,
+        PrismaService,
+        CustomHttpService,
+        ShikimoriHelper,
+      ],
     }).compile();
 
     service = module.get<ShikimoriService>(ShikimoriService);

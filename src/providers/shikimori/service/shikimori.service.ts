@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 
 import {
   AiredOn,
-  BasicId,
+  BasicIdShik,
   Poster,
   ReleasedOn,
   Shikimori,
@@ -12,16 +12,17 @@ import { PrismaService } from '../../../prisma.service';
 
 import { UpdateType } from '../../../shared/UpdateType';
 
-import { Shikimori as PrismaShikimori, Screenshot } from '@prisma/client';
+import { Screenshot } from '@prisma/client';
 import { UrlConfig } from '../../../configs/url.config';
 import { CustomHttpService } from '../../../http/http.service';
 import { GraphQL } from '../graphql/shikimori.graphql';
+import { ShikimoriHelper } from '../utils/shikimori-helper';
 
-export interface ShikimoriWithRelations extends PrismaShikimori {
+export interface ShikimoriWithRelations extends Shikimori {
   airedOn?: AiredOn | null;
   releasedOn?: ReleasedOn | null;
   poster?: Poster | null;
-  chronology: BasicId[];
+  chronology: BasicIdShik[];
   videos: Video[];
   screenshots: Screenshot[];
 }
@@ -33,6 +34,7 @@ export class ShikimoriService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly customHttpService: CustomHttpService,
+    private readonly helper: ShikimoriHelper,
   ) {}
 
   async getShikimori(id: string): Promise<ShikimoriWithRelations> {
@@ -60,80 +62,8 @@ export class ShikimoriService {
 
     const animeShik = shikimoriList.animes[0] as Shikimori;
     const anime = shikimoriList.animes[0];
-
     const savedShikimori = await this.prisma.shikimori.create({
-      data: {
-        id: anime.id,
-        malId: anime.malId,
-        name: anime.name,
-        russian: anime.russian,
-        licenseNameRu: anime.licenseNameRu,
-        english: anime.english,
-        japanese: anime.japanese,
-        synonyms: anime.synonyms,
-        kind: anime.kind,
-        rating: anime.rating,
-        score: anime.score,
-        status: anime.status,
-        episodes: anime.episodes,
-        episodesAired: anime.episodesAired,
-        duration: anime.duration,
-        url: anime.url,
-        season: anime.season,
-        createdAt: anime.createdAt,
-        updatedAt: anime.updatedAt,
-        nextEpisodeAt: anime.nextEpisodeAt,
-        screenshots: {
-          create: anime.screenshots?.map((s) => ({
-            originalUrl: s.originalUrl,
-            x166Url: s.x166Url,
-            x332Url: s.x332Url,
-          })),
-        },
-        chronology: {
-          create: anime.chronology?.map((c) => ({
-            idMal: c.idMal,
-          })),
-        },
-        videos: {
-          create: anime.videos?.map((v) => ({
-            videoId: v.videoId,
-            videoImageUrl: v.videoImageUrl,
-            kind: v.kind,
-            videoName: v.videoName,
-            playerUrl: v.playerUrl,
-            videoUrl: v.videoUrl,
-          })),
-        },
-        airedOn: anime.airedOn
-          ? {
-              create: {
-                year: anime.airedOn.year,
-                month: anime.airedOn.month,
-                day: anime.airedOn.day,
-                date: anime.airedOn.date,
-              },
-            }
-          : undefined,
-        releasedOn: anime.releasedOn
-          ? {
-              create: {
-                year: anime.releasedOn.year,
-                month: anime.releasedOn.month,
-                day: anime.releasedOn.day,
-                date: anime.releasedOn.date,
-              },
-            }
-          : undefined,
-        poster: anime.poster
-          ? {
-              create: {
-                originalUrl: anime.poster.originalUrl,
-                mainUrl: anime.poster.mainUrl,
-              },
-            }
-          : undefined,
-      },
+      data: this.helper.getDataForPrisma(anime),
       include: {
         chronology: true, // Include the relation field
         screenshots: true,
@@ -146,7 +76,7 @@ export class ShikimoriService {
     return this.adjustShikimori(savedShikimori);
   }
 
-  async getChronology(id: string): Promise<BasicId[]> {
+  async getChronology(id: string): Promise<BasicIdShik[]> {
     const shikimori = await this.prisma.shikimori.findUnique({
       where: { id },
       include: {
@@ -168,9 +98,7 @@ export class ShikimoriService {
         id,
         1,
         1,
-      )) as {
-        animes: Shikimori[];
-      };
+      )) as ShikimoriResponse;
 
       if (!updatedShikimoriList.animes.length) {
         throw new NotFoundException(
@@ -180,7 +108,7 @@ export class ShikimoriService {
 
       const updatedShikimori = await this.prisma.shikimori.update({
         where: { id },
-        data: updatedShikimoriList.animes[0],
+        data: this.helper.getDataForPrisma(updatedShikimoriList.animes[0]),
         include: {
           chronology: true, // Include the relation field
           screenshots: true,
@@ -252,150 +180,7 @@ export class ShikimoriService {
 
     return await this.prisma.shikimori.upsert({
       where: { id: anime.id },
-      update: {
-        id: anime.id,
-        malId: anime.malId,
-        name: anime.name,
-        russian: anime.russian,
-        licenseNameRu: anime.licenseNameRu,
-        english: anime.english,
-        japanese: anime.japanese,
-        synonyms: anime.synonyms,
-        kind: anime.kind,
-        rating: anime.rating,
-        score: anime.score,
-        status: anime.status,
-        episodes: anime.episodes,
-        episodesAired: anime.episodesAired,
-        duration: anime.duration,
-        url: anime.url,
-        season: anime.season,
-        createdAt: anime.createdAt,
-        updatedAt: anime.updatedAt,
-        nextEpisodeAt: anime.nextEpisodeAt,
-        screenshots: {
-          create: anime.screenshots?.map((s) => ({
-            originalUrl: s.originalUrl,
-            x166Url: s.x166Url,
-            x332Url: s.x332Url,
-          })),
-        },
-        chronology: {
-          create: anime.chronology?.map((c) => ({
-            idMal: c.idMal,
-          })),
-        },
-        videos: {
-          create: anime.videos?.map((v) => ({
-            videoId: v.videoId,
-            videoImageUrl: v.videoImageUrl,
-            kind: v.kind,
-            videoName: v.videoName,
-            playerUrl: v.playerUrl,
-            videoUrl: v.videoUrl,
-          })),
-        },
-        airedOn: anime.airedOn
-          ? {
-              create: {
-                year: anime.airedOn.year,
-                month: anime.airedOn.month,
-                day: anime.airedOn.day,
-                date: anime.airedOn.date,
-              },
-            }
-          : undefined,
-        releasedOn: anime.releasedOn
-          ? {
-              create: {
-                year: anime.releasedOn.year,
-                month: anime.releasedOn.month,
-                day: anime.releasedOn.day,
-                date: anime.releasedOn.date,
-              },
-            }
-          : undefined,
-        poster: anime.poster
-          ? {
-              create: {
-                originalUrl: anime.poster.originalUrl,
-                mainUrl: anime.poster.mainUrl,
-              },
-            }
-          : undefined,
-      },
-      create: {
-        id: anime.id,
-        malId: anime.malId,
-        name: anime.name,
-        russian: anime.russian,
-        licenseNameRu: anime.licenseNameRu,
-        english: anime.english,
-        japanese: anime.japanese,
-        synonyms: anime.synonyms,
-        kind: anime.kind,
-        rating: anime.rating,
-        score: anime.score,
-        status: anime.status,
-        episodes: anime.episodes,
-        episodesAired: anime.episodesAired,
-        duration: anime.duration,
-        url: anime.url,
-        season: anime.season,
-        createdAt: anime.createdAt,
-        updatedAt: anime.updatedAt,
-        nextEpisodeAt: anime.nextEpisodeAt,
-        screenshots: {
-          create: anime.screenshots?.map((s) => ({
-            originalUrl: s.originalUrl,
-            x166Url: s.x166Url,
-            x332Url: s.x332Url,
-          })),
-        },
-        chronology: {
-          create: anime.chronology?.map((c) => ({
-            idMal: c.idMal,
-          })),
-        },
-        videos: {
-          create: anime.videos?.map((v) => ({
-            videoId: v.videoId,
-            videoImageUrl: v.videoImageUrl,
-            kind: v.kind,
-            videoName: v.videoName,
-            playerUrl: v.playerUrl,
-            videoUrl: v.videoUrl,
-          })),
-        },
-        airedOn: anime.airedOn
-          ? {
-              create: {
-                year: anime.airedOn.year,
-                month: anime.airedOn.month,
-                day: anime.airedOn.day,
-                date: anime.airedOn.date,
-              },
-            }
-          : undefined,
-        releasedOn: anime.releasedOn
-          ? {
-              create: {
-                year: anime.releasedOn.year,
-                month: anime.releasedOn.month,
-                day: anime.releasedOn.day,
-                date: anime.releasedOn.date,
-              },
-            }
-          : undefined,
-        poster: anime.poster
-          ? {
-              create: {
-                originalUrl: anime.poster.originalUrl,
-                mainUrl: anime.poster.mainUrl,
-              },
-            }
-          : undefined,
-      },
+      update: this.helper.getDataForPrisma(anime),
       include: {
         chronology: true, // Include the relation field
         screenshots: true,
@@ -404,6 +189,7 @@ export class ShikimoriService {
         poster: true,
         videos: true,
       },
+      create: this.helper.getDataForPrisma(anime),
     });
   }
 
@@ -417,77 +203,14 @@ export class ShikimoriService {
     await this.prisma.lastUpdated.createMany({ data: lastUpdatedData });
     for (const anime of shikimoris) {
       await this.prisma.shikimori.create({
-        data: {
-          id: anime.id,
-          malId: anime.malId,
-          name: anime.name,
-          russian: anime.russian,
-          licenseNameRu: anime.licenseNameRu,
-          english: anime.english,
-          japanese: anime.japanese,
-          synonyms: anime.synonyms,
-          kind: anime.kind,
-          rating: anime.rating,
-          score: anime.score,
-          status: anime.status,
-          episodes: anime.episodes,
-          episodesAired: anime.episodesAired,
-          duration: anime.duration,
-          url: anime.url,
-          season: anime.season,
-          createdAt: anime.createdAt,
-          updatedAt: anime.updatedAt,
-          nextEpisodeAt: anime.nextEpisodeAt,
-          screenshots: {
-            create: anime.screenshots?.map((s) => ({
-              originalUrl: s.originalUrl,
-              x166Url: s.x166Url,
-              x332Url: s.x332Url,
-            })),
-          },
-          chronology: {
-            create: anime.chronology?.map((c) => ({
-              idMal: c.idMal,
-            })),
-          },
-          videos: {
-            create: anime.videos?.map((v) => ({
-              videoId: v.videoId,
-              videoImageUrl: v.videoImageUrl,
-              kind: v.kind,
-              videoName: v.videoName,
-              playerUrl: v.playerUrl,
-              videoUrl: v.videoUrl,
-            })),
-          },
-          airedOn: anime.airedOn
-            ? {
-                create: {
-                  year: anime.airedOn.year,
-                  month: anime.airedOn.month,
-                  day: anime.airedOn.day,
-                  date: anime.airedOn.date,
-                },
-              }
-            : undefined,
-          releasedOn: anime.releasedOn
-            ? {
-                create: {
-                  year: anime.releasedOn.year,
-                  month: anime.releasedOn.month,
-                  day: anime.releasedOn.day,
-                  date: anime.releasedOn.date,
-                },
-              }
-            : undefined,
-          poster: anime.poster
-            ? {
-                create: {
-                  originalUrl: anime.poster.originalUrl,
-                  mainUrl: anime.poster.mainUrl,
-                },
-              }
-            : undefined,
+        data: this.helper.getDataForPrisma(anime),
+        include: {
+          chronology: true, // Include the relation field
+          screenshots: true,
+          airedOn: true,
+          releasedOn: true,
+          poster: true,
+          videos: true,
         },
       });
     }
