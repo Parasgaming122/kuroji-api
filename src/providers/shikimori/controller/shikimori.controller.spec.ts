@@ -12,6 +12,8 @@ describe('ShikimoriController', () => {
     controller = module.get<ShikimoriController>(ShikimoriController);
   });
 
+  it('get Shikimori check', () => {});
+
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
