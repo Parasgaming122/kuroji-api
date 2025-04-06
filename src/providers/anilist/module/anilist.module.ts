@@ -6,6 +6,7 @@ import { ShikimoriHelperModule } from '../../shikimori/module/shikimori-helper.m
 import { ShikimoriService } from '../../shikimori/service/shikimori.service';
 import { AnilistController } from '../controller/anilist.controller';
 import { AnilistService } from '../service/anilist.service';
+import { ReleaseIndexerService } from '../service/release-indexer/release-indexer.service';
 import { AnilistHelper } from '../utils/anilist-helper';
 
 @Module({
@@ -17,6 +18,7 @@ import { AnilistHelper } from '../utils/anilist-helper';
     PrismaService,
     CustomHttpService,
     AnilistHelper,
+    ReleaseIndexerService,
   ],
 })
 export class AnilistModule {}

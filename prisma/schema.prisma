@@ -56,6 +56,12 @@ model Anilist {
   BasicIdAni        BasicIdAni[]
 }
 
+model AnilistIndex {
+  id        String   @id
+  updatedAt DateTime @default(now()) @updatedAt
+  createdAt DateTime @default(now())
+}
+
 model AnilistTag {
   id               Int      @id @default(autoincrement())
   releaseId        Int
@@ -105,7 +111,7 @@ model BasicIdAni {
 }
 
 model BasicRelease {
-  id                Int              @id
+  id                Int      @id
   idMal             Int?
   siteUrl           String?
   title             Json?
@@ -132,6 +138,7 @@ model BasicRelease {
   genres            String[]
   nextAiringEpisode Json?
 }
+
 
 // Shikimori.prisma
 model Shikimori {

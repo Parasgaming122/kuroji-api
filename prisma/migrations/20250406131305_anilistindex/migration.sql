@@ -1,0 +1,8 @@
+-- CreateTable
+CREATE TABLE "AnilistIndex" (
+    "id" TEXT NOT NULL,
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "addedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "AnilistIndex_pkey" PRIMARY KEY ("id")
+);
