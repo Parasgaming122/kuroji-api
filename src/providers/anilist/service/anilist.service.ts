@@ -43,7 +43,10 @@ export class AnilistService {
     private readonly customHttpService: CustomHttpService,
   ) {}
 
-  async getAnilist(id: number): Promise<AnilistWithRelations> {
+  async getAnilist(
+    id: number,
+    isMal: boolean = false,
+  ): Promise<AnilistWithRelations> {
     const existingAnilist = await this.prisma.anilist.findUnique({
       where: { id },
       include: {
@@ -129,9 +132,17 @@ export class AnilistService {
     });
   }
 
-  async fetchAnilistFromGraphQL(id: number): Promise<AnilistResponse> {
+  async fetchAnilistFromGraphQL(
+    id: number,
+    isMal: boolean = false,
+  ): Promise<AnilistResponse> {
     const queryBuilder = new AnilistQueryBuilder();
-    queryBuilder.setId(id).setPerPage(1);
+
+    if (isMal) {
+      queryBuilder.setIdMal(id).setPerPage(1);
+    } else {
+      queryBuilder.setId(id).setPerPage(1);
+    }
 
     const query = AnilistQL.getQuery();
 
