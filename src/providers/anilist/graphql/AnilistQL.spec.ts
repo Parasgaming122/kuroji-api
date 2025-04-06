@@ -1,9 +1,9 @@
-import { Test } from '@nestjs/testing';
 import { HttpModule } from '@nestjs/axios';
+import { Test } from '@nestjs/testing';
+import { UrlConfig } from '../../../configs/url.config';
+import { CustomHttpService } from '../../../http/http.service';
 import AnilistQL from './AnilistQL';
 import AnilistQueryBuilder from './query/AnilistQueryBuilder';
-import { CustomHttpService } from '../../../http/http.service';
-import { UrlConfig } from '../../../configs/url.config';
 
 describe('AnilistQL', () => {
   let httpService: CustomHttpService;
@@ -19,25 +19,22 @@ describe('AnilistQL', () => {
 
   it('should include required fields in query', async () => {
     const queryBuilder = new AnilistQueryBuilder();
-    queryBuilder
-      .setId(21)
-      .setPage(1)
-      .setPerPage(1);
+    queryBuilder.setId(21).setPage(1).setPerPage(1);
 
     const query = AnilistQL.getQuery();
 
-    console.log('Generated GraphQL Query:', query);
-    
+    //console.log('Generated GraphQL Query:', query);
+
     // Make the actual API call
     const result = await httpService.getGraphQL(
       UrlConfig.ANILIST_GRAPHQL,
       query,
-      queryBuilder.build()
+      queryBuilder.build(),
     );
 
     // Log the result
-    console.log(JSON.stringify(result, null, 2));
-    
+    //console.log(JSON.stringify(result, null, 2));
+
     expect(result).toBeDefined();
   });
 });

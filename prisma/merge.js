@@ -6,7 +6,9 @@ const modelDir = path.join(__dirname, 'models');
 const outputPath = path.join(__dirname, 'schema.prisma');
 
 // Read all models from the "models" folder
-const modelFiles = fs.readdirSync(modelDir).filter(file => file.endsWith('.prisma'));
+const modelFiles = fs
+  .readdirSync(modelDir)
+  .filter((file) => file.endsWith('.prisma'));
 
 // Start of the schema.prisma file (generator and datasource)
 let schemaContent = `generator client {
@@ -19,7 +21,7 @@ datasource db {
 }`;
 
 // Add all models from the "models" folder
-modelFiles.forEach(file => {
+modelFiles.forEach((file) => {
   const modelContent = fs.readFileSync(path.join(modelDir, file), 'utf-8');
   schemaContent += `\n\n// ${file}\n${modelContent}`;
 });

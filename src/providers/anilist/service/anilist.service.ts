@@ -1,17 +1,18 @@
 import { Injectable } from '@nestjs/common';
+import { Anilist, BasicRelease } from '@prisma/client';
+import { ApiResponse } from '../../../api/ApiResponse';
+import { UrlConfig } from '../../../configs/url.config';
 import { CustomHttpService } from '../../../http/http.service';
 import { PrismaService } from '../../../prisma.service';
-import { ShikimoriService, ShikimoriWithRelations } from '../../shikimori/service/shikimori.service';
-import { Anilist, BasicRelease, Screenshot, Shikimori } from '@prisma/client'
-import { MediaPage } from '../graphql/types/MediaPage'
-import { UrlConfig } from '../../../configs/url.config'
-import AnilistQueryBuilder from '../graphql/query/AnilistQueryBuilder'
-import AnilistQL from '../graphql/AnilistQL'
-import { UpdateType } from 'src/shared/UpdateType'
-import { AnilistHelper } from '../utils/anilist-helper'
-import { ApiResponse } from 'src/api/ApiResponse'
-import { BasicAnilist } from '../model/BasicAnilist'
-import { MediaSort } from '../graphql/types/MediaEnums'
+import { UpdateType } from '../../../shared/UpdateType';
+import {
+  ShikimoriService,
+  ShikimoriWithRelations,
+} from '../../shikimori/service/shikimori.service';
+import AnilistQL from '../graphql/AnilistQL';
+import AnilistQueryBuilder from '../graphql/query/AnilistQueryBuilder';
+import { BasicAnilist } from '../model/BasicAnilist';
+import { AnilistHelper } from '../utils/anilist-helper';
 
 export interface AnilistResponse {
   Page: {
@@ -26,7 +27,8 @@ export interface AnilistResponse {
   };
 }
 
-export interface AnilistWithRelations extends Anilist {
+export interface AnilistWithRelations
+  extends Omit<Anilist, 'recommendations' | 'BasicIdAni'> {
   chronology?: BasicRelease[];
   recommendation?: BasicRelease[];
   shikimori?: ShikimoriWithRelations;
@@ -48,15 +50,17 @@ export class AnilistService {
         tags: true,
         externalLinks: true,
         streamingEpisodes: true,
-        BasicIdAni: true
-      }
+        BasicIdAni: true,
+      },
     });
 
     if (existingAnilist) {
-      const shikimori = await this.shikimoriService.getShikimori(existingAnilist.idMal?.toString() || '');
+      const shikimori = await this.shikimoriService.getShikimori(
+        existingAnilist.idMal?.toString() || '',
+      );
       return {
         ...existingAnilist,
-        screenshots: shikimori.screenshots || []
+        screenshots: shikimori.screenshots || [],
       } as AnilistWithRelations;
     }
 
@@ -69,43 +73,54 @@ export class AnilistService {
     const savedAnilist = await this.saveAnilist(anilist);
 
     // Get screenshots from Shikimori after saving
-    const shikimori = await this.shikimoriService.getShikimori(anilist.idMal?.toString() || '');
+    const shikimori = await this.shikimoriService.getShikimori(
+      anilist.idMal?.toString() || '',
+    );
 
     return {
       ...savedAnilist,
-      shikimori: shikimori || null
+      shikimori: shikimori || null,
     } as AnilistWithRelations;
   }
 
-  async getAnilists(query: AnilistQueryBuilder): Promise<ApiResponse<BasicAnilist[]>> {
+  async getAnilists(
+    query: AnilistQueryBuilder,
+  ): Promise<ApiResponse<BasicAnilist[]>> {
     // Get paginated anilists based on filter
     const response = await this.getAnilistByFilter(query); // returns { data, pageInfo }
-  
+
     // Process Shikimori data
-    const malIds = response.data.map(anilist => anilist.idMal?.toString() || '').join(',');
-    const shikimoriData = await this.shikimoriService.saveMultipleShikimori(malIds);
-  
+    const malIds = response.data
+      .map((anilist) => anilist.idMal?.toString() || '')
+      .join(',');
+    const shikimoriData =
+      await this.shikimoriService.saveMultipleShikimori(malIds);
+
     // Attach screenshots from Shikimori to each anilist
-    const data = response.data.map(anilist => {
+    const data = response.data.map((anilist) => {
       const malId = anilist.idMal?.toString() || '';
-      const shikimori = shikimoriData.find(data => data.malId?.toString() === malId);
+      const shikimori = shikimoriData.find(
+        (data) => data.malId?.toString() === malId,
+      );
       return {
         ...anilist,
-        shikimori: (shikimori as any) || null
+        shikimori: (shikimori as any) || null,
       } as AnilistWithRelations;
     });
 
-    const basicAnilist = data.map(anilist => this.helper.convertAnilistToBasic(anilist));
-  
+    const basicAnilist = data.map((anilist) =>
+      this.helper.convertAnilistToBasic(anilist),
+    );
+
     return { data: basicAnilist, pageInfo: response.pageInfo };
   }
 
   async saveAnilist(anilist: Anilist): Promise<Anilist> {
     await this.prisma.lastUpdated.create({
-        data: {
-          entityId: anilist.id.toString(),
-          type: UpdateType.ANILIST,
-        },
+      data: {
+        entityId: anilist.id.toString(),
+        type: UpdateType.ANILIST,
+      },
     });
 
     return await this.prisma.anilist.upsert({
@@ -115,9 +130,7 @@ export class AnilistService {
     });
   }
 
-  async fetchAnilistFromGraphQL(
-    id: number
-  ): Promise<AnilistResponse> {
+  async fetchAnilistFromGraphQL(id: number): Promise<AnilistResponse> {
     const queryBuilder = new AnilistQueryBuilder();
     queryBuilder.setId(id).setPerPage(1);
 
@@ -126,13 +139,15 @@ export class AnilistService {
     return await this.customHttpService.getGraphQL<AnilistResponse>(
       UrlConfig.ANILIST_GRAPHQL,
       query,
-      queryBuilder.build()
+      queryBuilder.build(),
     );
   }
 
-  async getAnilistByFilter(queryBuilder: AnilistQueryBuilder): Promise<ApiResponse<Anilist[]>> {
+  async getAnilistByFilter(
+    queryBuilder: AnilistQueryBuilder,
+  ): Promise<ApiResponse<Anilist[]>> {
     const filter = queryBuilder.convertToReleaseFilter();
-  
+
     const conditions = [
       // Basic filters (only include if defined)
       filter.id !== undefined ? { id: filter.id } : {},
@@ -144,7 +159,7 @@ export class AnilistService {
       filter.isAdult !== undefined ? { isAdult: filter.isAdult } : {},
       filter.isLicensed !== undefined ? { isLicensed: filter.isLicensed } : {},
       filter.countryOfOrigin ? { countryOfOrigin: filter.countryOfOrigin } : {},
-  
+
       // Array contains filters
       filter.genreIn ? { genres: { hasEvery: filter.genreIn } } : {},
       filter.genreNotIn ? { genres: { hasNone: filter.genreNotIn } } : {},
@@ -152,77 +167,99 @@ export class AnilistService {
       filter.idNotIn ? { id: { notIn: filter.idNotIn } } : {},
       filter.idMalIn ? { idMal: { in: filter.idMalIn } } : {},
       filter.idMalNotIn ? { idMal: { notIn: filter.idMalNotIn } } : {},
-  
+
       // Numeric comparisons
-      filter.durationGreater != null ? { duration: { gt: filter.durationGreater } } : {},
-      filter.durationLesser != null ? { duration: { lt: filter.durationLesser } } : {},
-      filter.episodesGreater != null ? { episodes: { gt: filter.episodesGreater } } : {},
-      filter.episodesLesser != null ? { episodes: { lt: filter.episodesLesser } } : {},
-      filter.popularityGreater != null ? { popularity: { gt: filter.popularityGreater } } : {},
-      filter.popularityLesser != null ? { popularity: { lt: filter.popularityLesser } } : {},
-      filter.averageScoreGreater != null ? { averageScore: { gt: filter.averageScoreGreater } } : {},
-      filter.averageScoreLesser != null ? { averageScore: { lt: filter.averageScoreLesser } } : {},
-  
+      filter.durationGreater != null
+        ? { duration: { gt: filter.durationGreater } }
+        : {},
+      filter.durationLesser != null
+        ? { duration: { lt: filter.durationLesser } }
+        : {},
+      filter.episodesGreater != null
+        ? { episodes: { gt: filter.episodesGreater } }
+        : {},
+      filter.episodesLesser != null
+        ? { episodes: { lt: filter.episodesLesser } }
+        : {},
+      filter.popularityGreater != null
+        ? { popularity: { gt: filter.popularityGreater } }
+        : {},
+      filter.popularityLesser != null
+        ? { popularity: { lt: filter.popularityLesser } }
+        : {},
+      filter.averageScoreGreater != null
+        ? { averageScore: { gt: filter.averageScoreGreater } }
+        : {},
+      filter.averageScoreLesser != null
+        ? { averageScore: { lt: filter.averageScoreLesser } }
+        : {},
+
       // Format filters
       filter.formatIn ? { format: { in: filter.formatIn } } : {},
       filter.formatNotIn ? { format: { notIn: filter.formatNotIn } } : {},
       filter.formatNot ? { format: { not: filter.formatNot } } : {},
-  
+
       // Status filters
       filter.statusIn ? { status: { in: filter.statusIn } } : {},
       filter.statusNotIn ? { status: { notIn: filter.statusNotIn } } : {},
       filter.statusNot ? { status: { not: filter.statusNot } } : {},
-  
+
       // Search filter
-      filter.search ? {
-        OR: [
-          { 
-            title: { 
-              path: ['romaji'],
-              string_contains: filter.search 
-            } 
-          },
-          { 
-            title: { 
-              path: ['english'],
-              string_contains: filter.search 
-            } 
-          },
-          { 
-            title: { 
-              path: ['native'],
-              string_contains: filter.search 
-            } 
-          },
-          { 
-            synonyms: { 
-              hasSome: [filter.search] 
-            } 
+      filter.search
+        ? {
+            OR: [
+              {
+                title: {
+                  path: ['romaji'],
+                  string_contains: filter.search,
+                },
+              },
+              {
+                title: {
+                  path: ['english'],
+                  string_contains: filter.search,
+                },
+              },
+              {
+                title: {
+                  path: ['native'],
+                  string_contains: filter.search,
+                },
+              },
+              {
+                synonyms: {
+                  hasSome: [filter.search],
+                },
+              },
+            ],
           }
-        ]
-      } : {},
-  
+        : {},
+
       // Date filters using JSON paths
-      filter.startDateGreater ? {
-        startDate: {
-          path: '$.year',
-          gt: parseInt(filter.startDateGreater)
-        }
-      } : {},
-      filter.endDateGreater ? {
-        endDate: {
-          path: '$.year',
-          gt: parseInt(filter.endDateGreater)
-        }
-      } : {}
-    ].filter(condition => Object.keys(condition).length > 0);
-    
+      filter.startDateGreater
+        ? {
+            startDate: {
+              path: '$.year',
+              gt: parseInt(filter.startDateGreater),
+            },
+          }
+        : {},
+      filter.endDateGreater
+        ? {
+            endDate: {
+              path: '$.year',
+              gt: parseInt(filter.endDateGreater),
+            },
+          }
+        : {},
+    ].filter((condition) => Object.keys(condition).length > 0);
+
     const whereCondition = { AND: conditions };
-  
+
     const perPage = filter.perPage || 25;
     const currentPage = filter.page || 1;
     const skip = (currentPage - 1) * perPage;
-  
+
     // Fetch the matching items along with the total count
     const [data, total] = await Promise.all([
       this.prisma.anilist.findMany({
@@ -231,37 +268,39 @@ export class AnilistService {
           tags: true,
           externalLinks: true,
           streamingEpisodes: true,
-          BasicIdAni: true
+          BasicIdAni: true,
         },
         take: perPage,
         skip,
-        orderBy: filter.sort?.map(sortField => {
+        orderBy: filter.sort?.map((sortField) => {
           const parts = sortField.split('_');
           let direction = 'asc';
-          if (parts.length > 1 && 
-              (parts[parts.length - 1].toLowerCase() === 'asc' ||
-               parts[parts.length - 1].toLowerCase() === 'desc')) {
+          if (
+            parts.length > 1 &&
+            (parts[parts.length - 1].toLowerCase() === 'asc' ||
+              parts[parts.length - 1].toLowerCase() === 'desc')
+          ) {
             direction = parts.pop()!.toLowerCase();
           }
           const field = parts.join('_');
 
           return { [field]: direction };
-        }) || [{ id: 'desc' }]
+        }) || [{ id: 'desc' }],
       }),
       this.prisma.anilist.count({
-        where: whereCondition
-      })
+        where: whereCondition,
+      }),
     ]);
-  
+
     const lastPage = Math.ceil(total / perPage);
     const pageInfo = {
       total,
       perPage,
       currentPage,
       lastPage,
-      hasNextPage: currentPage < lastPage
+      hasNextPage: currentPage < lastPage,
     };
-  
+
     return { data, pageInfo };
-  }  
+  }
 }

@@ -368,3 +368,36 @@ model LastUpdated {
   type      String
   createdAt DateTime @default(now())
 }
+
+
+// Zoro.prisma
+model Zoro {
+  id            String        @id
+  title         String?
+  malID         Int?
+  alID          Int?
+  japaneseTitle String?
+  image         String?
+  description   String?
+  type          String?
+  url           String?
+  subOrDub      String?
+  hasSub        Boolean?
+  hasDub        Boolean?
+  status        String?
+  season        String?
+  totalEpisodes Int?
+  episodes      EpisodeZoro[]
+}
+
+model EpisodeZoro {
+  id       String  @id
+  number   Int
+  title    String
+  isFiller Boolean
+  isSubbed Boolean
+  isDubbed Boolean
+  url      String
+  Zoro     Zoro?   @relation(fields: [zoroId], references: [id])
+  zoroId   String?
+}

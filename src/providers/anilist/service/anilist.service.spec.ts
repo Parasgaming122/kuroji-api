@@ -1,8 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AnilistService } from './anilist.service';
+import { CustomHttpService } from '../../../http/http.service';
 import { PrismaService } from '../../../prisma.service';
 import { ShikimoriService } from '../../shikimori/service/shikimori.service';
-import { CustomHttpService } from '../../../http/http.service';
+import { AnilistHelper } from '../utils/anilist-helper';
+import { AnilistService } from './anilist.service';
 
 describe('AnilistService', () => {
   let service: AnilistService;
@@ -10,19 +11,21 @@ describe('AnilistService', () => {
   const mockPrismaService = {
     anilist: {
       findUnique: jest.fn(),
-      create: jest.fn()
-    }
+      create: jest.fn(),
+    },
   };
-  
+
   const mockShikimoriService = {};
-  
+
   const mockCustomHttpService = {
     getGraphQL: jest.fn().mockResolvedValue({
-      media: [{
-        id: 21,
-        title: { romaji: 'Test Anime' }
-      }]
-    })
+      media: [
+        {
+          id: 21,
+          title: { romaji: 'Test Anime' },
+        },
+      ],
+    }),
   };
 
   beforeEach(async () => {
@@ -41,6 +44,7 @@ describe('AnilistService', () => {
           provide: CustomHttpService,
           useValue: mockCustomHttpService,
         },
+        AnilistHelper,
       ],
     }).compile();
 
@@ -50,9 +54,9 @@ describe('AnilistService', () => {
   it('fetch anilist', async () => {
     const id = 21;
     mockPrismaService.anilist.findUnique.mockResolvedValueOnce(null);
-    
+
     const result = await service.getAnilist(id);
-    
+
     expect(result).toBeDefined();
     expect(result.id).toEqual(id);
     expect(mockCustomHttpService.getGraphQL).toHaveBeenCalled();
