@@ -220,12 +220,6 @@ model ReleaseIndex {
   updatedAt DateTime @updatedAt
 }
 
-model Ids {
-  id   Int   @id @default(autoincrement())
-  sfw  Int[]
-  nsfw Int[]
-}
-
 model LastUpdated {
   id        Int   @id @default(autoincrement())
   entityId  String

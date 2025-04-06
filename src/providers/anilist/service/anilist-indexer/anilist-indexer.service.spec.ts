@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ReleaseIndexerService } from './release-indexer.service';
+import { AnilistIndexerService } from './anilist-indexer.service';
 
 describe('ReleaseIndexerService', () => {
-  let service: ReleaseIndexerService;
+  let service: AnilistIndexerService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ReleaseIndexerService],
+      providers: [AnilistIndexerService],
     }).compile();
 
-    service = module.get<ReleaseIndexerService>(ReleaseIndexerService);
+    service = module.get<AnilistIndexerService>(AnilistIndexerService);
   });
 
   it('should be defined', () => {

@@ -1,13 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { Ids } from '@prisma/client';
 import { CustomHttpService } from '../../../../http/http.service';
 import { PrismaService } from '../../../../prisma.service';
 import { AtomicInteger } from '../../../../shared/AtomicInteger';
 import { AnilistService } from '../anilist.service';
+import { get } from 'http'
+
+export interface Ids {
+  sfw: number[];
+  nsfw: number[];
+}
 
 @Injectable()
-export class ReleaseIndexerService {
+export class AnilistIndexerService {
   private isRunning: boolean = false;
   private scheduledUpdatesEnabled: boolean = true;
   private lastProcessedIndex: AtomicInteger = new AtomicInteger(0);
@@ -19,50 +24,50 @@ export class ReleaseIndexerService {
   ) {}
 
   public async index(resume: boolean, delay: number) {
+    if (this.isRunning) {
+      console.log('Already running, skip this round.');
+      return;
+    }    
+
     this.isRunning = true;
 
     if (!resume) {
       this.lastProcessedIndex.set(0);
     }
 
-    if (!this.allIds.length) {
-      this.allIds = (await this.getIds()).map((id) => id.id);
-    }
+    this.allIds = await this.getIds();
 
-    for (let i = this.lastProcessedIndex.get(); i < this.allIds.length; i++) {
+    for (let id of this.allIds) {
       if (!this.isRunning) {
-        this.lastProcessedIndex.set(i);
-        return;
+        console.log('Indexing manually stopped 🚫');
+        return; // dip out the loop
       }
 
-      let id: number = this.allIds[i];
-
-      try {
-        console.log('Fetching release: ' + id);
-
-        if (
-          !(await this.prisma.releaseIndex.findUnique({
-            where: { id: id.toString() },
-          }))
-        ) {
-          continue;
+      if (
+        !(await this.prisma.releaseIndex.findUnique({
+          where: { id: id.toString() },
+        }))
+      ) {
+        try {
+          console.log('Indexing new release: ' + id);
+          await this.service.getAnilist(id, true);
+    
+          await this.prisma.releaseIndex.create({
+            data: {
+              id: id.toString(), // you were also missing toString() here, bruh
+            },
+          });
+    
+          await this.sleep(10); // now this gon’ actually wait
+        } catch (e) {
+          console.error('Failed scheduled index update:', e);
         }
-
-        await this.service.getAnilist(id, true);
-
-        await this.prisma.anilistIndex.create({
-          data: {
-            id: id.toString(),
-          },
-        });
-        await this.sleep(delay);
-      } catch (e) {
-        console.error('Error processing release:', e);
       }
     }
   }
 
-  public sleep(delay: number) {
+  public async sleep(delay: number): Promise<void> {
+    console.log(`Sleeping for ${delay} seconds...`);
     return new Promise((resolve) => setTimeout(resolve, delay * 1000));
   }
 
@@ -85,7 +90,7 @@ export class ReleaseIndexerService {
 
     console.log('Scheduled index update started...');
 
-    let ids: number[] = (await this.getIds()).map((id) => id.id);
+    let ids: number[] = await this.getIds();
     ids = ids.sort((a, b) => b - a);
 
     for (let id in ids) {
@@ -121,9 +126,11 @@ export class ReleaseIndexerService {
     console.log('Scheduled updates have enabled.');
   }
 
-  public async getIds(): Promise<Ids[]> {
-    return await this.httpService.getResponse(
+  public async getIds(): Promise<number[]> {
+    const ids = await this.httpService.getResponse(
       'https://raw.githubusercontent.com/purarue/mal-id-cache/master/cache/anime_cache.json',
-    );
+    ) as Ids;
+
+    return [...ids.sfw, ...ids.nsfw];
   }
 }
