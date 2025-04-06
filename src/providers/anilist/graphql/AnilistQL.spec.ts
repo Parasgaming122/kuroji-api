@@ -23,17 +23,12 @@ describe('AnilistQL', () => {
 
     const query = AnilistQL.getQuery();
 
-    //console.log('Generated GraphQL Query:', query);
-
     // Make the actual API call
     const result = await httpService.getGraphQL(
       UrlConfig.ANILIST_GRAPHQL,
       query,
       queryBuilder.build(),
     );
-
-    // Log the result
-    //console.log(JSON.stringify(result, null, 2));
 
     expect(result).toBeDefined();
   });

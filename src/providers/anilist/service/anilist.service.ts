@@ -72,7 +72,6 @@ export class AnilistService {
     const anilist = data.Page.media[0];
     const savedAnilist = await this.saveAnilist(anilist);
 
-    // Get screenshots from Shikimori after saving
     const shikimori = await this.shikimoriService.getShikimori(
       anilist.idMal?.toString() || '',
     );
