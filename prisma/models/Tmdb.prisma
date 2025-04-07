@@ -1,72 +1,66 @@
-model tmdb {
-  id                  Int                   @id
-  adult               Boolean
-  backdrop_path       String?               // full URL constructed on getter in Java, handle that in your app logic
-  episode_run_time    Int[]                 // list of integers
-  first_air_date      String?
-  homepage            String?
-  in_production       Boolean?
-  last_air_date       String?
-  name                String?
-  number_of_episodes  Int?
-  number_of_seasons   Int?
-  original_language   String?
-  original_name       String?
-  origin_country      String[]              // list of countries
-  overview            String?               // @Lob in Java
-  popularity          Float?
-  poster_path         String?               // handle URL concatenation in your app logic
-  tagline             String?               // @Lob in Java
-  status              String?
-  type                String?
-  vote_average        Float?
-  vote_count          Int?
+model Tmdb {
+  id                 Int                @id
+  adult              Boolean
+  backdropPath       String?            // full URL constructed on getter in Java, handle that in your app logic
+  episodeRunTime     Int[]              // list of integers
+  firstAirDate       String?
+  homepage           String?
+  inProduction       Boolean?
+  lastAirDate        String?
+  name               String?
+  numberOfEpisodes   Int?
+  numberOfSeasons    Int?
+  originalLanguage   String?
+  originalName       String?
+  originCountry      String[]           // list of countries
+  overview           String?            // @Lob in Java
+  popularity         Float?
+  posterPath         String?            // handle URL concatenation in your app logic
+  tagline            String?            // @Lob in Java
+  status             String?
+  type               String?
+  voteAverage        Float?
+  voteCount          Int?
 
-  seasons             tmdb_release_season[] // relation to embedded seasons
+  seasons            Json? // relation to embedded seasons
 }
 
-model tmdb_release_season {
-  id             Int     @id
-  air_date       String?
-  episode_count  Int?
+model TmdbReleaseSeason {
+  id            Int     @id
+  airDate       String?
+  episodeCount  Int?
+  name          String?
+  overview      String?  // @Lob
+  posterPath    String?  // handle URL concatenation in your app logic
+  seasonNumber  Int?
+  voteAverage   Float?
+}
+
+model TmdbSeason {
+  id           Int                 @id
+  airDate      String?
+  showId       Int?                // although marked with @JsonIgnore, we keep it if you need it
+  name         String?
+  overview     String?             // @Lob
+  posterPath   String?             // handle URL concatenation in your app logic
+  seasonNumber Int?
+  voteAverage  Float?
+
+  episodes     Json? // relation to episodes
+}
+
+model TmdbSeasonEpisode {
+  id             Int    @id
+  airDate        String?
+  episodeNumber  Int?
+  episodeType    String?
   name           String?
   overview       String?  // @Lob
-  poster_path    String?  // handle URL concatenation in your app logic
-  season_number  Int?
-  vote_average   Float?
-
-  tmdb           tmdb   @relation(fields: [tmdb_id], references: [id])
-  tmdb_id        Int
-}
-
-model tmdb_season {
-  id            Int                    @id
-  air_date      String?
-  show_id       Int?                   // although marked with @JsonIgnore, we keep it if you need it
-  name          String?
-  overview      String?                // @Lob
-  poster_path   String?                // handle URL concatenation in your app logic
-  season_number Int?
-  vote_average  Float?
-
-  episodes      tmdb_season_episode[]  // relation to episodes
-}
-
-model tmdb_season_episode {
-  id              Int    @id
-  air_date        String?
-  episode_number  Int?
-  episode_type    String?
-  name            String?
-  overview        String?  // @Lob
-  production_code String?
-  runtime         Int?
-  season_number   Int?
-  show_id         Int?
-  still_path      String?  // handle URL concatenation in your app logic
-  vote_average    Float?
-  vote_count      Int?
-
-  tmdb_season     tmdb_season  @relation(fields: [tmdb_season_id], references: [id])
-  tmdb_season_id  Int
+  productionCode String?
+  runtime        Int?
+  seasonNumber   Int?
+  showId         Int?
+  stillPath      String?  // handle URL concatenation in your app logic
+  voteAverage    Float?
+  voteCount      Int?
 }

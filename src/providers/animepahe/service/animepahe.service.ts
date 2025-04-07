@@ -11,7 +11,7 @@ import { ZoroWithRelations } from '../../zoro/service/zoro.service'
 import { Source } from '../../../shared/Source'
 
 export interface AnimepaheWithRelations extends Animepahe {
-  episodes: AnimepaheEpisode[];
+  
 }
 
 export interface BasicAnimepahe {
@@ -38,9 +38,6 @@ export class AnimepaheService {
   async getAnimepaheByAnilist(id: number): Promise<AnimepaheWithRelations | null> {
     const existingAnimepahe = await this.prisma.animepahe.findFirst({
       where: { alId: id },
-      include: {
-        episodes: true,
-      },
     });
 
     if (existingAnimepahe) {
@@ -65,9 +62,6 @@ export class AnimepaheService {
     
     return this.prisma.animepahe.create({
       data: this.helper.getAnimePaheData(animepahe),
-      include: {
-        episodes: true,
-      },
     });
   }
   

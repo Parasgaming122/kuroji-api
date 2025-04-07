@@ -11,17 +11,15 @@ model Tvdb {
   nameTranslations     String[]           // list of translations
   overviewTranslations String[]           // list of translations
 
-  aliases              TvdbAlias[]
-  artworks             TvdbArtwork[]
-  remoteIds            TvdbRemoteId[]
+  aliases              Json?
+  artworks             Json?
+  remoteIds            Json?
 }
 
 model TvdbAlias {
   id            Int         @id @default(autoincrement())
   name          String?
   language      String?
-  tvdbId Int
-  tvdb   Tvdb @relation(fields: [tvdbId], references: [id])
 
   @@map("tvdb_aliases")
 }
@@ -36,9 +34,6 @@ model TvdbArtwork {
   thumbnail     String?
   type          Int?
   width         Int?
-  tvdbId Int
-  tvdb  Tvdb @relation(fields: [tvdbId], references: [id])
-
   @@map("tvdb_artworks")
 }
 
@@ -46,8 +41,6 @@ model TvdbRemoteId {
   id            String      @id
   type          Int?
   sourceName    String?
-  tvdbId Int
-  tvdb   Tvdb @relation(fields: [tvdbId], references: [id])
 
   @@map("tvdb_remote")
 }

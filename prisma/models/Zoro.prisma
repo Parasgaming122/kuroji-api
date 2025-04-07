@@ -14,7 +14,7 @@ model Zoro {
   status        String?
   season        String?
   totalEpisodes Int?
-  episodes      EpisodeZoro[]
+  episodes      Json?
 }
 
 model EpisodeZoro {
@@ -25,6 +25,4 @@ model EpisodeZoro {
   isSubbed Boolean
   isDubbed Boolean
   url      String
-  Zoro     Zoro?   @relation(fields: [zoroId], references: [id])
-  zoroId   String?
 }

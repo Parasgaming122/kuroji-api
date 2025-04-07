@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { Anilist, Prisma, Shikimori } from '@prisma/client'
+import { Anilist, Poster, Prisma, Shikimori } from '@prisma/client'
 import { AnilistWithRelations } from '../service/anilist.service'
 import { BasicAnilist, BasicShikimori } from '../model/BasicAnilist'
 import { ShikimoriWithRelations } from 'src/providers/shikimori/service/shikimori.service'
@@ -130,7 +130,7 @@ export class AnilistHelper {
       id: shikimori.id,
       malId: shikimori.malId ?? undefined,
       url: shikimori.url ?? undefined,
-      poster: shikimori.poster ?? undefined
+      poster: shikimori.poster as Poster ?? undefined
     }
   }
 }

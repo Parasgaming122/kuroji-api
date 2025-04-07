@@ -10,7 +10,7 @@ import { ScrapeHelper } from '../../../scrapper/scrape-helper'
 import { Source } from '../../../shared/Source'
 
 export interface AnimekaiWithRelations extends AnimeKai {
-  episodes: AnimekaiEpisode[];
+ 
 }
 
 export interface BasicAnimekai {
@@ -38,9 +38,6 @@ export class AnimekaiService {
   async getAnimekaiByAnilist(id: number): Promise<AnimekaiWithRelations> {
     const existingAnimekai = await this.prisma.animeKai.findFirst({
       where: { anilistId: id },
-      include: {
-        episodes: true,
-      },
     });
 
     if (existingAnimekai) {
@@ -65,9 +62,6 @@ export class AnimekaiService {
 
     return await this.prisma.animeKai.create({
       data: this.helper.getAnimekaiData(animekai),
-      include: {
-        episodes: true,
-      },
     });
   }
 

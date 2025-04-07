@@ -49,12 +49,6 @@ export class AnilistService {
   ): Promise<AnilistWithRelations> {
     const existingAnilist = await this.prisma.anilist.findUnique({
       where: { id },
-      include: {
-        tags: true,
-        externalLinks: true,
-        streamingEpisodes: true,
-        BasicIdAni: true,
-      },
     });
 
     if (existingAnilist) {
@@ -274,12 +268,6 @@ export class AnilistService {
     const [data, total] = await Promise.all([
       this.prisma.anilist.findMany({
         where: whereCondition,
-        include: {
-          tags: true,
-          externalLinks: true,
-          streamingEpisodes: true,
-          BasicIdAni: true,
-        },
         take: perPage,
         skip,
         orderBy: filter.sort?.map((sortField) => {

@@ -19,16 +19,13 @@ import { GraphQL } from '../graphql/shikimori.graphql';
 import { ShikimoriHelper } from '../utils/shikimori-helper';
 
 export interface ShikimoriWithRelations extends Shikimori {
-  airedOn?: AiredOn | null;
-  releasedOn?: ReleasedOn | null;
-  poster?: Poster | null;
-  chronology: BasicIdShik[];
-  videos: Video[];
-  screenshots: Screenshot[];
+
 }
+
 export interface ShikimoriResponse {
   animes: ShikimoriWithRelations[];
 }
+
 @Injectable()
 export class ShikimoriService {
   constructor(
@@ -40,14 +37,6 @@ export class ShikimoriService {
   async getShikimori(id: string): Promise<ShikimoriWithRelations> {
     const existingShikimori = await this.prisma.shikimori.findUnique({
       where: { id },
-      include: {
-        chronology: true,
-        screenshots: true,
-        airedOn: true,
-        releasedOn: true,
-        poster: true,
-        videos: true,
-      },
     });
     if (existingShikimori) {
       return this.adjustShikimori(existingShikimori);
@@ -73,14 +62,6 @@ export class ShikimoriService {
   async getChronology(id: string): Promise<BasicIdShik[]> {
     const shikimori = await this.prisma.shikimori.findUnique({
       where: { id },
-      include: {
-        chronology: true,
-        screenshots: true,
-        airedOn: true,
-        releasedOn: true,
-        poster: true,
-        videos: true,
-      },
     });
 
     if (!shikimori) {
@@ -104,20 +85,12 @@ export class ShikimoriService {
         where: { id },
         create: this.helper.getDataForPrisma(updatedShikimoriList.animes[0]),
         update: this.helper.getDataForPrisma(updatedShikimoriList.animes[0]),
-        include: {
-          chronology: true,
-          screenshots: true,
-          airedOn: true,
-          releasedOn: true,
-          poster: true,
-          videos: true,
-        },
       });
 
-      return updatedShikimori.chronology || [];
+      return updatedShikimori.chronology as BasicIdShik[] || [];
     }
 
-    return shikimori.chronology || [];
+    return shikimori.chronology as BasicIdShik[] || [];
   }
 
   async saveMultipleShikimori(ids: string): Promise<ShikimoriWithRelations[]> {
@@ -125,14 +98,6 @@ export class ShikimoriService {
 
     const existingShikimoriList = await this.prisma.shikimori.findMany({
       where: { id: { in: idList } },
-      include: {
-        chronology: true,
-        screenshots: true,
-        airedOn: true,
-        releasedOn: true,
-        poster: true,
-        videos: true,
-      },
     });
 
     const existingIds = existingShikimoriList.map((shikimori) => shikimori.id);
@@ -182,14 +147,6 @@ export class ShikimoriService {
       where: { id: anime.id },
       update: this.helper.getDataForPrisma(anime),
       create: this.helper.getDataForPrisma(anime),
-      include: {
-        chronology: true,
-        screenshots: true,
-        airedOn: true,
-        releasedOn: true,
-        poster: true,
-        videos: true,
-      },
     });
 
     return savedShikimori;
@@ -228,8 +185,10 @@ export class ShikimoriService {
   }
 
   adjustShikimori(shikimori: ShikimoriWithRelations): ShikimoriWithRelations {
-    if (shikimori.screenshots && shikimori.screenshots.length > 10) {
-      shikimori.screenshots = shikimori.screenshots.slice(0, 10);
+    const screenshots = shikimori.screenshots as Screenshot[];
+    
+    if (screenshots && screenshots.length > 10) {
+      shikimori.screenshots = screenshots.slice(0, 10);
     }
 
     return shikimori;

@@ -40,10 +40,10 @@ model Anilist {
   stats             Json? // Stats (including scoreDistribution and statusDistribution)
 
   // Normalized collections (stored in separate tables)
-  tags              AnilistTag[]
-  externalLinks     AnilistExternalLink[]
-  streamingEpisodes AnilistStreamingEpisode[]
-  BasicIdAni        BasicIdAni[]
+  tags              Json?
+  externalLinks     Json?
+  streamingEpisodes Json?
+  BasicIdAni        Json?
 }
 
 model AnilistIndex {
@@ -64,7 +64,6 @@ model AnilistTag {
   isMediaSpoiler   Boolean?
   isAdult          Boolean?
   userId           Int?
-  release          Anilist  @relation(fields: [releaseId], references: [id])
 }
 
 model AnilistExternalLink {
@@ -80,7 +79,6 @@ model AnilistExternalLink {
   icon       String?
   notes      String?
   isDisabled Boolean?
-  release    Anilist  @relation(fields: [releaseId], references: [id])
 }
 
 model AnilistStreamingEpisode {
@@ -90,14 +88,11 @@ model AnilistStreamingEpisode {
   thumbnail String?
   url       String?
   site      String?
-  release   Anilist @relation(fields: [releaseId], references: [id])
 }
 
 model BasicIdAni {
   id        Int      @id @default(autoincrement())
   idMal     Int?
-  release   Anilist? @relation(fields: [releaseId], references: [id])
-  releaseId Int?
 }
 
 model BasicRelease {
@@ -127,4 +122,57 @@ model BasicRelease {
   isAdult           Boolean?
   genres            String[]
   nextAiringEpisode Json?
+}
+
+model ReleaseFilter {
+  id                  Int      @id @default(autoincrement())
+  sort                String[]
+  perPage             Int?
+  page                Int?
+  sourceIn            String[]
+  popularityLesser    Int?
+  popularityGreater   Int?
+  popularityNot       Int?
+  averageScoreLesser  Int?
+  averageScoreGreater Int?
+  averageScoreNot     Int?
+  licensedByIdIn      String[]
+  licensedByIn        String[]
+  tagCategoryNotIn    String[]
+  tagCategoryIn       String[]
+  tagNotIn            String[]
+  tagIn               String[]
+  genreNotIn          String[]
+  genreIn             String[]
+  durationLesser      Int?
+  durationGreater     Int?
+  episodesLesser      Int?
+  episodesGreater     Int?
+  statusNotIn         String[]
+  statusNot           String?
+  statusIn            String[]
+  formatNotIn         String[]
+  formatNot           String?
+  formatIn            String[]
+  endDateLike         String?
+  endDateLesser       String?
+  endDateGreater      String?
+  startDateLike       String?
+  startDateLesser     String?
+  startDateGreater    String?
+  idMalNotIn          Int[]
+  idMalIn             Int[]
+  idMalNot            Int?
+  idNotIn             Int[]
+  idIn                Int[]
+  idNot               Int?
+  search              String?
+  isLicensed          Boolean?
+  countryOfOrigin     String?
+  isAdult             Boolean?
+  format              String?
+  type                String?
+  status              String?
+  season              String?
+  idMal               Int?
 }

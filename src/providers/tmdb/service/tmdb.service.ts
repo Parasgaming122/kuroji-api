@@ -9,11 +9,11 @@ import { ScrapeHelper } from '../../../scrapper/scrape-helper'
 import { UpdateType } from '../../../shared/UpdateType'
 
 export interface TmdbWithRelations extends Tmdb {
-  seasons: TmdbReleaseSeason[];
+  
 }
 
 export interface TmdbSeasonWithRelations extends TmdbSeason {
-  episodes: TmdbSeasonEpisode[];
+  
 }
 
 export interface BasicTmdb {
@@ -49,7 +49,9 @@ export class TmdbService {
       const anilist = await this.anilistService.getAnilist(id);
       const tmdb = await this.findTmdb(id);
 
-      if (!tmdb.seasons || tmdb.seasons.length === 0) {
+      const existTmdbSeason = tmdb.seasons as TmdbReleaseSeason[];
+
+      if (!existTmdbSeason || existTmdbSeason.length === 0) {
         throw new Error(`No seasons found for TMDb ID: ${tmdb.id}`);
       }
 
@@ -59,7 +61,7 @@ export class TmdbService {
       const day = anilistAirDate.day;
       const anilistAirDateString = `${year!!.toString().padStart(4, '0')}-${month!!.toString().padStart(2, '0')}-${day!!.toString().padStart(2, '0')}`;
 
-      let seasonNumber = tmdb.seasons.find(
+      let seasonNumber = existTmdbSeason.find(
         (season) =>
           season.airDate?.toLowerCase() === anilistAirDateString.toLowerCase(),
       )?.seasonNumber;
@@ -68,14 +70,15 @@ export class TmdbService {
         const MAX_SEASONS = tmdb.numberOfSeasons || 1;
         for (let currentSeason = 1; currentSeason <= MAX_SEASONS; currentSeason++) {
           const tmdbSeason = await this.fetchTmdbSeason(tmdb.id, currentSeason);
-          if (!tmdbSeason || !tmdbSeason.episodes || tmdbSeason.episodes.length === 0) {
+          const tmdbSeasonEpisode = tmdbSeason.episodes as TmdbSeasonEpisode[];
+          if (!tmdbSeasonEpisode || !tmdbSeasonEpisode || tmdbSeasonEpisode.length === 0) {
             break;
           }
 
           // Deep clone the season
           const clonedTmdbSeason: TmdbSeasonWithRelations = JSON.parse(JSON.stringify(tmdbSeason));
           const targetEpisodes: TmdbSeasonEpisode[] = [];
-          const allEpisodes = clonedTmdbSeason.episodes;
+          const allEpisodes = clonedTmdbSeason.episodes as TmdbSeasonEpisode[];
           let startIndex = -1;
 
           for (let i = 0; i < allEpisodes.length; i++) {
@@ -133,9 +136,6 @@ export class TmdbService {
       where: { id: tmdb.id },
       update: this.helper.getTmdbData(tmdb),
       create: this.helper.getTmdbData(tmdb),
-      include: {
-        seasons: true,
-      }
     });
   }
 
@@ -144,9 +144,6 @@ export class TmdbService {
       where: { id: tmdbSeason.id },
       update: this.helper.getTmdbSeasonData(tmdbSeason),
       create: this.helper.getTmdbSeasonData(tmdbSeason),
-      include: {
-        episodes: true,
-      }
     });
   }
 
@@ -179,7 +176,6 @@ export class TmdbService {
           mode: 'insensitive' 
         } 
       },
-      include: { seasons: true } // Add this
     });
     if (match && this.isTitleMatch(anilist, match as TmdbWithRelations)) {
       return match as TmdbWithRelations;
@@ -192,7 +188,6 @@ export class TmdbService {
           mode: 'insensitive' 
         } 
       },
-      include: { seasons: true } // Add this
     });
     if (match && this.isTitleMatch(anilist, match as TmdbWithRelations)) {
       return match as TmdbWithRelations;
@@ -205,7 +200,6 @@ export class TmdbService {
           mode: 'insensitive' 
         } 
       },
-      include: { seasons: true } // Add this
     });
     
     let candidates = candidatesRomaji;
@@ -217,7 +211,6 @@ export class TmdbService {
             mode: 'insensitive' 
           } 
         },
-        include: { seasons: true } // Add this
       });
       candidates = candidates.concat(candidatesEnglish);
     }
@@ -229,7 +222,6 @@ export class TmdbService {
           mode: 'insensitive' 
         } 
       },
-      include: { seasons: true } // Add this
     });
     candidates = candidates.concat(candidatesNative);
     

@@ -50,10 +50,10 @@ model Anilist {
   stats             Json? // Stats (including scoreDistribution and statusDistribution)
 
   // Normalized collections (stored in separate tables)
-  tags              AnilistTag[]
-  externalLinks     AnilistExternalLink[]
-  streamingEpisodes AnilistStreamingEpisode[]
-  BasicIdAni        BasicIdAni[]
+  tags              Json?
+  externalLinks     Json?
+  streamingEpisodes Json?
+  BasicIdAni        Json?
 }
 
 model AnilistIndex {
@@ -74,7 +74,6 @@ model AnilistTag {
   isMediaSpoiler   Boolean?
   isAdult          Boolean?
   userId           Int?
-  release          Anilist  @relation(fields: [releaseId], references: [id])
 }
 
 model AnilistExternalLink {
@@ -90,7 +89,6 @@ model AnilistExternalLink {
   icon       String?
   notes      String?
   isDisabled Boolean?
-  release    Anilist  @relation(fields: [releaseId], references: [id])
 }
 
 model AnilistStreamingEpisode {
@@ -100,14 +98,11 @@ model AnilistStreamingEpisode {
   thumbnail String?
   url       String?
   site      String?
-  release   Anilist @relation(fields: [releaseId], references: [id])
 }
 
 model BasicIdAni {
   id        Int      @id @default(autoincrement())
   idMal     Int?
-  release   Anilist? @relation(fields: [releaseId], references: [id])
-  releaseId Int?
 }
 
 model BasicRelease {
@@ -137,233 +132,6 @@ model BasicRelease {
   isAdult           Boolean?
   genres            String[]
   nextAiringEpisode Json?
-}
-
-
-// Animekai.prisma
-model AnimeKai {
-  id             String        @id
-  anilistId      Int?
-  title          String?
-  japaneseTitle  String?
-  image          String?
-  description    String?       // @Lob just means long text, handled by String
-  type           String?
-  url            String?
-  subOrDub       String?
-  hasSub         Boolean?
-  hasDub         Boolean?
-  status         String?
-  season         String?
-  totalEpisodes  Int?
-
-  episodes       AnimekaiEpisode[]
-}
-
-model AnimekaiEpisode {
-  id         String   @id
-  number     Int?
-  title      String?
-  isFiller   Boolean?
-  isSubbed   Boolean?
-  isDubbed   Boolean?
-  url        String?
-
-  animeKaiId String
-  animeKai   AnimeKai @relation(fields: [animeKaiId], references: [id])
-}
-
-// Animepahe.prisma
-model Animepahe {
-  id             String              @id
-  alId           Int?
-  title          String?
-  image          String?
-  cover          String?
-  hasSub         Boolean?
-  status         String?
-  type           String?
-  releaseDate    String?
-  totalEpisodes  Int?
-  episodePages   Int?
-
-  episodes       AnimepaheEpisode[] 
-}
-
-model AnimepaheEpisode {
-  id          String   @id
-  number      Int?
-  title       String?
-  image       String?
-  duration    String?
-  url         String?
-
-  animepaheId String
-  animepahe   Animepahe @relation(fields: [animepaheId], references: [id])
-}
-
-// Shikimori.prisma
-model Shikimori {
-  id            String        @id
-  malId         String?
-  name          String?
-  russian       String?
-  licenseNameRu String?
-  english       String?
-  japanese      String?
-  synonyms      String[]
-  kind          String?
-  rating        String?
-  score         Float?
-  status        String?
-  episodes      Int?
-  episodesAired Int?
-  duration      Int?
-  airedOn       AiredOn?      @relation(fields: [airedOnId], references: [id])
-  airedOnId     Int?
-  releasedOn    ReleasedOn?   @relation(fields: [releasedOnId], references: [id])
-  releasedOnId  Int?
-  url           String?
-  season        String?
-  poster        Poster?       @relation(fields: [posterId], references: [id])
-  posterId      Int?
-  createdAt     DateTime?
-  updatedAt     DateTime?
-  nextEpisodeAt DateTime?
-  chronology    BasicIdShik[]
-  videos        Video[]
-  screenshots   Screenshot[]
-}
-
-model AiredOn {
-  id        Int         @id @default(autoincrement())
-  year      Int?
-  month     Int?
-  day       Int?
-  date      String?
-  Shikimori Shikimori[]
-}
-
-model ReleasedOn {
-  id        Int         @id @default(autoincrement())
-  year      Int?
-  month     Int?
-  day       Int?
-  date      String?
-  Shikimori Shikimori[]
-}
-
-model BasicIdShik {
-  id          Int        @id @default(autoincrement())
-  malId       Int?
-  Shikimori   Shikimori? @relation(fields: [shikimoriId], references: [id])
-  shikimoriId String?
-}
-
-model Video {
-  id            Int        @id @default(autoincrement())
-  videoId       String?
-  videoImageUrl String?
-  kind          String?
-  videoName     String?
-  playerUrl     String?
-  videoUrl      String?
-  Shikimori     Shikimori? @relation(fields: [shikimoriId], references: [id])
-  shikimoriId   String?
-}
-
-model Screenshot {
-  id          Int        @id @default(autoincrement())
-  originalUrl String?
-  x166Url     String?
-  x332Url     String?
-  Shikimori   Shikimori? @relation(fields: [shikimoriId], references: [id])
-  shikimoriId String?
-}
-
-model BasicReleaseShikimori {
-  id                  Int             @id @default(autoincrement())
-  idMal               Int?
-  siteUrl             String?
-  title               Title?          @relation(fields: [titleId], references: [id])
-  titleId             Int?
-  synonyms            String[]
-  bannerImage         String?
-  coverImage          CoverImage?     @relation(fields: [coverImageId], references: [id])
-  coverImageId        Int?
-  type                String?
-  format              String?
-  status              String?
-  description         String?
-  startDate           DateDetails?    @relation(fields: [startDateId], references: [id])
-  startDateId         Int?
-  season              String?
-  seasonYear          Int?
-  episodes            Int?
-  episodesAired       Int?
-  duration            Int?
-  countryOfOrigin     String?
-  popularity          Int?
-  favourites          Int?
-  averageScore        Int?
-  meanScore           Int?
-  isLocked            Boolean?
-  isAdult             Boolean?
-  genres              String[]
-  nextAiringEpisode   AiringEpisode?  @relation(fields: [nextAiringEpisodeId], references: [id])
-  nextAiringEpisodeId Int?
-  shikimori           BasicShikimori? @relation(fields: [shikimoriId], references: [id])
-  shikimoriId         Int?
-}
-
-model Title {
-  id           Int                     @id @default(autoincrement())
-  romaji       String?
-  english      String?
-  native       String?
-  BasicRelease BasicReleaseShikimori[]
-}
-
-model CoverImage {
-  id           Int                     @id @default(autoincrement())
-  extraLarge   String?
-  large        String?
-  medium       String?
-  color        String?
-  BasicRelease BasicReleaseShikimori[]
-}
-
-model DateDetails {
-  id           Int                     @id @default(autoincrement())
-  year         Int?
-  month        Int?
-  day          Int?
-  BasicRelease BasicReleaseShikimori[]
-}
-
-model AiringEpisode {
-  id              Int                     @id @default(autoincrement())
-  airingAt        Int?
-  timeUntilAiring Int?
-  episode         Int?
-  BasicRelease    BasicReleaseShikimori[]
-}
-
-model BasicShikimori {
-  id           Int                     @id @default(autoincrement())
-  name         String?
-  url          String?
-  poster       Poster?                 @relation(fields: [posterId], references: [id])
-  posterId     Int?
-  BasicRelease BasicReleaseShikimori[]
-}
-
-model Poster {
-  id             Int              @id @default(autoincrement())
-  originalUrl    String?
-  mainUrl        String?
-  BasicShikimori BasicShikimori[]
-  Shikimori      Shikimori[]
 }
 
 model ReleaseFilter {
@@ -419,6 +187,211 @@ model ReleaseFilter {
   idMal               Int?
 }
 
+// Animekai.prisma
+model AnimeKai {
+  id             String        @id
+  anilistId      Int?
+  title          String?
+  japaneseTitle  String?
+  image          String?
+  description    String?       // @Lob just means long text, handled by String
+  type           String?
+  url            String?
+  subOrDub       String?
+  hasSub         Boolean?
+  hasDub         Boolean?
+  status         String?
+  season         String?
+  totalEpisodes  Int?
+
+  episodes       Json?
+}
+
+model AnimekaiEpisode {
+  id         String   @id
+  number     Int?
+  title      String?
+  isFiller   Boolean?
+  isSubbed   Boolean?
+  isDubbed   Boolean?
+  url        String?
+}
+
+// Animepahe.prisma
+model Animepahe {
+  id             String              @id
+  alId           Int?
+  title          String?
+  image          String?
+  cover          String?
+  hasSub         Boolean?
+  status         String?
+  type           String?
+  releaseDate    String?
+  totalEpisodes  Int?
+  episodePages   Int?
+
+  episodes       Json?
+}
+
+model AnimepaheEpisode {
+  id          String   @id
+  number      Int?
+  title       String?
+  image       String?
+  duration    String?
+  url         String?
+}
+
+// Shikimori.prisma
+model Shikimori {
+  id            String        @id
+  malId         String?
+  name          String?
+  russian       String?
+  licenseNameRu String?
+  english       String?
+  japanese      String?
+  synonyms      String[]
+  kind          String?
+  rating        String?
+  score         Float?
+  status        String?
+  episodes      Int?
+  episodesAired Int?
+  duration      Int?
+  airedOn       Json?
+  airedOnId     Int?
+  releasedOn    Json?
+  releasedOnId  Int?
+  url           String?
+  season        String?
+  poster        Json?
+  posterId      Int?
+  createdAt     DateTime?
+  updatedAt     DateTime?
+  nextEpisodeAt DateTime?
+  chronology    Json
+  videos        Json
+  screenshots   Json
+}
+
+model AiredOn {
+  id        Int         @id @default(autoincrement())
+  year      Int?
+  month     Int?
+  day       Int?
+  date      String?
+}
+
+model ReleasedOn {
+  id        Int         @id @default(autoincrement())
+  year      Int?
+  month     Int?
+  day       Int?
+  date      String?
+}
+
+model BasicIdShik {
+  id          Int        @id @default(autoincrement())
+  malId       Int?
+}
+
+model Video {
+  id            Int        @id @default(autoincrement())
+  videoId       String?
+  videoImageUrl String?
+  kind          String?
+  videoName     String?
+  playerUrl     String?
+  videoUrl      String?
+}
+
+model Screenshot {
+  id          Int        @id @default(autoincrement())
+  originalUrl String?
+  x166Url     String?
+  x332Url     String?
+}
+
+model BasicReleaseShikimori {
+  id                  Int             @id @default(autoincrement())
+  idMal               Int?
+  siteUrl             String?
+  title               Json?
+  titleId             Int?
+  synonyms            String[]
+  bannerImage         String?
+  coverImage          Json?
+  coverImageId        Int?
+  type                String?
+  format              String?
+  status              String?
+  description         String?
+  startDate           Json?
+  startDateId         Int?
+  season              String?
+  seasonYear          Int?
+  episodes            Int?
+  episodesAired       Int?
+  duration            Int?
+  countryOfOrigin     String?
+  popularity          Int?
+  favourites          Int?
+  averageScore        Int?
+  meanScore           Int?
+  isLocked            Boolean?
+  isAdult             Boolean?
+  genres              String[]
+  nextAiringEpisode   Json?
+  nextAiringEpisodeId Int?
+  shikimori           Json?
+  shikimoriId         Int?
+}
+
+model Title {
+  id           Int                     @id @default(autoincrement())
+  romaji       String?
+  english      String?
+  native       String?
+}
+
+model CoverImage {
+  id           Int                     @id @default(autoincrement())
+  extraLarge   String?
+  large        String?
+  medium       String?
+  color        String?
+}
+
+model DateDetails {
+  id           Int                     @id @default(autoincrement())
+  year         Int?
+  month        Int?
+  day          Int?
+}
+
+model AiringEpisode {
+  id              Int                     @id @default(autoincrement())
+  airingAt        Int?
+  timeUntilAiring Int?
+  episode         Int?
+}
+
+model BasicShikimori {
+  id           Int                     @id @default(autoincrement())
+  name         String?
+  url          String?
+  poster       Json? 
+  posterId     Int?
+}
+
+model Poster {
+  id             Int              @id @default(autoincrement())
+  originalUrl    String?
+  mainUrl        String?
+}
+
 model ReleaseIndex {
   id        String   @id
   addedAt   DateTime @default(now())
@@ -435,30 +408,30 @@ model LastUpdated {
 
 // Tmdb.prisma
 model Tmdb {
-  id               Int                    @id
-  adult            Boolean
-  backdropPath     String?                // full URL constructed on getter in Java, handle that in your app logic
-  episodeRunTime   Int[]                  // list of integers
-  firstAirDate     String?
-  homepage         String?
-  inProduction     Boolean?
-  lastAirDate      String?
-  name             String?
-  numberOfEpisodes Int?
-  numberOfSeasons  Int?
-  originalLanguage String?
-  originalName     String?
-  originCountry    String[]               // list of countries
-  overview         String?                // @Lob in Java
-  popularity       Float?
-  posterPath       String?                // handle URL concatenation in your app logic
-  tagline          String?                // @Lob in Java
-  status           String?
-  type             String?
-  voteAverage      Float?
-  voteCount        Int?
+  id                 Int                @id
+  adult              Boolean
+  backdropPath       String?            // full URL constructed on getter in Java, handle that in your app logic
+  episodeRunTime     Int[]              // list of integers
+  firstAirDate       String?
+  homepage           String?
+  inProduction       Boolean?
+  lastAirDate        String?
+  name               String?
+  numberOfEpisodes   Int?
+  numberOfSeasons    Int?
+  originalLanguage   String?
+  originalName       String?
+  originCountry      String[]           // list of countries
+  overview           String?            // @Lob in Java
+  popularity         Float?
+  posterPath         String?            // handle URL concatenation in your app logic
+  tagline            String?            // @Lob in Java
+  status             String?
+  type               String?
+  voteAverage        Float?
+  voteCount          Int?
 
-  seasons          TmdbReleaseSeason[]    // relation to embedded seasons
+  seasons            Json? // relation to embedded seasons
 }
 
 model TmdbReleaseSeason {
@@ -466,26 +439,23 @@ model TmdbReleaseSeason {
   airDate       String?
   episodeCount  Int?
   name          String?
-  overview      String?   // @Lob
-  posterPath    String?   // handle URL concatenation in your app logic
+  overview      String?  // @Lob
+  posterPath    String?  // handle URL concatenation in your app logic
   seasonNumber  Int?
   voteAverage   Float?
-
-  tmdb   Tmdb  @relation(fields: [tmdbId], references: [id])
-  tmdbId Int
 }
 
 model TmdbSeason {
-  id           Int                     @id
+  id           Int                 @id
   airDate      String?
-  showId       Int?                    // although marked with @JsonIgnore, we keep it if you need it
+  showId       Int?                // although marked with @JsonIgnore, we keep it if you need it
   name         String?
-  overview     String?                 // @Lob
-  posterPath   String?                 // handle URL concatenation in your app logic
+  overview     String?             // @Lob
+  posterPath   String?             // handle URL concatenation in your app logic
   seasonNumber Int?
   voteAverage  Float?
 
-  episodes     TmdbSeasonEpisode[]     // relation to episodes
+  episodes     Json? // relation to episodes
 }
 
 model TmdbSeasonEpisode {
@@ -502,9 +472,6 @@ model TmdbSeasonEpisode {
   stillPath      String?  // handle URL concatenation in your app logic
   voteAverage    Float?
   voteCount      Int?
-
-  tmdbSeason     TmdbSeason  @relation(fields: [tmdbSeasonId], references: [id])
-  tmdbSeasonId   Int
 }
 
 // Tvdb.prisma
@@ -521,17 +488,15 @@ model Tvdb {
   nameTranslations     String[]           // list of translations
   overviewTranslations String[]           // list of translations
 
-  aliases              TvdbAlias[]
-  artworks             TvdbArtwork[]
-  remoteIds            TvdbRemoteId[]
+  aliases              Json?
+  artworks             Json?
+  remoteIds            Json?
 }
 
 model TvdbAlias {
   id            Int         @id @default(autoincrement())
   name          String?
   language      String?
-  tvdbId Int
-  tvdb   Tvdb @relation(fields: [tvdbId], references: [id])
 
   @@map("tvdb_aliases")
 }
@@ -546,9 +511,6 @@ model TvdbArtwork {
   thumbnail     String?
   type          Int?
   width         Int?
-  tvdbId Int
-  tvdb  Tvdb @relation(fields: [tvdbId], references: [id])
-
   @@map("tvdb_artworks")
 }
 
@@ -556,8 +518,6 @@ model TvdbRemoteId {
   id            String      @id
   type          Int?
   sourceName    String?
-  tvdbId Int
-  tvdb   Tvdb @relation(fields: [tvdbId], references: [id])
 
   @@map("tvdb_remote")
 }
@@ -580,7 +540,7 @@ model Zoro {
   status        String?
   season        String?
   totalEpisodes Int?
-  episodes      EpisodeZoro[]
+  episodes      Json?
 }
 
 model EpisodeZoro {
@@ -591,6 +551,4 @@ model EpisodeZoro {
   isSubbed Boolean
   isDubbed Boolean
   url      String
-  Zoro     Zoro?   @relation(fields: [zoroId], references: [id])
-  zoroId   String?
 }

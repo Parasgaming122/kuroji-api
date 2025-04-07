@@ -21,20 +21,7 @@ export class ZoroHelper {
       status: zoro.status,
       season: zoro.season,
       totalEpisodes: zoro.totalEpisodes,
-      episodes: {
-        create: zoro.episodes.map((episode) => {
-          return {
-            id: episode.id,
-            number: episode.number,
-            title: episode.title,
-            isFiller: episode.isFiller,
-            isSubbed: episode.isSubbed,
-            isDubbed: episode.isDubbed,
-            url: episode.url,
-            zoroId: episode.zoroId,
-          };
-        }),
-      },
+      episodes: zoro.episodes,
     };
   }
 }

@@ -11,7 +11,7 @@ model Animepahe {
   totalEpisodes  Int?
   episodePages   Int?
 
-  episodes       AnimepaheEpisode[] 
+  episodes       Json?
 }
 
 model AnimepaheEpisode {
@@ -21,7 +21,4 @@ model AnimepaheEpisode {
   image       String?
   duration    String?
   url         String?
-
-  animepaheId String
-  animepahe   Animepahe @relation(fields: [animepaheId], references: [id])
 }

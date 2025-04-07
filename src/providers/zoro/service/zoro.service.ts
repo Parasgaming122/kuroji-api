@@ -10,7 +10,7 @@ import { ScrapeHelper } from '../../../scrapper/scrape-helper'
 import { Source } from '../../../shared/Source'
 
 export interface ZoroWithRelations extends Zoro {
-  episodes: EpisodeZoro[];
+  
 }
 
 export interface BasicZoro {
@@ -37,9 +37,6 @@ export class ZoroService {
   async getZoro(id: string): Promise<ZoroWithRelations> {
     const existingZoro = await this.prisma.zoro.findUnique({
       where: { id: id },
-      include: {
-        episodes: true,
-      },
     });
 
     if (!existingZoro) {
@@ -52,9 +49,6 @@ export class ZoroService {
   async getZoroByAnilist(id: number): Promise<ZoroWithRelations> {
     const existingZoro = await this.prisma.zoro.findFirst({
       where: { alID: id },
-      include: {
-        episodes: true,
-      },
     });
 
     if (!existingZoro) {
@@ -74,9 +68,6 @@ export class ZoroService {
 
     return this.prisma.zoro.create({
       data: this.helper.getZoroData(zoro),
-      include: {
-        episodes: true,
-      },
     });
   }
 
