@@ -21,17 +21,7 @@ export class AnimeKaiHelper {
       status: anime.status,
       season: anime.season,
       totalEpisodes: anime.totalEpisodes,
-      episodes: {
-        create: episodes.map((ep) => ({
-          id: ep.id,
-          number: ep.number,
-          title: ep.title,
-          isFiller: ep.isFiller,
-          isSubbed: ep.isSubbed,
-          isDubbed: ep.isDubbed,
-          url: ep.url,
-        })),
-      },
+      episodes: anime.episodes || [],
     };
   }
 }

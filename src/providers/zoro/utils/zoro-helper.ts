@@ -22,7 +22,7 @@ export class ZoroHelper {
       status: zoro.status,
       season: zoro.season,
       totalEpisodes: zoro.totalEpisodes,
-      episodes: zoro.episodes as JsonArray[],
+      episodes: zoro.episodes || [],
     };
   }
 }

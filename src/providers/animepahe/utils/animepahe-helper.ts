@@ -20,16 +20,7 @@ export class AnimePaheHelper {
       releaseDate: animePahe.releaseDate,
       totalEpisodes: animePahe.totalEpisodes,
       episodePages: animePahe.episodePages,
-      episodes: {
-        create: episodes.map((ep) => ({
-          id: ep.id,
-          number: ep.number,
-          title: ep.title,
-          image: ep.image,
-          duration: ep.duration,
-          url: ep.url,
-        })),
-      },
+      episodes: animePahe.episodes || [],
     };
   }
 }
