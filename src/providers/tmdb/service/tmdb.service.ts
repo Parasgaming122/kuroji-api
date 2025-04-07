@@ -53,114 +53,82 @@ export class TmdbService {
     try {
       const anilist = await this.anilistService.getAnilist(id);
       const tmdb = await this.findTmdb(id);
-
+  
       const existTmdbSeason = tmdb.seasons as TmdbReleaseSeason[];
-
+  
       if (!existTmdbSeason || existTmdbSeason.length === 0) {
         throw new Error(`No seasons found for TMDb ID: ${tmdb.id}`);
       }
-
+  
       const { year, month, day } = anilist.startDate as DateDetails;
-
-      if (!year || !month || !day) {
-        throw new Error('Invalid start date from AniList');
+      const { year: endYear, month: endMonth, day: endDay } = anilist.endDate as DateDetails;
+  
+      if (!year || !month || !day || !endYear || !endMonth || !endDay) {
+        throw new Error('Invalid start or end date from AniList');
       }
-
-      const anilistAirDateString = `${year.toString().padStart(4, '0')}-${month
+  
+      const anilistStartDateString = `${year.toString().padStart(4, '0')}-${month
         .toString()
         .padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+  
+      const anilistEndDateString = `${endYear.toString().padStart(4, '0')}-${endMonth
+        .toString()
+        .padStart(2, '0')}-${endDay.toString().padStart(2, '0')}`;
 
-      console.log('AnilistAirDate:', anilistAirDateString);
+  
+      const SEASONS = tmdb.number_of_seasons || 1;
 
-      // Try to find exact matching season by air_date
       let seasonNumber = existTmdbSeason.find(
         (season) =>
-          season.air_date?.toLowerCase() === anilistAirDateString.toLowerCase(),
-      )?.season_number;
-
-      if (!seasonNumber) {
-        // If exact match not found, do deep search through each season's episodes
-        const MAX_SEASONS = tmdb.number_of_seasons || 1;
-
-        for (
-          let currentSeason = 1;
-          currentSeason <= MAX_SEASONS;
-          currentSeason++
-        ) {
-          console.log('if !season number');
-
-          let tmdbSeason = await this.prisma.tmdbSeason.findFirst({
-            where: { show_id: tmdb.id, season_number: currentSeason },
-          });
-          if (!tmdbSeason) {
-            console.log('fetching tmdb season');
-            tmdbSeason = await this.fetchTmdbSeason(tmdb.id, currentSeason);
-          }
-
-          const episodes = tmdbSeason.episodes as TmdbSeasonEpisode[];
-          console.log(episodes);
-
-          if (!episodes || episodes.length === 0) {
-            console.log('continue');
-            continue;
-          }
-          let startIndex = -1;
-          for (let i = 0; i < episodes.length; i++) {
-            const ep = episodes[i];
-            if (
-              ep.episode_type === 'finale' &&
-              episodes[i].air_date === anilistAirDateString
-            ) {
-              startIndex = i + 1;
-              break;
-            }
-          }
-          console.log('first loop');
-
-          if (startIndex !== -1) {
-            const trimmedEpisodes: TmdbSeasonEpisode[] = [];
-
-            for (let i = startIndex; i < episodes.length; i++) {
-              const ep = {
-                ...episodes[i],
-                episode_number: trimmedEpisodes.length + 1,
-              };
-              trimmedEpisodes.push(ep);
-              if (ep.episode_type === 'finale') break;
-            }
-
-            const newSeason: TmdbSeasonWithRelations = {
-              ...tmdbSeason,
-              episodes: trimmedEpisodes,
-              show_id: tmdb.id,
-            };
-            console.log('saved new season');
-            return await this.saveTmdbSeason(newSeason);
-          }
+          season.air_date?.toLowerCase() === anilistStartDateString.toLowerCase(),
+      )?.season_number || 1;
+  
+      for (let currentSeason = seasonNumber; currentSeason <= SEASONS; currentSeason++) {
+        let tmdbSeason = await this.prisma.tmdbSeason.findFirst({
+          where: { show_id: tmdb.id, season_number: currentSeason },
+        });
+  
+        if (!tmdbSeason) {
+          tmdbSeason = await this.fetchTmdbSeason(tmdb.id, currentSeason);
+          tmdbSeason.show_id = tmdb.id;
+  
+          await this.saveTmdbSeason(tmdbSeason);
         }
-
-        throw new Error(
-          `Could not find matching season for release date: ${anilistAirDateString}`,
-        );
+  
+        const episodes = tmdbSeason.episodes as TmdbSeasonEpisode[];
+        if (!episodes || episodes.length === 0) continue;
+  
+        let startIndex = episodes.findIndex(ep => ep.air_date === anilistStartDateString);
+        if (startIndex === -1) continue;
+  
+        const trimmedEpisodes: TmdbSeasonEpisode[] = [];
+  
+        for (let i = startIndex; i < episodes.length; i++) {
+          const ep = { ...episodes[i], episode_number: trimmedEpisodes.length + 1 };
+          trimmedEpisodes.push(ep);
+          if (ep.air_date === anilistEndDateString) break;
+        }
+  
+        if (trimmedEpisodes.length === 0) continue;
+  
+        const newSeason: TmdbSeasonWithRelations = {
+          ...tmdbSeason,
+          episodes: trimmedEpisodes,
+          show_id: tmdb.id,
+        };
+  
+        return newSeason;
       }
-
-      let tmdbSeason = await this.prisma.tmdbSeason.findFirst({
-        where: { show_id: tmdb.id, season_number: seasonNumber },
-      });
-
-      if (!tmdbSeason) {
-        const newSeason = await this.fetchTmdbSeason(tmdb.id, seasonNumber);
-        newSeason.show_id = tmdb.id;
-        tmdbSeason = await this.saveTmdbSeason(newSeason);
-      }
-
-      return tmdbSeason;
+  
+      throw new Error(
+        `Could not find matching season for date range: ${anilistStartDateString} - ${anilistEndDateString}`
+      );
     } catch (error) {
       throw new Error(
-        `Error getting TMDb season by AniList ID: ${error.message}`,
+        `Error getting TMDb season by AniList ID: ${error.message}`
       );
     }
-  }
+  }  
 
   async saveTmdb(tmdb: TmdbWithRelations): Promise<TmdbWithRelations> {
     await this.prisma.lastUpdated.create({
