@@ -100,9 +100,6 @@ export class ZoroService {
     const anilist = await this.anilistService.getAnilist(id);
     const searchResult = await this.searchZoro((anilist.title as { romaji: string }).romaji);
 
-
-    console.log('Zoro items:', searchResult); // Debugging line
-
     for (const z of searchResult.results) {
       if (
         ScrapeHelper.compareTitles(

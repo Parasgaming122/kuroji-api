@@ -1,0 +1,27 @@
+model Animepahe {
+  id             String              @id
+  alId           Int?
+  title          String?
+  image          String?
+  cover          String?
+  hasSub         Boolean?
+  status         String?
+  type           String?
+  releaseDate    String?
+  totalEpisodes  Int?
+  episodePages   Int?
+
+  episodes       AnimepaheEpisode[] 
+}
+
+model AnimepaheEpisode {
+  id          String   @id
+  number      Int?
+  title       String?
+  image       String?
+  duration    String?
+  url         String?
+
+  animepaheId String
+  animepahe   Animepahe @relation(fields: [animepaheId], references: [id])
+}

@@ -7,6 +7,7 @@ import { AnilistService } from './anilist.service';
 import { AnilistController } from '../controller/anilist.controller'
 import { HttpModule } from '@nestjs/axios'
 import { ShikimoriHelperModule } from '../../shikimori/module/shikimori-helper.module';
+import { AnilistIndexerService } from './anilist-indexer/anilist-indexer.service'
 
 describe('AnilistService', () => {
   let service: AnilistService;
@@ -18,7 +19,8 @@ describe('AnilistService', () => {
         AnilistHelper,
         ShikimoriService,
         PrismaService,
-        CustomHttpService
+        CustomHttpService,
+        AnilistIndexerService
       ],
       controllers: [AnilistController],
       imports: [HttpModule, ShikimoriHelperModule],

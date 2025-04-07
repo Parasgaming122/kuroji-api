@@ -1,4 +1,6 @@
 {
   "editor.fontSize": 16,
-  "files.autoSave": "off"
+  "files.autoSave": "off",
+  "github.copilot.chat.edits.temporalContext.enabled": true,
+  "github.copilot.chat.languageContext.fix.typescript.enabled": false
 }

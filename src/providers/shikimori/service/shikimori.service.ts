@@ -61,6 +61,11 @@ export class ShikimoriService {
     }
 
     const anime = shikimoriList.animes[0];
+
+    if (!anime) {
+      throw new NotFoundException(`Shikimori not found for ID: ${id}`);
+    }
+
     const savedShikimori = await this.saveShikimori(anime);
     return this.adjustShikimori(savedShikimori);
   }
@@ -69,7 +74,7 @@ export class ShikimoriService {
     const shikimori = await this.prisma.shikimori.findUnique({
       where: { id },
       include: {
-        chronology: true, // Include the relation field
+        chronology: true,
         screenshots: true,
         airedOn: true,
         releasedOn: true,
@@ -95,11 +100,12 @@ export class ShikimoriService {
         );
       }
 
-      const updatedShikimori = await this.prisma.shikimori.update({
+      const updatedShikimori = await this.prisma.shikimori.upsert({
         where: { id },
-        data: this.helper.getDataForPrisma(updatedShikimoriList.animes[0]),
+        create: this.helper.getDataForPrisma(updatedShikimoriList.animes[0]),
+        update: this.helper.getDataForPrisma(updatedShikimoriList.animes[0]),
         include: {
-          chronology: true, // Include the relation field
+          chronology: true,
           screenshots: true,
           airedOn: true,
           releasedOn: true,
@@ -172,12 +178,10 @@ export class ShikimoriService {
       },
     });
 
-    const data = this.helper.getDataForPrisma(anime);
-    const { id, ...updateData } = data;
     const savedShikimori = await this.prisma.shikimori.upsert({
       where: { id: anime.id },
-      update: updateData,
-      create: data,
+      update: this.helper.getDataForPrisma(anime),
+      create: this.helper.getDataForPrisma(anime),
       include: {
         chronology: true,
         screenshots: true,
@@ -199,36 +203,13 @@ export class ShikimoriService {
 
     await this.prisma.lastUpdated.createMany({ data: lastUpdatedData });
 
-    // Deduplicate by 'id'
-    const uniqueShikimoris = Array.from(
-      new Map(shikimoris.map((s) => [s.id, s])).values()
-    );
-
-    for (const anime of uniqueShikimoris) {
-      const data = this.helper.getDataForPrisma(anime);
-      const { id, ...updateData } = data; // remove id from update data
-      await this.prisma.shikimori.upsert({
-        where: { id: anime.id },
-        update: updateData,
-        create: data,
-        include: {
-          chronology: true,
-          screenshots: true,
-          airedOn: true,
-          releasedOn: true,
-          poster: true,
-          videos: true,
-        },
-      });
+    for (const anime of shikimoris) {
+      await this.saveShikimori(anime);
     }
   }
 
   async update(id: string): Promise<Shikimori> {
-    const shikimoriList = (await this.fetchShikimoriFromGraphQL(
-      id,
-      1,
-      1,
-    )) as ShikimoriResponse;
+    const shikimoriList = (await this.fetchShikimoriFromGraphQL(id, 1, 1)) as ShikimoriResponse;
 
     if (!shikimoriList.animes.length) {
       throw new NotFoundException(`Shikimori not found for ID: ${id}`);

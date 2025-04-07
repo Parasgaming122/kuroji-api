@@ -14,7 +14,7 @@ export interface Ids {
 @Injectable()
 export class AnilistIndexerService {
   private isRunning: boolean = false;
-  private scheduledUpdatesEnabled: boolean = true;
+  private scheduledUpdatesEnabled: boolean = false;
   private lastProcessedIndex: AtomicInteger = new AtomicInteger(0);
   private allIds: number[] = [];
   constructor(
@@ -27,43 +27,47 @@ export class AnilistIndexerService {
     if (this.isRunning) {
       console.log('Already running, skip this round.');
       return;
-    }    
-
+    }
+  
     this.isRunning = true;
-
+  
     if (!resume) {
       this.lastProcessedIndex.set(0);
     }
-
+  
     this.allIds = await this.getIds();
-
+  
     for (let id of this.allIds) {
       if (!this.isRunning) {
         console.log('Indexing manually stopped 🚫');
+        this.isRunning = false;
         return; // dip out the loop
       }
-
-      if (
-        !(await this.prisma.releaseIndex.findUnique({
-          where: { id: id.toString() },
-        }))
-      ) {
+  
+      const existing = await this.prisma.releaseIndex.findUnique({
+        where: { id: id.toString() },
+      });
+  
+      if (!existing) {
         try {
           console.log('Indexing new release: ' + id);
           await this.service.getAnilist(id, true);
-    
+  
           await this.prisma.releaseIndex.create({
             data: {
-              id: id.toString(), // you were also missing toString() here, bruh
+              id: id.toString(),
             },
           });
-    
-          await this.sleep(10); // now this gon’ actually wait
+  
+          await this.sleep(delay);
         } catch (e) {
-          console.error('Failed scheduled index update:', e);
+          console.error('Failed index update:', e);
         }
       }
     }
+  
+    this.isRunning = false;
+    console.log('Indexing complete, shutting it down 🛑');
   }
 
   public async sleep(delay: number): Promise<void> {

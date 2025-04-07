@@ -7,6 +7,7 @@ import { ShikimoriService } from '../../shikimori/service/shikimori.service';
 import { AnilistService } from '../service/anilist.service';
 import { AnilistHelper } from '../utils/anilist-helper';
 import { AnilistController } from './anilist.controller';
+import { AnilistIndexerService } from '../service/anilist-indexer/anilist-indexer.service'
 
 describe('AnilistController', () => {
   let controller: AnilistController;
@@ -18,7 +19,8 @@ describe('AnilistController', () => {
         AnilistHelper,
         ShikimoriService,
         PrismaService,
-        CustomHttpService
+        CustomHttpService,
+        AnilistIndexerService
       ],
       controllers: [AnilistController],
       imports: [HttpModule, ShikimoriHelperModule],
