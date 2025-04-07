@@ -1,5 +1,5 @@
 import { Controller, Get, Param } from '@nestjs/common';
-import { TmdbService } from '../service/tmdb.service'
+import { TmdbService } from '../service/tmdb.service';
 
 @Controller('tmdb')
 export class TmdbController {

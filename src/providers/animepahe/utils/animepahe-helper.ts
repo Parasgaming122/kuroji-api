@@ -7,7 +7,6 @@ export class AnimePaheHelper {
   getAnimePaheData(
     animePahe: AnimepaheWithRelations,
   ): Prisma.AnimepaheCreateInput {
-    const episodes = animePahe.episodes as Prisma.AnimepaheEpisodeCreateInput[];
     return {
       id: animePahe.id,
       alId: animePahe.alId,
