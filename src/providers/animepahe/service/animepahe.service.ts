@@ -1,18 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { Animepahe, AnimepaheEpisode } from '@prisma/client'
-import { CustomHttpService } from '../../../http/http.service'
-import { PrismaService } from '../../../prisma.service'
-import { AnimePaheHelper } from '../utils/animepahe-helper'
-import { AnilistService } from '../../anilist/service/anilist.service'
-import { UpdateType } from '../../../shared/UpdateType'
-import { UrlConfig } from '../../../configs/url.config'
-import { ScrapeHelper } from '../../../scrapper/scrape-helper'
-import { ZoroWithRelations } from '../../zoro/service/zoro.service'
-import { Source } from '../../../shared/Source'
-
-export interface AnimepaheWithRelations extends Animepahe {
-  
-}
+import { Animepahe } from '@prisma/client';
+import { UrlConfig } from '../../../configs/url.config';
+import { CustomHttpService } from '../../../http/http.service';
+import { PrismaService } from '../../../prisma.service';
+import { ScrapeHelper } from '../../../scrapper/scrape-helper';
+import { Source } from '../../../shared/Source';
+import { UpdateType } from '../../../shared/UpdateType';
+import { AnilistService } from '../../anilist/service/anilist.service';
+import { AnimePaheHelper } from '../utils/animepahe-helper';
 
 export interface BasicAnimepahe {
   id: string;
@@ -35,7 +30,7 @@ export class AnimepaheService {
     private readonly helper: AnimePaheHelper,
   ) {}
 
-  async getAnimepaheByAnilist(id: number): Promise<AnimepaheWithRelations | null> {
+  async getAnimepaheByAnilist(id: number): Promise<Animepahe | null> {
     const existingAnimepahe = await this.prisma.animepahe.findFirst({
       where: { alId: id },
     });
@@ -49,48 +44,54 @@ export class AnimepaheService {
   }
 
   async getSources(episodeId: string): Promise<Source> {
-    return this.customHttpService.getResponse(UrlConfig.ANIMEPAHE + "watch/" + episodeId) as unknown as Source;
-  } 
+    return await this.customHttpService.getResponse(
+      UrlConfig.ANIMEPAHE + 'watch/' + episodeId,
+    );
+  }
 
-  async saveAnimepahe(animepahe: AnimepaheWithRelations): Promise<AnimepaheWithRelations> {
+  async saveAnimepahe(animepahe: Animepahe): Promise<Animepahe> {
     await this.prisma.lastUpdated.create({
       data: {
         entityId: animepahe.id,
         type: UpdateType.ANIMEPAHE,
       },
     });
-    
+
     return this.prisma.animepahe.create({
       data: this.helper.getAnimePaheData(animepahe),
     });
   }
-  
-  async fetchAnimepahe(id: string): Promise<AnimepaheWithRelations> { 
-    return this.customHttpService.getResponse(UrlConfig.ANIMEPAHE + "info/" + id);
+
+  async fetchAnimepahe(id: string): Promise<Animepahe> {
+    return this.customHttpService.getResponse(
+      UrlConfig.ANIMEPAHE + 'info/' + id,
+    );
   }
 
   async searchAnimepahe(q: string): Promise<AnimepaheResponse> {
     return this.customHttpService.getResponse(UrlConfig.ANIMEPAHE + q);
   }
 
-  async findAnimepahe(id: number): Promise<AnimepaheWithRelations> {
+  async findAnimepahe(id: number): Promise<Animepahe> {
     const anilist = await this.anilistService.getAnilist(id);
-    const searchResult = await this.searchAnimepahe((anilist.title as { romaji: string }).romaji);
-  
+    const searchResult = await this.searchAnimepahe(
+      (anilist.title as { romaji: string }).romaji,
+    );
+
     for (const result of searchResult.results) {
       if (
-              ScrapeHelper.compareTitlesSimple(
-                (anilist.title as { romaji: string }).romaji,
-                (anilist.title as { english: string }).english,
-                (anilist.title as { native: string }).native,
-                anilist.synonyms,
-                result.title
-              )
-            ) {
-              const data = await this.fetchAnimepahe(result.id);
-              data.alId = id;
-              return data;
-            }
+        ScrapeHelper.compareTitlesSimple(
+          (anilist.title as { romaji: string }).romaji,
+          (anilist.title as { english: string }).english,
+          (anilist.title as { native: string }).native,
+          anilist.synonyms,
+          result.title,
+        )
+      ) {
+        const data = await this.fetchAnimepahe(result.id);
+        data.alId = id;
+        return data;
+      }
     }
 
     return Promise.reject(new Error('Animepahe not found'));

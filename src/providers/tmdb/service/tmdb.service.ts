@@ -17,10 +17,6 @@ import {
 } from '../../anilist/service/anilist.service';
 import { TmdbHelper } from '../utils/tmdb-helper';
 
-export interface TmdbWithRelations extends Tmdb {}
-
-export interface TmdbSeasonWithRelations extends TmdbSeason {}
-
 export interface BasicTmdb {
   id: number;
   original_name: string;
@@ -41,7 +37,7 @@ export class TmdbService {
     private readonly helper: TmdbHelper,
   ) {}
 
-  async getTmdbByAnilist(id: number): Promise<TmdbWithRelations> {
+  async getTmdbByAnilist(id: number): Promise<Tmdb> {
     try {
       return await this.findTmdb(id);
     } catch (error) {
@@ -73,7 +69,7 @@ export class TmdbService {
       console.log('AnilistAirDate:', anilistAirDateString);
 
       // Try to find exact matching season by air_date
-      let seasonNumber = existTmdbSeason.find(
+      const seasonNumber = existTmdbSeason.find(
         (season) =>
           season.air_date?.toLowerCase() === anilistAirDateString.toLowerCase(),
       )?.season_number;
@@ -129,7 +125,7 @@ export class TmdbService {
               if (ep.episode_type === 'finale') break;
             }
 
-            const newSeason: TmdbSeasonWithRelations = {
+            const newSeason: TmdbSeason = {
               ...tmdbSeason,
               episodes: trimmedEpisodes,
               show_id: tmdb.id,
@@ -162,7 +158,7 @@ export class TmdbService {
     }
   }
 
-  async saveTmdb(tmdb: TmdbWithRelations): Promise<TmdbWithRelations> {
+  async saveTmdb(tmdb: Tmdb): Promise<Tmdb> {
     await this.prisma.lastUpdated.create({
       data: {
         entityId: String(tmdb.id),
@@ -177,9 +173,7 @@ export class TmdbService {
     });
   }
 
-  async saveTmdbSeason(
-    tmdbSeason: TmdbSeasonWithRelations,
-  ): Promise<TmdbSeason> {
+  async saveTmdbSeason(tmdbSeason: TmdbSeason): Promise<TmdbSeason> {
     return this.prisma.tmdbSeason.upsert({
       where: { id: tmdbSeason.id },
       update: this.helper.getTmdbSeasonData(tmdbSeason),
@@ -187,20 +181,16 @@ export class TmdbService {
     });
   }
 
-  async fetchTmdb(id: number, type: string): Promise<TmdbWithRelations> {
+  async fetchTmdb(id: number, type: string): Promise<Tmdb> {
     const url =
       type === 'tv' ? TMDB.getTvDetails(id) : TMDB.getMovieDetails(id);
     return this.customHttpService.getResponse(url);
   }
 
-  async fetchTmdbSeason(
-    id: number,
-    seasonNumber: number,
-  ): Promise<TmdbSeasonWithRelations> {
-    const seasonData: TmdbSeasonWithRelations =
-      await this.customHttpService.getResponse(
-        TMDB.getSeasonDetails(id, seasonNumber),
-      );
+  async fetchTmdbSeason(id: number, seasonNumber: number): Promise<TmdbSeason> {
+    const seasonData: TmdbSeason = await this.customHttpService.getResponse(
+      TMDB.getSeasonDetails(id, seasonNumber),
+    );
 
     const filteredEpisodes = (seasonData.episodes as any[]).map((episode) => ({
       id: episode.id,
@@ -227,13 +217,13 @@ export class TmdbService {
     return this.customHttpService.getResponse(TMDB.multiSearch(query));
   }
 
-  async findTmdb(id: number): Promise<TmdbWithRelations> {
+  async findTmdb(id: number): Promise<Tmdb> {
     const tmdb = await this.findMatchInPrisma(id);
     if (tmdb) return tmdb;
     return this.fetchTmdbByAnilist(id);
   }
 
-  async findMatchInPrisma(id: number): Promise<TmdbWithRelations> {
+  async findMatchInPrisma(id: number): Promise<Tmdb> {
     const anilist = await this.anilistService.getAnilist(id);
 
     let match = await this.prisma.tmdb.findFirst({
@@ -244,8 +234,8 @@ export class TmdbService {
         },
       },
     });
-    if (match && this.isTitleMatch(anilist, match as TmdbWithRelations)) {
-      return match as TmdbWithRelations;
+    if (match && this.isTitleMatch(anilist, match as Tmdb)) {
+      return match as Tmdb;
     }
 
     match = await this.prisma.tmdb.findFirst({
@@ -256,8 +246,8 @@ export class TmdbService {
         },
       },
     });
-    if (match && this.isTitleMatch(anilist, match as TmdbWithRelations)) {
-      return match as TmdbWithRelations;
+    if (match && this.isTitleMatch(anilist, match as Tmdb)) {
+      return match as Tmdb;
     }
 
     const candidatesRomaji = await this.prisma.tmdb.findMany({
@@ -294,14 +284,11 @@ export class TmdbService {
 
     return this.findBestMatchFromCandidates(
       anilist,
-      candidates as TmdbWithRelations[],
-    ) as TmdbWithRelations;
+      candidates as Tmdb[],
+    ) as Tmdb;
   }
 
-  isTitleMatch(
-    anilist: AnilistWithRelations,
-    tmdb: TmdbWithRelations,
-  ): boolean {
+  isTitleMatch(anilist: AnilistWithRelations, tmdb: Tmdb): boolean {
     return ScrapeHelper.compareTitles(
       (anilist.title as { romaji: string }).romaji,
       (anilist.title as { english: string }).english,
@@ -314,12 +301,12 @@ export class TmdbService {
 
   findBestMatchFromCandidates(
     anilist: AnilistWithRelations,
-    candidates: TmdbWithRelations[],
-  ): TmdbWithRelations | null {
+    candidates: Tmdb[],
+  ): Tmdb | null {
     return candidates.find((tmdb) => this.isTitleMatch(anilist, tmdb)) || null;
   }
 
-  async fetchTmdbByAnilist(id: number): Promise<TmdbWithRelations> {
+  async fetchTmdbByAnilist(id: number): Promise<Tmdb> {
     const anilist = await this.anilistService.getAnilist(id);
 
     let searchResults = await this.searchTmdb(

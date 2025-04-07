@@ -6,6 +6,7 @@ import { AnilistService } from '../providers/anilist/service/anilist.service';
 import { AnimekaiService } from '../providers/animekai/service/animekai.service';
 import { AnimepaheService } from '../providers/animepahe/service/animepahe.service';
 import { ShikimoriService } from '../providers/shikimori/service/shikimori.service';
+import { TmdbService } from '../providers/tmdb/service/tmdb.service';
 
 interface IProvider {
   save: (data: any) => any;
@@ -27,6 +28,7 @@ export class UpdateService {
     private readonly AniKaiService: AnimekaiService,
     private readonly PaheService: AnimepaheService,
     private readonly ShikService: ShikimoriService,
+    private readonly TmdbService: TmdbService,
     private readonly prisma: PrismaService,
   ) {}
 
@@ -36,6 +38,21 @@ export class UpdateService {
       fetch: (data: any) => this.AniService.fetchAnilistFromGraphQL(data),
       type: 'ANILIST',
     },
+    {
+      save: (data: any) => this.AniKaiService.saveAnimekai(data),
+      fetch: (data: any) => this.AniKaiService.fetchAnimekai(data),
+      type: 'ANIMEKAI',
+    },
+    {
+      save: (data: any) => this.PaheService.saveAnimepahe(data),
+      fetch: (data: any) => this.PaheService.fetchAnimepahe(data),
+      type: 'ANIMEPAHE',
+    },
+    // {
+    //   save: (data: any) => this.TmdbService.saveTmdb(data),
+    //   fetch: (data: any) => this.TmdbService.fetchTmdb(data),
+    //   type: 'TMDB',
+    // },
   ];
 
   @Cron(CronExpression.EVERY_12_HOURS)
