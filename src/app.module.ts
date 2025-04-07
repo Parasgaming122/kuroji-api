@@ -6,9 +6,17 @@ import { AnilistModule } from './providers/anilist/module/anilist.module'
 import { ZoroModule } from './providers/zoro/module/zoro.module'
 import { AnimepaheModule } from './providers/animepahe/module/animepahe.module'
 import { AnimekaiModule } from './providers/animekai/module/animekai.module'
+import { TmdbModule } from './providers/tmdb/module/tmdb.module'
 
 @Module({
-  imports: [ShikimoriModule, AnilistModule, ZoroModule, AnimepaheModule, AnimekaiModule],
+  imports: [
+    ShikimoriModule, 
+    AnilistModule, 
+    ZoroModule, 
+    AnimepaheModule, 
+    AnimekaiModule,
+    TmdbModule
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

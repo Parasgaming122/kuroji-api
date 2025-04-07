@@ -433,6 +433,136 @@ model LastUpdated {
 }
 
 
+// Tmdb.prisma
+model Tmdb {
+  id               Int                    @id
+  adult            Boolean
+  backdropPath     String?                // full URL constructed on getter in Java, handle that in your app logic
+  episodeRunTime   Int[]                  // list of integers
+  firstAirDate     String?
+  homepage         String?
+  inProduction     Boolean?
+  lastAirDate      String?
+  name             String?
+  numberOfEpisodes Int?
+  numberOfSeasons  Int?
+  originalLanguage String?
+  originalName     String?
+  originCountry    String[]               // list of countries
+  overview         String?                // @Lob in Java
+  popularity       Float?
+  posterPath       String?                // handle URL concatenation in your app logic
+  tagline          String?                // @Lob in Java
+  status           String?
+  type             String?
+  voteAverage      Float?
+  voteCount        Int?
+
+  seasons          TmdbReleaseSeason[]    // relation to embedded seasons
+}
+
+model TmdbReleaseSeason {
+  id            Int     @id
+  airDate       String?
+  episodeCount  Int?
+  name          String?
+  overview      String?   // @Lob
+  posterPath    String?   // handle URL concatenation in your app logic
+  seasonNumber  Int?
+  voteAverage   Float?
+
+  tmdb   Tmdb  @relation(fields: [tmdbId], references: [id])
+  tmdbId Int
+}
+
+model TmdbSeason {
+  id           Int                     @id
+  airDate      String?
+  showId       Int?                    // although marked with @JsonIgnore, we keep it if you need it
+  name         String?
+  overview     String?                 // @Lob
+  posterPath   String?                 // handle URL concatenation in your app logic
+  seasonNumber Int?
+  voteAverage  Float?
+
+  episodes     TmdbSeasonEpisode[]     // relation to episodes
+}
+
+model TmdbSeasonEpisode {
+  id             Int    @id
+  airDate        String?
+  episodeNumber  Int?
+  episodeType    String?
+  name           String?
+  overview       String?  // @Lob
+  productionCode String?
+  runtime        Int?
+  seasonNumber   Int?
+  showId         Int?
+  stillPath      String?  // handle URL concatenation in your app logic
+  voteAverage    Float?
+  voteCount      Int?
+
+  tmdbSeason     TmdbSeason  @relation(fields: [tmdbSeasonId], references: [id])
+  tmdbSeasonId   Int
+}
+
+// Tvdb.prisma
+model Tvdb {
+  id                   Int                @id
+  type                 String?            // even though it's ignored in JSON, you can keep it if needed
+  name                 String?
+  slug                 String?
+  image                String?
+  score                Int?
+  runtime              Int?
+  lastUpdated          String?
+  year                 String?
+  nameTranslations     String[]           // list of translations
+  overviewTranslations String[]           // list of translations
+
+  aliases              TvdbAlias[]
+  artworks             TvdbArtwork[]
+  remoteIds            TvdbRemoteId[]
+}
+
+model TvdbAlias {
+  id            Int         @id @default(autoincrement())
+  name          String?
+  language      String?
+  tvdbId Int
+  tvdb   Tvdb @relation(fields: [tvdbId], references: [id])
+
+  @@map("tvdb_aliases")
+}
+
+model TvdbArtwork {
+  id            Int         @id
+  height        Int?
+  image         String?
+  includesText  Boolean?
+  language      String?
+  score         Int?
+  thumbnail     String?
+  type          Int?
+  width         Int?
+  tvdbId Int
+  tvdb  Tvdb @relation(fields: [tvdbId], references: [id])
+
+  @@map("tvdb_artworks")
+}
+
+model TvdbRemoteId {
+  id            String      @id
+  type          Int?
+  sourceName    String?
+  tvdbId Int
+  tvdb   Tvdb @relation(fields: [tvdbId], references: [id])
+
+  @@map("tvdb_remote")
+}
+
+
 // Zoro.prisma
 model Zoro {
   id            String        @id
