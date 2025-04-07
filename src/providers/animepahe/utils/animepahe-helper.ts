@@ -1,10 +1,13 @@
-import { Injectable } from '@nestjs/common'
-import { AnimepaheWithRelations } from '../service/animepahe.service'
-import { Prisma } from '@prisma/client'
+import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+import { AnimepaheWithRelations } from '../service/animepahe.service';
 
 @Injectable()
 export class AnimePaheHelper {
-  getAnimePaheData(animePahe: AnimepaheWithRelations): Prisma.AnimepaheCreateInput {
+  getAnimePaheData(
+    animePahe: AnimepaheWithRelations,
+  ): Prisma.AnimepaheCreateInput {
+    const episodes = animePahe.episodes as Prisma.AnimepaheEpisodeCreateInput[];
     return {
       id: animePahe.id,
       alId: animePahe.alId,
@@ -18,7 +21,7 @@ export class AnimePaheHelper {
       totalEpisodes: animePahe.totalEpisodes,
       episodePages: animePahe.episodePages,
       episodes: {
-        create: animePahe.episodes.map((ep) => ({
+        create: episodes.map((ep) => ({
           id: ep.id,
           number: ep.number,
           title: ep.title,

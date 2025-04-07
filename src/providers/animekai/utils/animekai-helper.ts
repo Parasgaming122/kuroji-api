@@ -5,6 +5,7 @@ import { AnimekaiWithRelations } from '../service/animekai.service';
 @Injectable()
 export class AnimeKaiHelper {
   getAnimekaiData(anime: AnimekaiWithRelations): Prisma.AnimeKaiCreateInput {
+    const episodes = anime?.episodes as Prisma.AnimekaiEpisodeCreateInput[];
     return {
       id: anime.id,
       anilistId: anime.anilistId,
@@ -21,7 +22,7 @@ export class AnimeKaiHelper {
       season: anime.season,
       totalEpisodes: anime.totalEpisodes,
       episodes: {
-        create: anime.episodes.map((ep) => ({
+        create: episodes.map((ep) => ({
           id: ep.id,
           number: ep.number,
           title: ep.title,
