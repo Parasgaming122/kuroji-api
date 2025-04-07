@@ -1,21 +1,16 @@
 import { HttpModule } from '@nestjs/axios';
 import { Test, TestingModule } from '@nestjs/testing';
-import { CustomHttpService } from '../../../http/http.service';
-import { PrismaService } from '../../../prisma.service';
 import { ZoroHelper } from '../utils/zoro-helper';
 import { ZoroService } from './zoro.service';
-import { AnilistService } from '../../../providers/anilist/service/anilist.service'
-import { AnilistHelper } from '../../../providers/anilist/utils/anilist-helper'
-import { ShikimoriService } from '../../../providers/shikimori/service/shikimori.service'
-import { ShikimoriHelper } from '../../../providers/shikimori/utils/shikimori-helper'
+import { SharedModule } from '../../../shared/shared.module'
 
 describe('ZoroService', () => {
   let service: ZoroService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [HttpModule],
-      providers: [ZoroService, PrismaService, AnilistService, ShikimoriService, ShikimoriHelper, CustomHttpService, ZoroHelper, AnilistHelper],
+            imports: [HttpModule, SharedModule],
+            providers: [ZoroService, ZoroHelper],
     }).compile();
 
     service = module.get<ZoroService>(ZoroService);

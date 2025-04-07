@@ -140,6 +140,39 @@ model BasicRelease {
 }
 
 
+// Animekai.prisma
+model AnimeKai {
+  id             String        @id
+  anilistId      Int?
+  title          String?
+  japaneseTitle  String?
+  image          String?
+  description    String?       // @Lob just means long text, handled by String
+  type           String?
+  url            String?
+  subOrDub       String?
+  hasSub         Boolean?
+  hasDub         Boolean?
+  status         String?
+  season         String?
+  totalEpisodes  Int?
+
+  episodes       AnimekaiEpisode[]
+}
+
+model AnimekaiEpisode {
+  id         String   @id
+  number     Int?
+  title      String?
+  isFiller   Boolean?
+  isSubbed   Boolean?
+  isDubbed   Boolean?
+  url        String?
+
+  animeKaiId String
+  animeKai   AnimeKai @relation(fields: [animeKaiId], references: [id])
+}
+
 // Animepahe.prisma
 model Animepahe {
   id             String              @id

@@ -8,6 +8,7 @@ import { UpdateType } from '../../../shared/UpdateType'
 import { UrlConfig } from '../../../configs/url.config'
 import { ScrapeHelper } from '../../../scrapper/scrape-helper'
 import { ZoroWithRelations } from '../../zoro/service/zoro.service'
+import { Source } from '../../../shared/Source'
 
 export interface AnimepaheWithRelations extends Animepahe {
   episodes: AnimepaheEpisode[];
@@ -46,11 +47,13 @@ export class AnimepaheService {
       return existingAnimepahe;
     }
 
-    console.log('Anilist id in animepahe: ' + id);
-
     const animepahe = await this.findAnimepahe(id);
     return this.saveAnimepahe(animepahe);
   }
+
+  async getSources(episodeId: string): Promise<Source> {
+    return this.customHttpService.getResponse(UrlConfig.ANIMEPAHE + "watch/" + episodeId) as unknown as Source;
+  } 
 
   async saveAnimepahe(animepahe: AnimepaheWithRelations): Promise<AnimepaheWithRelations> {
     await this.prisma.lastUpdated.create({
