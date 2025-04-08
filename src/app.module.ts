@@ -6,12 +6,11 @@ import { AnimekaiModule } from './providers/animekai/module/animekai.module';
 import { AnimepaheModule } from './providers/animepahe/module/animepahe.module';
 import { ShikimoriModule } from './providers/shikimori/module/shikimori.module';
 import { TmdbModule } from './providers/tmdb/module/tmdb.module';
+import { TvdbModule } from './providers/tvdb/module/tvdb.module';
 import { ZoroModule } from './providers/zoro/module/zoro.module';
+import { AuthModule } from './security/auth/auth.module';
 import { UpdateModule } from './update/update.module';
-import { TvdbModule } from './providers/tvdb/module/tvdb.module'
 import { UserModule } from './user/user.module';
-import { UsersModule } from './users/users.module';
-import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -24,7 +23,6 @@ import { AuthModule } from './auth/auth.module';
     TvdbModule,
     UpdateModule,
     UserModule,
-    UsersModule,
     AuthModule,
   ],
   controllers: [AppController],

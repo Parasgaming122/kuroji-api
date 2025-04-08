@@ -4,10 +4,10 @@ model User {
   email           String        @unique
   name            String
   password        String
-  status          AccountStatus
-  reputation      Float
-  isOnline        Boolean
-  lastSeen        DateTime
+  status          AccountStatus @default(ACTIVE)
+  reputation      Float         @default(100.0)
+  isOnline        Boolean       @default(false)
+  lastSeen        DateTime      @default(now())
   isEmailVerified Boolean       @default(false)
   favorites       String[]
   stats           UserStats     @relation(fields: [userStatsId], references: [id])
@@ -15,12 +15,14 @@ model User {
   socials         Socials       @relation(fields: [socialsId], references: [id])
   roles           UserRole[]
   privacy         UserPrivacy   @relation(fields: [userPrivacyId], references: [id])
-  avatar          File?         @relation(fields: [avatarId], references: [id])
-  avatarId        BigInt
+  // avatar          File?         @relation(fields: [avatarId], references: [id])
+  // avatarId        BigInt
   userStatsId     BigInt
   nameHistoryId   Int
   socialsId       BigInt
   userPrivacyId   BigInt
+  File            File?         @relation(fields: [fileId], references: [id])
+  fileId          BigInt?
 }
 
 enum AccountStatus {
