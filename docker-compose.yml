@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  backend:
+    container_name: nestend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.prod
+    depends_on:
+      - postgres
+
+  postgres:
+    container_name: pgdb
+    image: postgres:15
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: veaquer
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: nestend
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  pgdata:
