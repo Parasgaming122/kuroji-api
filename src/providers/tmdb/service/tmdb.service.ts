@@ -212,9 +212,16 @@ export class TmdbService {
   }
 
   async findTmdb(id: number): Promise<Tmdb> {
-    const tmdb = await this.findMatchInPrisma(id);
+    let tmdb;
+
+    try {
+      tmdb = await this.findMatchInPrisma(id)
+    } catch (error) {
+      console.log('Tmdb error: ' + error)
+    }
+
     if (tmdb) return tmdb;
-    return this.fetchTmdbByAnilist(id);
+    return await this.fetchTmdbByAnilist(id);
   }
 
   async findMatchInPrisma(id: number): Promise<Tmdb> {
@@ -222,67 +229,71 @@ export class TmdbService {
 
     let match = await this.prisma.tmdb.findFirst({
       where: {
-        name: {
-          equals: (anilist.title as { romaji: string }).romaji,
-          mode: 'insensitive',
-        },
-      },
-    });
-    if (match && this.isTitleMatch(anilist, match as Tmdb)) {
-      return match as Tmdb;
-    }
-
-    match = await this.prisma.tmdb.findFirst({
-      where: {
-        original_name: {
-          equals: (anilist.title as { native: string }).native,
-          mode: 'insensitive',
-        },
-      },
-    });
-    if (match && this.isTitleMatch(anilist, match as Tmdb)) {
-      return match as Tmdb;
-    }
-
-    const candidatesRomaji = await this.prisma.tmdb.findMany({
-      where: {
-        name: {
-          contains: (anilist.title as { romaji: string }).romaji,
-          mode: 'insensitive',
-        },
-      },
-    });
-
-    let candidates = candidatesRomaji;
-    if ((anilist.title as { english: string }).english) {
-      const candidatesEnglish = await this.prisma.tmdb.findMany({
-        where: {
-          name: {
-            contains: (anilist.title as { english: string }).english,
-            mode: 'insensitive',
+        OR: [
+          {
+            name: {
+              equals: (anilist.title as { romaji: string }).romaji,
+              mode: 'insensitive',
+            }
           },
-        },
-      });
-      candidates = candidates.concat(candidatesEnglish);
-    }
-
-    const candidatesNative = await this.prisma.tmdb.findMany({
-      where: {
-        original_name: {
-          contains: (anilist.title as { native: string }).native,
-          mode: 'insensitive',
-        },
+          {
+            name: {
+              equals: (anilist.title as { english: string }).english,
+              mode: 'insensitive',
+            }
+          },
+          {
+            original_name: {
+              equals: (anilist.title as { native: string }).native,
+              mode: 'insensitive',
+            }
+          }
+        ]
       },
     });
-    candidates = candidates.concat(candidatesNative);
 
-    return this.findBestMatchFromCandidates(
-      anilist,
-      candidates as Tmdb[],
-    ) as Tmdb;
+    if (match && this.isTitleMatch(anilist, match as Tmdb)) {
+      return match as Tmdb;
+    }
+
+    const candidates = await this.prisma.tmdb.findMany({
+      where: {
+        OR: [
+          {
+            name: {
+              contains: ScrapeHelper.normalizeTitle((anilist.title as { romaji: string }).romaji),
+              mode: 'insensitive',
+            }
+          },
+          {
+            name: {
+              contains: ScrapeHelper.normalizeTitle((anilist.title as { english: string }).english || ''),
+              mode: 'insensitive',
+            }
+          },
+          {
+            original_name: {
+              contains: ScrapeHelper.normalizeTitle((anilist.title as { native: string }).native),
+              mode: 'insensitive',
+            }
+          }
+        ]
+      },
+    });
+
+    const bestMatch = this.findBestMatchFromCandidates(anilist, candidates as Tmdb[]);
+    
+    if (bestMatch) {
+      return bestMatch;
+    }
+
+    return Promise.reject('No match found in database');
   }
 
   isTitleMatch(anilist: AnilistWithRelations, tmdb: Tmdb): boolean {
+    if (anilist.format?.toLowerCase() !== tmdb.media_type?.toLowerCase()) {
+      return false;
+    }
     return ScrapeHelper.compareTitles(
       (anilist.title as { romaji: string }).romaji,
       (anilist.title as { english: string }).english,
@@ -323,7 +334,8 @@ export class TmdbService {
       bestMatch.id,
       bestMatch.media_type,
     );
-    return this.saveTmdb(fetchedTmdb);
+    fetchedTmdb.media_type = bestMatch.media_type;
+    return await this.saveTmdb(fetchedTmdb);
   }
 
   findBestMatchFromSearch(
@@ -332,6 +344,7 @@ export class TmdbService {
   ): BasicTmdb | null {
     return (
       results.find((result) =>
+        anilist.format?.toLowerCase() === result.media_type.toLowerCase() &&
         ScrapeHelper.compareTitles(
           (anilist.title as { romaji: string }).romaji,
           (anilist.title as { english: string }).english,
@@ -339,7 +352,7 @@ export class TmdbService {
           anilist.synonyms,
           result.name,
           result.original_name,
-        ),
+        )
       ) || null
     );
   }

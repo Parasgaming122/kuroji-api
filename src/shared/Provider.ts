@@ -1,0 +1,5 @@
+export enum Provider {
+  ANIWATCH = 'ANIWATCH',
+  ANIMEKAI = 'ANIMEKAI',
+  ANIMEPAHE = 'ANIMEPAHE'
+}

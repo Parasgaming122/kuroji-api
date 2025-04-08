@@ -9,6 +9,7 @@ export class TmdbHelper {
       adult: tmdb.adult ?? false,
       backdrop_path: tmdb.backdrop_path ?? undefined,
       episode_run_time: tmdb.episode_run_time ?? [],
+      media_type: tmdb.media_type ?? undefined,
       first_air_date: tmdb.first_air_date ?? undefined,
       homepage: tmdb.homepage ?? undefined,
       in_production: tmdb.in_production ?? undefined,

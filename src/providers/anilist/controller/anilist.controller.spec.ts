@@ -1,29 +1,16 @@
 import { HttpModule } from '@nestjs/axios';
 import { Test, TestingModule } from '@nestjs/testing';
-import { CustomHttpService } from '../../../http/http.service';
-import { PrismaService } from '../../../prisma.service';
 import { ShikimoriHelperModule } from '../../shikimori/module/shikimori-helper.module';
-import { ShikimoriService } from '../../shikimori/service/shikimori.service';
-import { AnilistService } from '../service/anilist.service';
-import { AnilistHelper } from '../utils/anilist-helper';
 import { AnilistController } from './anilist.controller';
-import { AnilistIndexerService } from '../service/anilist-indexer/anilist-indexer.service'
+import { SharedModule } from '../../../shared/shared.module'
 
 describe('AnilistController', () => {
   let controller: AnilistController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        AnilistService,
-        AnilistHelper,
-        ShikimoriService,
-        PrismaService,
-        CustomHttpService,
-        AnilistIndexerService
-      ],
       controllers: [AnilistController],
-      imports: [HttpModule, ShikimoriHelperModule],
+      imports: [HttpModule, ShikimoriHelperModule, SharedModule],
     }).compile();
 
     controller = module.get<AnilistController>(AnilistController);

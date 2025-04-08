@@ -18,6 +18,8 @@ import { TvdbTokenService } from '../providers/tvdb/service/token/tvdb.token.ser
 import { UpdateService } from '../update/update.service'
 import { ZoroService } from '../providers/zoro/service/zoro.service'
 import { ZoroHelper } from '../providers/zoro/utils/zoro-helper'
+import { StreamService } from '../providers/stream/service/stream.service'
+import { AnilistIndexerService } from '../providers/anilist/service/anilist-indexer/anilist-indexer.service'
 
 @Module({
   imports: [HttpModule],
@@ -25,6 +27,7 @@ import { ZoroHelper } from '../providers/zoro/utils/zoro-helper'
     PrismaService,
     CustomHttpService,
     AnilistService,
+    AnilistIndexerService,
     ShikimoriService,
     AnilistHelper,
     ShikimoriHelper,
@@ -39,12 +42,14 @@ import { ZoroHelper } from '../providers/zoro/utils/zoro-helper'
     TvdbService,
     TvdbTokenService,
     TvdbHelper,
-    UpdateService
+    UpdateService,
+    StreamService
   ],
   exports: [
     PrismaService,
     CustomHttpService,
     AnilistService,
+    AnilistIndexerService,
     ShikimoriService,
     AnilistHelper,
     ShikimoriHelper,
@@ -57,7 +62,8 @@ import { ZoroHelper } from '../providers/zoro/utils/zoro-helper'
     TvdbService,
     TvdbTokenService,
     TvdbHelper,
-    UpdateService
+    UpdateService,
+    StreamService
   ],
 })
 export class SharedModule {}

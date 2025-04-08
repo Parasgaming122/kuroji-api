@@ -92,7 +92,7 @@ export class ZoroService {
     return this.saveZoro(zoro);
   }
 
-  async getSource(episodeId: string, dub: boolean): Promise<Source> {
+  async getSources(episodeId: string, dub: boolean): Promise<Source> {
     const zoro = await this.http.getResponse(UrlConfig.ZORO + 'watch/' + episodeId + '?dub=' + dub);
     return zoro as Source;
   }

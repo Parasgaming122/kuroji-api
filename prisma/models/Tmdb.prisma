@@ -3,6 +3,7 @@ model Tmdb {
   adult              Boolean
   backdrop_path      String?  // full URL constructed on getter in Java, handle that in your app logic
   episode_run_time   Int[]    // list of integers
+  media_type         String?
   first_air_date     String?
   homepage           String?
   in_production      Boolean?
