@@ -8,6 +8,8 @@ RUN npm install
 
 COPY . .
 
+RUN npx prisma generate --schema=./prisma/schema.prisma
+
 RUN chmod +x ./entrypoint.sh
 
 # build only, no migrate yet

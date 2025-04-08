@@ -8,7 +8,6 @@ done
 echo "✅ Database is live!"
 
 # Run Prisma stuff
-npx prisma generate
 npx prisma migrate deploy
 
 # Run the app
