@@ -7,18 +7,12 @@ import { AnimekaiService } from '../providers/animekai/service/animekai.service'
 import { AnimepaheService } from '../providers/animepahe/service/animepahe.service';
 import { ShikimoriService } from '../providers/shikimori/service/shikimori.service';
 import { TmdbService } from '../providers/tmdb/service/tmdb.service';
+import { UpdateType } from '../shared/UpdateType'
+import { ZoroService } from '../providers/zoro/service/zoro.service'
 
 interface IProvider {
-  save: (data: any) => any;
-  fetch: (data: any) => any;
-  type:
-    | 'ANILIST'
-    | 'ANIMEKAI'
-    | 'ANIMEPAHE'
-    | 'SHIKIMORI'
-    | 'TMDB'
-    | 'TVDB'
-    | 'ZORO';
+  update: (id: any) => any;
+  type: UpdateType;
 }
 
 @Injectable()
@@ -26,6 +20,7 @@ export class UpdateService {
   constructor(
     private readonly AniService: AnilistService,
     private readonly AniKaiService: AnimekaiService,
+    private readonly ZoroService: ZoroService,
     private readonly PaheService: AnimepaheService,
     private readonly ShikService: ShikimoriService,
     private readonly TmdbService: TmdbService,
@@ -34,25 +29,29 @@ export class UpdateService {
 
   providers: IProvider[] = [
     {
-      save: (data: any) => this.AniService.saveAnilist(data),
-      fetch: (data: any) => this.AniService.fetchAnilistFromGraphQL(data),
-      type: 'ANILIST',
+      update: (id: any) => this.AniService.update(Number(id)),
+      type: UpdateType.ANILIST,
     },
     {
-      save: (data: any) => this.AniKaiService.saveAnimekai(data),
-      fetch: (data: any) => this.AniKaiService.fetchAnimekai(data),
-      type: 'ANIMEKAI',
+      update: (id: any) => this.AniKaiService.update(String(id)),
+      type: UpdateType.ANIMEKAI,
     },
     {
-      save: (data: any) => this.PaheService.saveAnimepahe(data),
-      fetch: (data: any) => this.PaheService.fetchAnimepahe(data),
-      type: 'ANIMEPAHE',
+      update: (id: any) => this.PaheService.update(String(id)),
+      type: UpdateType.ANIMEPAHE,
     },
-    // {
-    //   save: (data: any) => this.TmdbService.saveTmdb(data),
-    //   fetch: (data: any) => this.TmdbService.fetchTmdb(data),
-    //   type: 'TMDB',
-    // },
+    {
+      update: (id: any) => this.ZoroService.update(String(id)),
+      type: UpdateType.ANIWATCH,
+    },
+    {
+      update: (id: any) => this.ShikService.update(String(id)),
+      type: UpdateType.SHIKIMORI,
+    },
+    {
+      update: (id: any) => this.TmdbService.update(Number(id)),
+      type: UpdateType.TMDB,
+    },
   ];
 
   @Cron(CronExpression.EVERY_12_HOURS)
@@ -81,7 +80,7 @@ export class UpdateService {
               `Updating ${provider.type} with ID:${lastUpdated.entityId}`,
             );
 
-            provider.save(await provider.fetch(lastUpdated.entityId));
+            provider.update(lastUpdated.entityId);
             await this.sleep(10);
           }
 

@@ -1,15 +1,8 @@
 import { HttpModule } from '@nestjs/axios';
 import { Test, TestingModule } from '@nestjs/testing';
-import { CustomHttpService } from '../http/http.service';
 import { PrismaService } from '../prisma.service';
-import { AnilistService } from '../providers/anilist/service/anilist.service';
-import { AnimekaiService } from '../providers/animekai/service/animekai.service';
-import { AnimeKaiHelper } from '../providers/animekai/utils/animekai-helper';
-import { AnimepaheService } from '../providers/animepahe/service/animepahe.service';
-import { AnimePaheHelper } from '../providers/animepahe/utils/animepahe-helper';
-import { ShikimoriService } from '../providers/shikimori/service/shikimori.service';
-import { ShikimoriHelper } from '../providers/shikimori/utils/shikimori-helper';
 import { UpdateService } from './update.service';
+import { SharedModule } from '../shared/shared.module'
 
 describe('UpdateService', () => {
   let service: UpdateService;
@@ -17,33 +10,7 @@ describe('UpdateService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [HttpModule],
-      providers: [
-        CustomHttpService,
-        ShikimoriService,
-        ShikimoriHelper,
-        AnimekaiService,
-        AnimeKaiHelper,
-        AnimepaheService,
-        AnimePaheHelper,
-        UpdateService,
-        {
-          provide: PrismaService,
-          useValue: {
-            lastUpdated: {
-              findMany: jest.fn(),
-              delete: jest.fn(),
-            },
-          },
-        },
-        {
-          provide: AnilistService,
-          useValue: {
-            fetchAnilistFromGraphQL: jest.fn(),
-            saveAnilist: jest.fn(),
-          },
-        },
-      ],
+      imports: [HttpModule, SharedModule],
     }).compile();
 
     service = module.get<UpdateService>(UpdateService);

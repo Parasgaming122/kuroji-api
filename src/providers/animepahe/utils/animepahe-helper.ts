@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
-import { AnimepaheWithRelations } from '../service/animepahe.service';
+import { Animepahe, Prisma } from '@prisma/client';
 
 @Injectable()
 export class AnimePaheHelper {
   getAnimePaheData(
-    animePahe: AnimepaheWithRelations,
+    animePahe: Animepahe,
   ): Prisma.AnimepaheCreateInput {
     return {
       id: animePahe.id,

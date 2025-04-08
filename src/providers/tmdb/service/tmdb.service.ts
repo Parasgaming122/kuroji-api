@@ -107,7 +107,7 @@ export class TmdbService {
   
         if (trimmedEpisodes.length === 0) continue;
   
-        const newSeason: TmdbSeasonWithRelations = {
+        const newSeason: TmdbSeason = {
           ...tmdbSeason,
           episodes: trimmedEpisodes,
           show_id: tmdb.id,
@@ -147,6 +147,32 @@ export class TmdbService {
       update: this.helper.getTmdbSeasonData(tmdbSeason),
       create: this.helper.getTmdbSeasonData(tmdbSeason),
     });
+  }
+
+  async update(id: number): Promise<Tmdb> {
+    const tmdb = await this.fetchTmdb(id, await this.detectType(id));
+    await this.saveTmdb(tmdb);
+    await this.updateSeason(id);
+    return tmdb;
+  }
+
+  async updateSeason(id: number): Promise<Tmdb> {
+    const tmdb = await this.prisma.tmdb.findFirst({
+      where: { id },
+    });
+
+    if (!tmdb) {
+      throw new Error(`TMDb ID ${id} not found`);
+    }
+
+    for (const season of tmdb.seasons as TmdbReleaseSeason[]) {
+      const tmdbSeason = await this.fetchTmdbSeason(id, season.season_number || 1);
+      await this.saveTmdbSeason(tmdbSeason);
+
+      this.sleep(5);
+    }
+
+    return tmdb;
   }
 
   async fetchTmdb(id: number, type: string): Promise<Tmdb> {
@@ -330,5 +356,9 @@ export class TmdbService {
         throw new Error('ID not found in TMDb as Movie or TV Show.');
       }
     }
+  }
+
+  public async sleep(delay: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, delay * 1000));
   }
 }

@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common'
 import { Anilist, Poster, Prisma, Shikimori } from '@prisma/client'
 import { AnilistWithRelations } from '../service/anilist.service'
 import { BasicAnilist, BasicShikimori } from '../model/BasicAnilist'
-import { ShikimoriWithRelations } from 'src/providers/shikimori/service/shikimori.service'
 
 @Injectable()
 export class AnilistHelper {
@@ -122,7 +121,7 @@ export class AnilistHelper {
     }
   }
 
-  public convertShikimoriToBasic(shikimori?: ShikimoriWithRelations): BasicShikimori | undefined {
+  public convertShikimoriToBasic(shikimori?: Shikimori): BasicShikimori | undefined {
     if (!shikimori) {
       return undefined;
     }

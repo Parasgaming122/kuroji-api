@@ -8,6 +8,7 @@ import { Source } from '../../../shared/Source';
 import { UpdateType } from '../../../shared/UpdateType';
 import { AnilistService } from '../../anilist/service/anilist.service';
 import { AnimeKaiHelper } from '../utils/animekai-helper';
+import { TmdbService } from '../../tmdb/service/tmdb.service'
 
 export interface BasicAnimekai {
   id: string;
@@ -27,6 +28,7 @@ export class AnimekaiService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly anilistService: AnilistService,
+    private readonly tmdbService: TmdbService,
     private readonly customHttpService: CustomHttpService,
     private readonly helper: AnimeKaiHelper,
   ) {}
@@ -58,9 +60,35 @@ export class AnimekaiService {
       },
     });
 
-    return await this.prisma.animeKai.create({
-      data: this.helper.getAnimekaiData(animekai),
+    return await this.prisma.animeKai.upsert({
+      where: { id: animekai.id },
+      update: this.helper.getAnimekaiData(animekai),
+      create: this.helper.getAnimekaiData(animekai),
     });
+  }
+
+  async update(id: string): Promise<AnimeKai> {
+    const existingAnimekai = await this.prisma.animeKai.findFirst({
+      where: { id },
+    });
+
+    const animekai = await this.fetchAnimekai(id);
+
+    if (!animekai) {
+      return Promise.reject(new Error('Animekai not found'));
+    }
+
+    animekai.anilistId = existingAnimekai?.anilistId ?? 0;
+
+    if (existingAnimekai?.episodes !== animekai.episodes) {
+      const tmdb = await this.tmdbService.getTmdbByAnilist(animekai.anilistId);
+
+      if (tmdb) {
+        await this.tmdbService.update(tmdb.id);
+      }
+    }
+
+    return await this.saveAnimekai(animekai);
   }
 
   async fetchAnimekai(id: string): Promise<AnimeKai> {

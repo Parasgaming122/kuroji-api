@@ -1,5 +1,6 @@
 model Tvdb {
   id                   Int                @id
+  tmdbId               Int?
   type                 String?            // even though it's ignored in JSON, you can keep it if needed
   name                 String?
   slug                 String?
@@ -43,4 +44,11 @@ model TvdbRemoteId {
   sourceName    String?
 
   @@map("tvdb_remote")
+}
+
+model TvdbLogin {
+  id         Int      @id @default(autoincrement())
+  token      String   
+  createDate DateTime @default(now())
+  expired    Boolean  @default(false)
 }

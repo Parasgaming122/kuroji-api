@@ -8,10 +8,7 @@ import { UpdateType } from '../../../shared/UpdateType';
 import { AnilistService } from '../../../providers/anilist/service/anilist.service'
 import { ScrapeHelper } from '../../../scrapper/scrape-helper'
 import { Source } from '../../../shared/Source'
-
-export interface ZoroWithRelations extends Zoro {
-  
-}
+import { TmdbService } from '../../tmdb/service/tmdb.service'
 
 export interface BasicZoro {
   id: string;
@@ -30,11 +27,12 @@ export class ZoroService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly anilistService: AnilistService,
+    private readonly tmdbService: TmdbService,
     private readonly http: CustomHttpService,
     private readonly helper: ZoroHelper
   ) {}
 
-  async getZoro(id: string): Promise<ZoroWithRelations> {
+  async getZoro(id: string): Promise<Zoro> {
     const existingZoro = await this.prisma.zoro.findUnique({
       where: { id: id },
     });
@@ -46,7 +44,7 @@ export class ZoroService {
     return existingZoro;
   }
 
-  async getZoroByAnilist(id: number): Promise<ZoroWithRelations> {
+  async getZoroByAnilist(id: number): Promise<Zoro> {
     const existingZoro = await this.prisma.zoro.findFirst({
       where: { alID: id },
     });
@@ -58,7 +56,7 @@ export class ZoroService {
     return existingZoro;
   }
 
-  async saveZoro(zoro: ZoroWithRelations): Promise<ZoroWithRelations> {
+  async saveZoro(zoro: Zoro): Promise<Zoro> {
     await this.prisma.lastUpdated.create({
       data: {
         entityId: zoro.id,
@@ -71,15 +69,38 @@ export class ZoroService {
     });
   }
 
+  async update(id: string): Promise<Zoro> {
+    const existingZoro = await this.prisma.zoro.findFirst({
+      where: { id },
+    });
+
+    if (!existingZoro) {
+      throw new Error('Zoro not found');
+    }
+
+    const zoro = await this.fetchZoro(id);
+    zoro.alID = existingZoro.alID || 0;
+
+    if (existingZoro?.episodes !== zoro.episodes) {
+      const tmdb = await this.tmdbService.getTmdbByAnilist(zoro.alID);
+
+      if (tmdb) {
+        await this.tmdbService.update(tmdb.id);
+      }
+    }
+
+    return this.saveZoro(zoro);
+  }
+
   async getSource(episodeId: string, dub: boolean): Promise<Source> {
     const zoro = await this.http.getResponse(UrlConfig.ZORO + 'watch/' + episodeId + '?dub=' + dub);
     return zoro as Source;
   }
 
-  async fetchZoro(id: string): Promise<ZoroWithRelations> {
+  async fetchZoro(id: string): Promise<Zoro> {
     const zoro = await this.http.getResponse(UrlConfig.ZORO + 'info?id=' + id);
 
-    return zoro as Promise<ZoroWithRelations>;
+    return zoro as Promise<Zoro>;
   }
 
   async searchZoro(q: string): Promise<ZoroResponse> {
@@ -87,7 +108,7 @@ export class ZoroService {
     return zoro as Promise<ZoroResponse>;
   }
   
-  async findZoroByAnilist(id: number): Promise<ZoroWithRelations> {
+  async findZoroByAnilist(id: number): Promise<Zoro> {
     const anilist = await this.anilistService.getAnilist(id);
     const searchResult = await this.searchZoro((anilist.title as { romaji: string }).romaji);
 
@@ -105,7 +126,7 @@ export class ZoroService {
         const zoroData = await this.fetchZoro(z.id);
         if (zoroData.malID === anilist.idMal) {
           zoroData.alID = id;
-          return zoroData as ZoroWithRelations;
+          return zoroData as Zoro;
         }
       }
     }

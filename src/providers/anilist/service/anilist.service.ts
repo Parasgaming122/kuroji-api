@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Anilist, BasicRelease } from '@prisma/client';
+import { Anilist as PrismaAnilist, BasicRelease, Shikimori } from '@prisma/client';
 import { ApiResponse } from '../../../api/ApiResponse';
 import { UrlConfig } from '../../../configs/url.config';
 import { CustomHttpService } from '../../../http/http.service';
@@ -7,7 +7,6 @@ import { PrismaService } from '../../../prisma.service';
 import { UpdateType } from '../../../shared/UpdateType';
 import {
   ShikimoriService,
-  ShikimoriWithRelations,
 } from '../../shikimori/service/shikimori.service';
 import AnilistQL from '../graphql/AnilistQL';
 import AnilistQueryBuilder from '../graphql/query/AnilistQueryBuilder';
@@ -16,7 +15,7 @@ import { AnilistHelper } from '../utils/anilist-helper';
 
 export interface AnilistResponse {
   Page: {
-    media: Anilist[];
+    media: PrismaAnilist[];
     pageInfo: {
       total: number;
       perPage: number;
@@ -28,10 +27,10 @@ export interface AnilistResponse {
 }
 
 export interface AnilistWithRelations
-  extends Omit<Anilist, 'recommendations' | 'BasicIdAni'> {
+  extends Omit<PrismaAnilist, 'recommendations' | 'BasicIdAni'> {
   chronology?: BasicRelease[];
   recommendation?: BasicRelease[];
-  shikimori?: ShikimoriWithRelations;
+  shikimori?: Shikimori;
 }
 
 @Injectable()
@@ -111,7 +110,7 @@ export class AnilistService {
     return { data: basicAnilist, pageInfo: response.pageInfo };
   }
 
-  async saveAnilist(data: AnilistResponse): Promise<Anilist> {
+  async saveAnilist(data: AnilistResponse): Promise<PrismaAnilist> {
     if (!data.Page?.media || data.Page.media.length === 0) {
       throw new Error('No media found');
     }
@@ -130,6 +129,15 @@ export class AnilistService {
       create: this.helper.getDataForPrisma(anilist),
       update: this.helper.getDataForPrisma(anilist),
     });
+  }
+
+  async update(id: number): Promise<void> {
+    const data = await this.fetchAnilistFromGraphQL(id);
+    if (!data.Page?.media || data.Page.media.length === 0) {
+      throw new Error('No media found');
+    }
+
+    await this.saveAnilist(data);
   }
 
   async fetchAnilistFromGraphQL(
@@ -155,7 +163,7 @@ export class AnilistService {
 
   async getAnilistByFilter(
     queryBuilder: AnilistQueryBuilder,
-  ): Promise<ApiResponse<Anilist[]>> {
+  ): Promise<ApiResponse<PrismaAnilist[]>> {
     const filter = queryBuilder.convertToReleaseFilter();
 
     const conditions = [

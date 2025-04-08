@@ -8,6 +8,7 @@ import { Source } from '../../../shared/Source';
 import { UpdateType } from '../../../shared/UpdateType';
 import { AnilistService } from '../../anilist/service/anilist.service';
 import { AnimePaheHelper } from '../utils/animepahe-helper';
+import { TmdbService } from '../../tmdb/service/tmdb.service'
 
 export interface BasicAnimepahe {
   id: string;
@@ -26,6 +27,7 @@ export class AnimepaheService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly anilistService: AnilistService,
+    private readonly tmdbService: TmdbService,
     private readonly customHttpService: CustomHttpService,
     private readonly helper: AnimePaheHelper,
   ) {}
@@ -57,9 +59,35 @@ export class AnimepaheService {
       },
     });
 
-    return this.prisma.animepahe.create({
-      data: this.helper.getAnimePaheData(animepahe),
+    return this.prisma.animepahe.upsert({
+      where: { id: animepahe.id },
+      update: this.helper.getAnimePaheData(animepahe),
+      create: this.helper.getAnimePaheData(animepahe),
     });
+  }
+
+  async update(id: string): Promise<Animepahe> {
+    const existingAnimepahe = await this.prisma.animepahe.findFirst({
+      where: { id },
+    });
+
+    const animepahe = await this.fetchAnimepahe(id);
+
+    if (!animepahe) {
+      return Promise.reject(new Error('Animepahe not found'));
+    }
+    
+    animepahe.alId = existingAnimepahe?.alId || 0;
+
+    if (existingAnimepahe?.episodes !== animepahe.episodes) {
+      const tmdb = await this.tmdbService.getTmdbByAnilist(animepahe.alId);
+
+      if (tmdb) {
+        await this.tmdbService.update(tmdb.id);
+      }
+    }
+
+    return await this.saveAnimepahe(animepahe);
   }
 
   async fetchAnimepahe(id: string): Promise<Animepahe> {

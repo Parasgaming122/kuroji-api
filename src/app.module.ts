@@ -8,6 +8,7 @@ import { ShikimoriModule } from './providers/shikimori/module/shikimori.module';
 import { TmdbModule } from './providers/tmdb/module/tmdb.module';
 import { ZoroModule } from './providers/zoro/module/zoro.module';
 import { UpdateModule } from './update/update.module';
+import { TvdbModule } from './providers/tvdb/module/tvdb.module'
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { UpdateModule } from './update/update.module';
     AnimepaheModule,
     AnimekaiModule,
     TmdbModule,
+    TvdbModule,
     UpdateModule,
   ],
   controllers: [AppController],

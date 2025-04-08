@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
-import { ZoroWithRelations } from '../service/zoro.service';
+import { Prisma, Zoro } from '@prisma/client';
 
 @Injectable()
 export class ZoroHelper {
-  getZoroData(zoro: ZoroWithRelations): Prisma.ZoroCreateInput {
+  getZoroData(zoro: Zoro): Prisma.ZoroCreateInput {
     return {
       id: zoro.id,
       title: zoro.title,

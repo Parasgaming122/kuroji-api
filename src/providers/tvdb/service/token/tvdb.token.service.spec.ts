@@ -1,17 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { TvdbService } from './tvdb.service';
+import { TvdbTokenService } from './tvdb.token.service';
 import { HttpModule } from '@nestjs/axios'
-import { SharedModule } from '../../../shared/shared.module'
+import { SharedModule } from '../../../../shared/shared.module'
 
-describe('TvdbService', () => {
-  let service: TvdbService;
+describe('TvdbTokenService', () => {
+  let service: TvdbTokenService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [HttpModule, SharedModule],
     }).compile();
 
-    service = module.get<TvdbService>(TvdbService);
+    service = module.get<TvdbTokenService>(TvdbTokenService);
   });
 
   it('should be defined', () => {

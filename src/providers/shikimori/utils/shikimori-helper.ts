@@ -1,12 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
-import { ShikimoriWithRelations } from './../service/shikimori.service';
+import { Prisma, Shikimori } from '@prisma/client';
 
 export type CreateShikimoriData = Prisma.ShikimoriCreateInput;
 
 @Injectable()
 export class ShikimoriHelper {
-  public getDataForPrisma(anime: ShikimoriWithRelations): CreateShikimoriData {
+  public getDataForPrisma(anime: Shikimori): CreateShikimoriData {
     return {
       id: anime.id,
        malId: anime.malId,

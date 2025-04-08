@@ -477,6 +477,7 @@ model TmdbSeasonEpisode {
 // Tvdb.prisma
 model Tvdb {
   id                   Int                @id
+  tmdbId               Int?
   type                 String?            // even though it's ignored in JSON, you can keep it if needed
   name                 String?
   slug                 String?
@@ -522,6 +523,12 @@ model TvdbRemoteId {
   @@map("tvdb_remote")
 }
 
+model TvdbLogin {
+  id         Int      @id @default(autoincrement())
+  token      String   
+  createDate DateTime @default(now())
+  expired    Boolean  @default(false)
+}
 
 // Zoro.prisma
 model Zoro {
