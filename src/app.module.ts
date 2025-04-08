@@ -9,6 +9,9 @@ import { TmdbModule } from './providers/tmdb/module/tmdb.module';
 import { ZoroModule } from './providers/zoro/module/zoro.module';
 import { UpdateModule } from './update/update.module';
 import { TvdbModule } from './providers/tvdb/module/tvdb.module'
+import { UserModule } from './user/user.module';
+import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -20,6 +23,9 @@ import { TvdbModule } from './providers/tvdb/module/tvdb.module'
     TmdbModule,
     TvdbModule,
     UpdateModule,
+    UserModule,
+    UsersModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

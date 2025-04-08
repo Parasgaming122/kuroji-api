@@ -531,6 +531,114 @@ model TvdbLogin {
   expired    Boolean  @default(false)
 }
 
+// User.prisma
+model User {
+  id              BigInt        @id @default(autoincrement())
+  username        String        @unique
+  email           String        @unique
+  name            String
+  password        String
+  status          AccountStatus
+  reputation      Float
+  isOnline        Boolean
+  lastSeen        DateTime
+  isEmailVerified Boolean       @default(false)
+  favorites       String[]
+  stats           UserStats     @relation(fields: [userStatsId], references: [id])
+  nameHistory     NameHistory   @relation(fields: [nameHistoryId], references: [id])
+  socials         Socials       @relation(fields: [socialsId], references: [id])
+  roles           UserRole[]
+  privacy         UserPrivacy   @relation(fields: [userPrivacyId], references: [id])
+  avatar          File?         @relation(fields: [avatarId], references: [id])
+  avatarId        BigInt
+  userStatsId     BigInt
+  nameHistoryId   Int
+  socialsId       BigInt
+  userPrivacyId   BigInt
+}
+
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+  BANNED
+}
+
+enum UserRole {
+  USER
+  MOD
+  ADMIN
+}
+
+enum UserAccess {
+  NOBODY
+  FRIENDS
+  EVERYONE
+}
+
+model UserPrivacy {
+  id                  BigInt     @id @default(autoincrement())
+  statAccess          UserAccess
+  releasesAccess      UserAccess
+  socialsAccess       UserAccess
+  friendRequestPolicy UserAccess
+  User                User[]
+}
+
+model Socials {
+  id        BigInt @id @default(autoincrement())
+  github    String
+  telegram  String
+  discord   String
+  instagram String
+  tiktok    String
+  User      User[]
+}
+
+model NameHistory {
+  id    Int      @id @default(autoincrement())
+  name  String
+  time  DateTime
+  first Boolean
+  User  User[]
+}
+
+model UserStats {
+  id             BigInt      @id @default(autoincrement())
+  commentsAmount Int
+  collections    Int
+  animes         UserAnime[]
+  User           User[]
+}
+
+enum AnimeStatus {
+  PLANNED
+  ON_HOLD
+  DROPPED
+  WATCHING
+  WATCHED
+}
+
+model UserAnime {
+  id          BigInt      @id @default(autoincrement())
+  animeId     String
+  status      AnimeStatus
+  addedAt     DateTime    @default(now())
+  UserStats   UserStats?  @relation(fields: [userStatsId], references: [id])
+  userStatsId BigInt?
+}
+
+model File {
+  id           BigInt   @id @default(autoincrement())
+  filename     String
+  originalName String
+  mimeType     String
+  size         Int
+  path         String
+  uploadedAt   DateTime @default(now())
+  User         User[]
+}
+
+
 // Zoro.prisma
 model Zoro {
   id            String        @id
