@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { JsonArray } from '@prisma/client/runtime/library';
 import { ZoroWithRelations } from '../service/zoro.service';
 
 @Injectable()

@@ -1,11 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
-import { AnimekaiWithRelations } from '../service/animekai.service';
+import { AnimeKai, Prisma } from '@prisma/client';
 
 @Injectable()
 export class AnimeKaiHelper {
-  getAnimekaiData(anime: AnimekaiWithRelations): Prisma.AnimeKaiCreateInput {
-    const episodes = anime?.episodes as Prisma.AnimekaiEpisodeCreateInput[];
+  getAnimekaiData(anime: AnimeKai): Prisma.AnimeKaiCreateInput {
     return {
       id: anime.id,
       anilistId: anime.anilistId,

@@ -67,7 +67,7 @@ export class AnilistService {
     }
 
     const anilist = data.Page.media[0];
-    const savedAnilist = await this.saveAnilist(anilist);
+    const savedAnilist = await this.saveAnilist(data);
 
     const shikimori = await this.shikimoriService.getShikimori(
       anilist.idMal?.toString() || '',
@@ -111,7 +111,13 @@ export class AnilistService {
     return { data: basicAnilist, pageInfo: response.pageInfo };
   }
 
-  async saveAnilist(anilist: Anilist): Promise<Anilist> {
+  async saveAnilist(data: AnilistResponse): Promise<Anilist> {
+    if (!data.Page?.media || data.Page.media.length === 0) {
+      throw new Error('No media found');
+    }
+
+    const anilist = data.Page.media[0];
+
     await this.prisma.lastUpdated.create({
       data: {
         entityId: anilist.id.toString(),
