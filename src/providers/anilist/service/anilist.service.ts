@@ -12,6 +12,8 @@ import AnilistQL from '../graphql/AnilistQL';
 import AnilistQueryBuilder from '../graphql/query/AnilistQueryBuilder';
 import { BasicAnilist } from '../model/BasicAnilist';
 import { AnilistHelper } from '../utils/anilist-helper';
+import { Filter } from '../model/Filter'
+import { FilterDto } from '../model/FilterDto'
 
 export interface AnilistResponse {
   Page: {
@@ -79,10 +81,10 @@ export class AnilistService {
   }
 
   async getAnilists(
-    query: AnilistQueryBuilder,
+    filter: FilterDto,
   ): Promise<ApiResponse<BasicAnilist[]>> {
     // Get paginated anilists based on filter
-    const response = await this.getAnilistByFilter(query); // returns { data, pageInfo }
+    const response = await this.getAnilistByFilter(filter); // returns { data, pageInfo }
 
     // Process Shikimori data
     const malIds = response.data
@@ -162,9 +164,10 @@ export class AnilistService {
   }
 
   async getAnilistByFilter(
-    queryBuilder: AnilistQueryBuilder,
+    filter: FilterDto,
   ): Promise<ApiResponse<PrismaAnilist[]>> {
-    const filter = queryBuilder.convertToReleaseFilter();
+
+    console.log(filter);
 
     const conditions = [
       // Basic filters (only include if defined)

@@ -134,59 +134,6 @@ model BasicRelease {
   nextAiringEpisode Json?
 }
 
-model ReleaseFilter {
-  id                  Int      @id @default(autoincrement())
-  sort                String[]
-  perPage             Int?
-  page                Int?
-  sourceIn            String[]
-  popularityLesser    Int?
-  popularityGreater   Int?
-  popularityNot       Int?
-  averageScoreLesser  Int?
-  averageScoreGreater Int?
-  averageScoreNot     Int?
-  licensedByIdIn      String[]
-  licensedByIn        String[]
-  tagCategoryNotIn    String[]
-  tagCategoryIn       String[]
-  tagNotIn            String[]
-  tagIn               String[]
-  genreNotIn          String[]
-  genreIn             String[]
-  durationLesser      Int?
-  durationGreater     Int?
-  episodesLesser      Int?
-  episodesGreater     Int?
-  statusNotIn         String[]
-  statusNot           String?
-  statusIn            String[]
-  formatNotIn         String[]
-  formatNot           String?
-  formatIn            String[]
-  endDateLike         String?
-  endDateLesser       String?
-  endDateGreater      String?
-  startDateLike       String?
-  startDateLesser     String?
-  startDateGreater    String?
-  idMalNotIn          Int[]
-  idMalIn             Int[]
-  idMalNot            Int?
-  idNotIn             Int[]
-  idIn                Int[]
-  idNot               Int?
-  search              String?
-  isLicensed          Boolean?
-  countryOfOrigin     String?
-  isAdult             Boolean?
-  format              String?
-  type                String?
-  status              String?
-  season              String?
-  idMal               Int?
-}
-
 // Animekai.prisma
 model AnimeKai {
   id             String        @id

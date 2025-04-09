@@ -5,6 +5,9 @@ import { MediaSort } from '../graphql/types/MediaEnums';
 import { AnilistIndexerService } from '../service/anilist-indexer/anilist-indexer.service'
 import { StreamService } from '../../stream/service/stream.service'
 import { Provider } from '../../../shared/Provider'
+import { filter } from 'rxjs'
+import { Filter } from '../model/Filter'
+import { FilterDto } from '../model/FilterDto'
 
 @Controller('anilist')
 export class AnilistController {
@@ -49,9 +52,8 @@ export class AnilistController {
   }
 
   @Get('search')
-  async searchAnilist(@Query() query: any) {
-    const builder = new AnilistQueryBuilder();
-    return this.service.getAnilists(builder.getByQuery(query));
+  async searchAnilist(@Query() filter: FilterDto) {
+    return this.service.getAnilists(filter);
   }
 
   @Put('index')

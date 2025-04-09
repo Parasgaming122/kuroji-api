@@ -1,5 +1,5 @@
-import { ReleaseFilter } from '@prisma/client';
 import Dimens from '../../../../configs/Dimens';
+import { Filter } from '../../model/Filter'
 import { MediaSort } from '../types/MediaEnums';
 
 type FlexibleField = string | number | boolean | object | null | undefined;
@@ -12,62 +12,9 @@ export default class AnilistQueryBuilder {
     this.variables.perPage = parseInt(Dimens.PER_PAGE, 10); // Assuming Dimens.PER_PAGE is a string
   }
 
-  public convertToReleaseFilter(): ReleaseFilter {
-    return {
-      sort: this.variables.sort as MediaSort[],
-      perPage: this.variables.perPage as number,
-      page: this.variables.page as number,
-      sourceIn: this.variables.source_in as string[],
-      popularityLesser: this.variables.popularity_lesser as number,
-      popularityGreater: this.variables.popularity_greater as number,
-      popularityNot: this.variables.popularity_not as number,
-      averageScoreLesser: this.variables.averageScore_lesser as number,
-      averageScoreGreater: this.variables.averageScore_greater as number,
-      averageScoreNot: this.variables.averageScore_not as number,
-      licensedByIdIn: this.variables.licensedById_in as string[],
-      licensedByIn: this.variables.licensedBy_in as string[],
-      tagCategoryNotIn: this.variables.tagCategory_not_in as string[],
-      tagCategoryIn: this.variables.tagCategory_in as string[],
-      tagNotIn: this.variables.tag_not_in as string[],
-      tagIn: this.variables.tag_in as string[],
-      genreIn: this.variables.genreIn as string[],
-      genreNotIn: this.variables.genreNotIn as string[],
-      durationLesser: this.variables.durationLesser as number,
-      durationGreater: this.variables.durationGreater as number,
-      episodesLesser: this.variables.episodesLesser as number,
-      episodesGreater: this.variables.episodesGreater as number,
-      statusNotIn: this.variables.statusNotIn as string[],
-      statusNot: this.variables.statusNot as string,
-      statusIn: this.variables.statusIn as string[],
-      formatNotIn: this.variables.formatNotIn as string[],
-      formatNot: this.variables.formatNot as string,
-      formatIn: this.variables.formatIn as string[],
-      endDateLike: this.variables.endDateLike as string,
-      endDateLesser: this.variables.endDateLesser as string,
-      endDateGreater: this.variables.endDateGreater as string,
-      startDateLike: this.variables.startDateLike as string,
-      startDateLesser: this.variables.startDateLesser as string,
-      startDateGreater: this.variables.startDateGreater as string,
-      idMalNotIn: this.variables.idMalNotIn as number[],
-      idMalIn: this.variables.idMalIn as number[],
-      idMalNot: this.variables.idMalNot as number,
-      idNotIn: this.variables.idNotIn as number[],
-      idIn: this.variables.idIn as number[],
-      idNot: this.variables.idNot as number,
-      search: this.variables.search as string,
-      isLicensed: this.variables.isLicensed as boolean,
-      countryOfOrigin: this.variables.countryOfOrigin as string,
-      isAdult: this.variables.isAdult as boolean,
-      format: this.variables.format as string | null,
-      type: this.variables.type as string | null,
-      status: this.variables.status as string | null,
-      season: this.variables.season as string | null,
-      id: this.variables.id as number,
-      idMal: this.variables.idMal as number,
-    };
-  }
-
   public getByQuery(query: any): this {
+    console.log(query)
+
     // Pagination
     if (query.page) this.setPage(+query.page);
     if (query.perPage) this.setPerPage(+query.perPage);
