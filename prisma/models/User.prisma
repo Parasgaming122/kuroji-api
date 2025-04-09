@@ -1,28 +1,28 @@
 model User {
-  id              BigInt        @id @default(autoincrement())
-  username        String        @unique
-  email           String        @unique
-  name            String
-  password        String
-  status          AccountStatus @default(ACTIVE)
-  reputation      Float         @default(100.0)
-  isOnline        Boolean       @default(false)
-  lastSeen        DateTime      @default(now())
-  isEmailVerified Boolean       @default(false)
-  favorites       String[]
-  stats           UserStats     @relation(fields: [userStatsId], references: [id])
-  nameHistory     NameHistory   @relation(fields: [nameHistoryId], references: [id])
-  socials         Socials       @relation(fields: [socialsId], references: [id])
-  roles           UserRole[]
-  privacy         UserPrivacy   @relation(fields: [userPrivacyId], references: [id])
-  // avatar          File?         @relation(fields: [avatarId], references: [id])
-  // avatarId        BigInt
-  userStatsId     BigInt
-  nameHistoryId   Int
-  socialsId       BigInt
-  userPrivacyId   BigInt
-  File            File?         @relation(fields: [fileId], references: [id])
-  fileId          BigInt?
+  id               BigInt        @id @default(autoincrement())
+  username         String        @unique
+  email            String        @unique
+  name             String
+  password         String
+  status           AccountStatus @default(ACTIVE)
+  reputation       Float         @default(100.0)
+  isOnline         Boolean       @default(false)
+  lastSeen         DateTime      @default(now())
+  isEmailVerified  Boolean       @default(false)
+  emailToken       String?
+  emailTokenExpiry DateTime?
+  favorites        String[]
+  stats            UserStats     @relation(fields: [userStatsId], references: [id])
+  nameHistory      NameHistory   @relation(fields: [nameHistoryId], references: [id])
+  socials          Socials       @relation(fields: [socialsId], references: [id])
+  roles            UserRole[]
+  privacy          UserPrivacy   @relation(fields: [userPrivacyId], references: [id])
+  avatar           File?         @relation(fields: [avatarId], references: [id])
+  avatarId         BigInt?
+  userStatsId      BigInt
+  nameHistoryId    Int
+  socialsId        BigInt
+  userPrivacyId    BigInt
 }
 
 enum AccountStatus {
@@ -32,9 +32,25 @@ enum AccountStatus {
 }
 
 enum UserRole {
-  USER
-  MOD
   ADMIN
+  USER
+  MODERATOR
+  DEVELOPER
+  TESTER
+  DAYN
+  GAY
+  TRANSGENDER
+  HELICOPTER
+  FIGHTER
+  ZOV
+  PATRIOTIC
+  BANDERA
+  OTAKU
+  AIM9L
+  AIM9M
+  AIM7F
+  R60MK
+  T80U
 }
 
 enum UserAccess {

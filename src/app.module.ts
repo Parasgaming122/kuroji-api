@@ -11,6 +11,8 @@ import { ZoroModule } from './providers/zoro/module/zoro.module';
 import { AuthModule } from './security/auth/auth.module';
 import { UpdateModule } from './update/update.module';
 import { UserModule } from './user/user.module';
+import { MailerModule } from './mailer/mailer.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { UserModule } from './user/user.module';
     UpdateModule,
     UserModule,
     AuthModule,
+    MailerModule,
+    CloudinaryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
