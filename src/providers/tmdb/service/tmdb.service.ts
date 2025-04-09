@@ -56,21 +56,27 @@ export class TmdbService {
         throw new Error(`No seasons found for TMDb ID: ${tmdb.id}`);
       }
   
-      const { year, month, day } = anilist.startDate as DateDetails;
-      const { year: endYear, month: endMonth, day: endDay } = anilist.endDate as DateDetails;
-  
-      if (!year || !month || !day || !endYear || !endMonth || !endDay) {
-        throw new Error('Invalid start or end date from AniList');
-      }
-  
-      const anilistStartDateString = `${year.toString().padStart(4, '0')}-${month
-        .toString()
-        .padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-  
-      const anilistEndDateString = `${endYear.toString().padStart(4, '0')}-${endMonth
-        .toString()
-        .padStart(2, '0')}-${endDay.toString().padStart(2, '0')}`;
+      const { year, month, day } = anilist.startDate as DateDetails || {}
+      const { year: endYear, month: endMonth, day: endDay } = anilist.endDate as DateDetails || {}
 
+      let anilistStartDateString: string | null = null
+      let anilistEndDateString: string | null = null
+
+      if (year && month && day) {
+        anilistStartDateString = `${year.toString().padStart(4, '0')}-${month
+          .toString()
+          .padStart(2, '0')}-${day.toString().padStart(2, '0')}`
+      }
+
+      if (endYear && endMonth && endDay) {
+        anilistEndDateString = `${endYear.toString().padStart(4, '0')}-${endMonth
+          .toString()
+          .padStart(2, '0')}-${endDay.toString().padStart(2, '0')}`
+      }
+
+      if (!anilistStartDateString) {
+        throw new Error('Missing start date from AniList: ' + anilist.id)
+      }
   
       const SEASONS = tmdb.number_of_seasons || 1;
 

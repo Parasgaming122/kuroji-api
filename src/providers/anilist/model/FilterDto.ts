@@ -6,7 +6,7 @@ import {
   IsString,
   IsArray,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
 import {
   MediaFormat,
   MediaSeason,
@@ -20,7 +20,7 @@ export class FilterDto {
   @IsOptional()
   @IsArray()
   @IsEnum(MediaSort, { each: true })
-  @Type(() => String)
+  @Transform(({ value }) => (Array.isArray(value) ? value : [value]))
   sort?: MediaSort[];
 
   @IsOptional()
