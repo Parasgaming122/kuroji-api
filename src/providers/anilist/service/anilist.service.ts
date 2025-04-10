@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Anilist as PrismaAnilist, BasicRelease, Shikimori, AnilistTitle, AnilistCover, StartDate, EndDate } from '@prisma/client';
+import { Anilist as PrismaAnilist, BasicRelease, Shikimori, AnilistTitle, AnilistCover, StartDate, EndDate, AnilistTag } from '@prisma/client';
 import { ApiResponse } from '../../../api/ApiResponse';
 import { UrlConfig } from '../../../configs/url.config';
 import { CustomHttpService } from '../../../http/http.service';
@@ -34,6 +34,7 @@ export interface AnilistWithRelations
   cover?: AnilistCover;
   startDate?: StartDate;
   endDate?: EndDate;
+  tags?: AnilistTag[]
   chronology?: BasicRelease[];
   recommendation?: BasicRelease[];
   shikimori?: Shikimori;
@@ -82,6 +83,7 @@ export class AnilistService {
             id: true,
           }
         },
+        tags: true
       },
     }
 

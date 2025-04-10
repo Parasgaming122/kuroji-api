@@ -50,7 +50,7 @@ model Anilist {
   stats             Json? // Stats (including scoreDistribution and statusDistribution)
 
   // Normalized collections (stored in separate tables)
-  tags              Json?
+  tags              AnilistTag[] @relation("AnilistTags")
   externalLinks     Json?
   streamingEpisodes Json?
 
@@ -111,6 +111,8 @@ model AnilistTag {
   isMediaSpoiler   Boolean?
   isAdult          Boolean?
   userId           Int?
+
+  anilist          Anilist  @relation("AnilistTags", fields: [releaseId], references: [id])
 }
 
 model AnilistExternalLink {

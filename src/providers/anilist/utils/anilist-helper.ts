@@ -72,7 +72,18 @@ export class AnilistHelper {
       airingSchedule: anime.airingSchedule,
       nextAiringEpisode: anime.nextAiringEpisode,
       stats: anime.stats,
-      tags: anime.tags,
+      tags: {
+        create: anime.tags?.map((tag: any) => ({
+          name: tag.name,
+          description: tag.description ?? null,
+          category: tag.category ?? null,
+          rank: tag.rank ?? null,
+          isGeneralSpoiler: tag.isGeneralSpoiler ?? false,
+          isMediaSpoiler: tag.isMediaSpoiler ?? false,
+          isAdult: tag.isAdult ?? false,
+          userId: tag.userId ?? null,
+        }))
+      },
       externalLinks: anime.externalLinks,
       streamingEpisodes: anime.streamingEpisodes,
     }
