@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Anilist as PrismaAnilist, BasicRelease, Shikimori } from '@prisma/client';
+import { Anilist as PrismaAnilist, BasicRelease, Shikimori, AnilistTitle, AnilistCover, StartDate, EndDate } from '@prisma/client';
 import { ApiResponse } from '../../../api/ApiResponse';
 import { UrlConfig } from '../../../configs/url.config';
 import { CustomHttpService } from '../../../http/http.service';
@@ -29,7 +29,11 @@ export interface AnilistResponse {
 }
 
 export interface AnilistWithRelations
-  extends Omit<PrismaAnilist, 'recommendations' | 'BasicIdAni'> {
+  extends PrismaAnilist {
+  title?: AnilistTitle;
+  cover?: AnilistCover;
+  startDate?: StartDate;
+  endDate?: EndDate;
   chronology?: BasicRelease[];
   recommendation?: BasicRelease[];
   shikimori?: Shikimori;
@@ -48,9 +52,40 @@ export class AnilistService {
     id: number,
     isMal: boolean = false,
   ): Promise<AnilistWithRelations> {
-    const existingAnilist = await this.prisma.anilist.findUnique({
+    const findUnique = {
+      omit: {
+        titleId: true,
+        coverId: true,
+        startDateId: true,
+        endDateId: true,
+        recommendations: true,
+      },
       where: { id },
-    });
+      include: {
+        title: {
+          omit: {
+            id: true,
+          }
+        },
+        coverImage: {
+          omit: {
+            id: true,
+          }
+        },
+        startDate: {
+          omit: {
+            id: true,
+          }
+        },
+        endDate: {
+          omit: {
+            id: true,
+          }
+        },
+      },
+    }
+
+    let existingAnilist = await this.prisma.anilist.findUnique(findUnique);
 
     if (existingAnilist) {
       const shikimori = await this.shikimoriService.getShikimori(
@@ -58,8 +93,8 @@ export class AnilistService {
       );
       return {
         ...existingAnilist,
-        screenshots: shikimori.screenshots || [],
-      } as AnilistWithRelations;
+        shikimori
+      } as unknown as AnilistWithRelations;
     }
 
     const data = await this.fetchAnilistFromGraphQL(id);
@@ -68,14 +103,16 @@ export class AnilistService {
     }
 
     const anilist = data.Page.media[0];
-    const savedAnilist = await this.saveAnilist(data);
+    await this.saveAnilist(data);
 
     const shikimori = await this.shikimoriService.getShikimori(
       anilist.idMal?.toString() || '',
     );
 
+    existingAnilist = await this.prisma.anilist.findUnique(findUnique);
+
     return {
-      ...savedAnilist,
+      ...existingAnilist,
       shikimori: shikimori || null,
     } as AnilistWithRelations;
   }
@@ -118,6 +155,7 @@ export class AnilistService {
     }
 
     const anilist = data.Page.media[0];
+
 
     await this.prisma.lastUpdated.create({
       data: {
@@ -228,32 +266,38 @@ export class AnilistService {
       // Search filter
       filter.search
         ? {
-            OR: [
-              {
-                title: {
-                  path: ['romaji'],
-                  string_contains: filter.search,
+          OR: [
+            {
+              title: {
+                romaji: {
+                  contains: filter.search,
+                  mode: 'insensitive',
                 },
               },
-              {
-                title: {
-                  path: ['english'],
-                  string_contains: filter.search,
+            },
+            {
+              title: {
+                english: {
+                  contains: filter.search,
+                  mode: 'insensitive',
                 },
               },
-              {
-                title: {
-                  path: ['native'],
-                  string_contains: filter.search,
+            },
+            {
+              title: {
+                native: {
+                  contains: filter.search,
+                  mode: 'insensitive',
                 },
               },
-              {
-                synonyms: {
-                  hasSome: [filter.search],
-                },
+            },
+            {
+              synonyms: {
+                hasSome: [filter.search],
               },
-            ],
-          }
+            },
+          ],
+        } as any
         : {},
 
       // Date filters using JSON paths
@@ -285,6 +329,28 @@ export class AnilistService {
     const [data, total] = await Promise.all([
       this.prisma.anilist.findMany({
         where: whereCondition,
+        include: {
+          title: {
+            omit: {
+              id: true,
+            }
+          },
+          coverImage: {
+            omit: {
+              id: true,
+            }
+          },
+          startDate: {
+            omit: {
+              id: true,
+            }
+          },
+          endDate: {
+            omit: {
+              id: true,
+            }
+          },
+        },
         take: perPage,
         skip,
         orderBy: filter.sort?.map((sortField) => {

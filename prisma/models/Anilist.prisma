@@ -3,16 +3,16 @@ model Anilist {
   idMal             Int?
   siteUrl           String?
   // Embedded objects stored as JSON
-  title             Json? // corresponds to Release.Title
-  coverImage        Json? // corresponds to Release.CoverImage
+  title             AnilistTitle? @relation(fields: [titleId], references: [id]) // corresponds to Release.Title
+  coverImage        AnilistCover? @relation(fields: [coverId], references: [id]) // corresponds to Release.CoverImage
   bannerImage       String?
   status            String?
   type              String?
   format            String?
   updatedAt         Int?
   description       String?
-  startDate         Json? // corresponds to Date (with start_year, start_month, start_day)
-  endDate           Json? // corresponds to Date (with end_year, end_month, end_day)
+  startDate         StartDate? @relation(fields: [startDateId], references: [id]) // corresponds to Date (with start_year, start_month, start_day)
+  endDate           EndDate? @relation(fields: [endDateId], references: [id]) // corresponds to Date (with end_year, end_month, end_day)
   season            String?
   seasonYear        Int?
   episodes          Int?
@@ -43,7 +43,44 @@ model Anilist {
   tags              Json?
   externalLinks     Json?
   streamingEpisodes Json?
-  BasicIdAni        Json?
+
+  titleId           Int?
+  coverId           Int?
+  startDateId		Int?
+  endDateId			Int?
+}
+
+model AnilistTitle {
+  id               Int      @id @default(autoincrement())
+  romaji    String?
+  english   String?
+  native    String?
+  anilist   Anilist[]
+}
+
+model StartDate {
+  id               Int      @id @default(autoincrement())
+  day       Int?
+  month     Int?
+  year      Int?
+  anilist	Anilist[]
+}
+
+model EndDate {
+  id               Int      @id @default(autoincrement())
+  day       Int?
+  month     Int?
+  year      Int?
+  anilist	Anilist[]
+}
+
+model AnilistCover {
+  id               Int      @id @default(autoincrement())
+  color     String?
+  large     String?
+  medium    String?
+  extraLarge String?
+  anilist	Anilist[]
 }
 
 model AnilistIndex {
