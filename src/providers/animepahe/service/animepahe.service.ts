@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Animepahe } from '@prisma/client';
+import { Animepahe, AnimepaheExternalLink } from '@prisma/client';
 import { UrlConfig } from '../../../configs/url.config';
 import { CustomHttpService } from '../../../http/http.service';
 import { PrismaService } from '../../../prisma.service';
@@ -117,8 +117,12 @@ export class AnimepaheService {
         )
       ) {
         const data = await this.fetchAnimepahe(result.id);
-        data.alId = id;
-        return data;
+        const externalLinks = data.externalLinks as AnimepaheExternalLink[];
+
+        if (externalLinks.find(l => l.sourceName === 'AniList' && l.id === String(id))) {
+          data.alId = id;
+          return data;
+        }
       }
     }
 
