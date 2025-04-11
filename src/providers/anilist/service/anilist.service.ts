@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Anilist as PrismaAnilist, BasicRelease, Shikimori } from '@prisma/client';
+import { Anilist as PrismaAnilist, BasicRelease, Shikimori, AnilistTitle, AnilistCover, StartDate, EndDate, AnilistTag, AnilistExternalLink, AnilistStreamingEpisode, AnilistStudio, AnilistAiringSchedule, AnilistNextAiringEpisode, AnilistCharacter } from '@prisma/client';
 import { ApiResponse } from '../../../api/ApiResponse';
 import { UrlConfig } from '../../../configs/url.config';
 import { CustomHttpService } from '../../../http/http.service';
@@ -12,6 +12,8 @@ import AnilistQL from '../graphql/AnilistQL';
 import AnilistQueryBuilder from '../graphql/query/AnilistQueryBuilder';
 import { BasicAnilist } from '../model/BasicAnilist';
 import { AnilistHelper } from '../utils/anilist-helper';
+import { Filter } from '../model/Filter'
+import { FilterDto } from '../model/FilterDto'
 
 export interface AnilistResponse {
   Page: {
@@ -27,7 +29,18 @@ export interface AnilistResponse {
 }
 
 export interface AnilistWithRelations
-  extends Omit<PrismaAnilist, 'recommendations' | 'BasicIdAni'> {
+  extends PrismaAnilist {
+  title?: AnilistTitle;
+  cover?: AnilistCover;
+  startDate?: StartDate;
+  endDate?: EndDate;
+  characters?: AnilistCharacter[];
+  studios?: AnilistStudio[];
+  airingSchedule?: AnilistAiringSchedule[];
+  nextAiringEpisode?: AnilistNextAiringEpisode;
+  tags?: AnilistTag[];
+  externalLinks?: AnilistExternalLink[];
+  streamingEpisodes?: AnilistStreamingEpisode[];
   chronology?: BasicRelease[];
   recommendation?: BasicRelease[];
   shikimori?: Shikimori;
@@ -46,9 +59,47 @@ export class AnilistService {
     id: number,
     isMal: boolean = false,
   ): Promise<AnilistWithRelations> {
-    const existingAnilist = await this.prisma.anilist.findUnique({
+    const findUnique = {
+      omit: {
+        titleId: true,
+        coverId: true,
+        startDateId: true,
+        endDateId: true,
+        recommendations: true,
+      },
       where: { id },
-    });
+      include: {
+        title: {
+          omit: {
+            id: true,
+          }
+        },
+        coverImage: {
+          omit: {
+            id: true,
+          }
+        },
+        startDate: {
+          omit: {
+            id: true,
+          }
+        },
+        endDate: {
+          omit: {
+            id: true,
+          }
+        },
+        characters: true,
+        studios: true,
+        airingSchedule: true,
+        nextAiringEpisode: true,
+        tags: true,
+        externalLinks: true,
+        streamingEpisodes: true,
+      },
+    }
+
+    let existingAnilist = await this.prisma.anilist.findUnique(findUnique);
 
     if (existingAnilist) {
       const shikimori = await this.shikimoriService.getShikimori(
@@ -56,8 +107,8 @@ export class AnilistService {
       );
       return {
         ...existingAnilist,
-        screenshots: shikimori.screenshots || [],
-      } as AnilistWithRelations;
+        shikimori
+      } as unknown as AnilistWithRelations;
     }
 
     const data = await this.fetchAnilistFromGraphQL(id);
@@ -66,23 +117,25 @@ export class AnilistService {
     }
 
     const anilist = data.Page.media[0];
-    const savedAnilist = await this.saveAnilist(data);
+    await this.saveAnilist(data);
 
     const shikimori = await this.shikimoriService.getShikimori(
       anilist.idMal?.toString() || '',
     );
 
+    existingAnilist = await this.prisma.anilist.findUnique(findUnique);
+
     return {
-      ...savedAnilist,
+      ...existingAnilist,
       shikimori: shikimori || null,
     } as AnilistWithRelations;
   }
 
   async getAnilists(
-    query: AnilistQueryBuilder,
+    filter: FilterDto,
   ): Promise<ApiResponse<BasicAnilist[]>> {
     // Get paginated anilists based on filter
-    const response = await this.getAnilistByFilter(query); // returns { data, pageInfo }
+    const response = await this.getAnilistByFilter(filter); // returns { data, pageInfo }
 
     // Process Shikimori data
     const malIds = response.data
@@ -162,9 +215,10 @@ export class AnilistService {
   }
 
   async getAnilistByFilter(
-    queryBuilder: AnilistQueryBuilder,
+    filter: FilterDto,
   ): Promise<ApiResponse<PrismaAnilist[]>> {
-    const filter = queryBuilder.convertToReleaseFilter();
+
+    console.log(filter);
 
     const conditions = [
       // Basic filters (only include if defined)
@@ -225,32 +279,38 @@ export class AnilistService {
       // Search filter
       filter.search
         ? {
-            OR: [
-              {
-                title: {
-                  path: ['romaji'],
-                  string_contains: filter.search,
+          OR: [
+            {
+              title: {
+                romaji: {
+                  contains: filter.search,
+                  mode: 'insensitive',
                 },
               },
-              {
-                title: {
-                  path: ['english'],
-                  string_contains: filter.search,
+            },
+            {
+              title: {
+                english: {
+                  contains: filter.search,
+                  mode: 'insensitive',
                 },
               },
-              {
-                title: {
-                  path: ['native'],
-                  string_contains: filter.search,
+            },
+            {
+              title: {
+                native: {
+                  contains: filter.search,
+                  mode: 'insensitive',
                 },
               },
-              {
-                synonyms: {
-                  hasSome: [filter.search],
-                },
+            },
+            {
+              synonyms: {
+                hasSome: [filter.search],
               },
-            ],
-          }
+            },
+          ],
+        } as any
         : {},
 
       // Date filters using JSON paths
@@ -282,6 +342,28 @@ export class AnilistService {
     const [data, total] = await Promise.all([
       this.prisma.anilist.findMany({
         where: whereCondition,
+        include: {
+          title: {
+            omit: {
+              id: true,
+            }
+          },
+          coverImage: {
+            omit: {
+              id: true,
+            }
+          },
+          startDate: {
+            omit: {
+              id: true,
+            }
+          },
+          endDate: {
+            omit: {
+              id: true,
+            }
+          },
+        },
         take: perPage,
         skip,
         orderBy: filter.sort?.map((sortField) => {

@@ -13,6 +13,7 @@ export class AnimePaheHelper {
       image: animePahe.image,
       cover: animePahe.cover,
       hasSub: animePahe.hasSub,
+      externalLinks: animePahe.externalLinks || [],
       status: animePahe.status,
       type: animePahe.type,
       releaseDate: animePahe.releaseDate,

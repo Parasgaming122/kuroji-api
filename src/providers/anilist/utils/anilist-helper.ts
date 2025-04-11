@@ -2,24 +2,52 @@ import { Injectable } from '@nestjs/common'
 import { Anilist, Poster, Prisma, Shikimori } from '@prisma/client'
 import { AnilistWithRelations } from '../service/anilist.service'
 import { BasicAnilist, BasicShikimori } from '../model/BasicAnilist'
+import { PrismaService } from '../../../prisma.service'
 
 @Injectable()
 export class AnilistHelper {
+  constructor(private readonly prisma: PrismaService) {}
+
   public getDataForPrisma(anime: any): Prisma.AnilistCreateInput {
     return {
       id: anime.id,
       idMal: anime.idMal,
       siteUrl: anime.siteUrl,
-      title: anime.title,
-      coverImage: anime.coverImage,
+      title: {
+        create: {
+          romaji: anime.title?.romaji ?? null,
+          english: anime.title?.english ?? null,
+          native: anime.title?.native ?? null,
+        }
+      },
+      coverImage: {
+        create: {
+          color: anime.coverImage?.color ?? null,
+          large: anime.coverImage?.large ?? null,
+          medium: anime.coverImage?.medium ?? null,
+          extraLarge: anime.coverImage?.extraLarge ?? null
+        }
+      },
       bannerImage: anime.bannerImage,
       status: anime.status,
       type: anime.type,
       format: anime.format,
       updatedAt: anime.updatedAt,
       description: anime.description,
-      startDate: anime.startDate,
-      endDate: anime.endDate,
+      startDate: {
+        create: {
+          day: anime.startDate?.day ?? null,
+          month: anime.startDate?.month ?? null,
+          year: anime.startDate?.year ?? null
+        }
+      },
+      endDate: {
+        create: {
+          day: anime.endDate?.day ?? null,
+          month: anime.endDate?.month ?? null,
+          year: anime.endDate?.year ?? null
+        }
+      },
       season: anime.season,
       seasonYear: anime.seasonYear,
       episodes: anime.episodes,
@@ -39,56 +67,73 @@ export class AnilistHelper {
       genres: anime.genres,
       synonyms: anime.synonyms,
       recommendations: anime.recommendations,
-      characters: anime.characters,
-      studios: anime.studios,
-      airingSchedule: anime.airingSchedule,
-      nextAiringEpisode: anime.nextAiringEpisode,
+      characters: {
+        create: anime.characters?.edges?.map((edge: any) => ({
+          characterId: edge?.node?.id ?? null,
+          name: edge?.node?.name?.full ?? null,
+          image: edge?.node?.image?.medium ?? null
+        })) ?? []
+      },
+      studios: {
+        create: anime.studios?.edges?.map((edge: any) => ({
+          studioId: edge?.node?.id ?? null,
+          name: edge?.node?.name ?? null,
+          isMain: edge?.isMain ?? false
+        })) ?? []
+      },
+      airingSchedule: {
+        create: anime.airingSchedule?.edges?.map((edge: any) => ({
+          scheduleId: edge?.node?.id ?? null,
+          episode: edge?.node?.episode ?? null,
+          airingAt: edge?.node?.airingAt ?? null
+        })) ?? []
+      },
+      nextAiringEpisode: anime.nextAiringEpisode ? {
+        create: {
+          episode: anime.nextAiringEpisode?.episode ?? null,
+          airingAt: anime.nextAiringEpisode?.airingAt ?? null,
+          timeUntilAiring: anime.nextAiringEpisode?.timeUntilAiring ?? null
+        }
+      } : undefined,
       stats: anime.stats,
-      // Handle relations
       tags: {
         create: anime.tags?.map((tag: any) => ({
-          tagId: tag.id,
           name: tag.name,
-          description: tag.description,
-          category: tag.category,
-          rank: tag.rank,
-          isGeneralSpoiler: tag.isGeneralSpoiler,
-          isMediaSpoiler: tag.isMediaSpoiler,
-          isAdult: tag.isAdult,
-          userId: tag.userId
-        })) || []
+          description: tag.description ?? null,
+          category: tag.category ?? null,
+          rank: tag.rank ?? null,
+          isGeneralSpoiler: tag.isGeneralSpoiler ?? false,
+          isMediaSpoiler: tag.isMediaSpoiler ?? false,
+          isAdult: tag.isAdult ?? false,
+          userId: tag.userId ?? null,
+        }))
       },
       externalLinks: {
         create: anime.externalLinks?.map((link: any) => ({
-          exLinkId: link.id,
-          url: link.url,
-          site: link.site,
-          siteId: link.siteId,
-          type: link.type,
-          language: link.language,
-          color: link.color,
-          icon: link.icon,
-          notes: link.notes,
-          isDisabled: link.isDisabled
-        })) || []
+          exLinkId: link.id ?? null,
+          url: link.url ?? null,
+          site: link.site ?? null,
+          siteId: link.siteId ?? null,
+          type: link.type ?? null,
+          language: link.language ?? null,
+          color: link.color ?? null,
+          icon: link.icon ?? null,
+          notes: link.notes ?? null,
+          isDisabled: link.isDisabled ?? false
+        })) ?? []
       },
       streamingEpisodes: {
         create: anime.streamingEpisodes?.map((episode: any) => ({
-          title: episode.title,
-          thumbnail: episode.thumbnail,
-          url: episode.url,
-          site: episode.site
-        })) || []
+          title: episode.title ?? null,
+          thumbnail: episode.thumbnail ?? null,
+          url: episode.url ?? null,
+          site: episode.site ?? null
+        })) ?? []
       },
-      BasicIdAni: {
-        create: anime.recommendations?.edges?.map((edge: any) => ({
-          idMal: edge.node.mediaRecommendation.idMal
-        })) || []
-      }
     }
   }
 
-  public convertAnilistToBasic(anilist: AnilistWithRelations): BasicAnilist {
+  public convertAnilistToBasic(anilist: any): BasicAnilist {
     return {
       id: anilist.id,
       idMal: anilist.idMal ?? undefined,
@@ -123,7 +168,7 @@ export class AnilistHelper {
 
   public convertShikimoriToBasic(shikimori?: Shikimori): BasicShikimori | undefined {
     if (!shikimori) {
-      return undefined;
+      return undefined
     }
     return {
       id: shikimori.id,

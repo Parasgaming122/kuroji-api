@@ -105,9 +105,7 @@ export class ShikimoriService {
       )) as ShikimoriResponse;
 
       if (!fetchedShikimoriList.animes.length) {
-        throw new NotFoundException(
-          'No Shikimori data found for the provided IDs.',
-        );
+        return [];
       }
 
       const newShikimoriList: Shikimori[] = fetchedShikimoriList.animes.filter(

@@ -3,16 +3,16 @@ model Anilist {
   idMal             Int?
   siteUrl           String?
   // Embedded objects stored as JSON
-  title             Json? // corresponds to Release.Title
-  coverImage        Json? // corresponds to Release.CoverImage
+  title             AnilistTitle? @relation(fields: [titleId], references: [id]) // corresponds to Release.Title
+  coverImage        AnilistCover? @relation(fields: [coverId], references: [id]) // corresponds to Release.CoverImage
   bannerImage       String?
   status            String?
   type              String?
   format            String?
   updatedAt         Int?
   description       String?
-  startDate         Json? // corresponds to Date (with start_year, start_month, start_day)
-  endDate           Json? // corresponds to Date (with end_year, end_month, end_day)
+  startDate         StartDate? @relation(fields: [startDateId], references: [id]) // corresponds to Date (with start_year, start_month, start_day)
+  endDate           EndDate? @relation(fields: [endDateId], references: [id]) // corresponds to Date (with end_year, end_month, end_day)
   season            String?
   seasonYear        Int?
   episodes          Int?
@@ -33,23 +33,70 @@ model Anilist {
   synonyms          String[]
   // Complex embedded collections stored as JSON:
   recommendations   Json? // RecommendationEdgeWrapper<BasicId>
-  characters        Json? // CharacterEdgeWrapper
-  studios           Json? // StudioEdgeWrapper
-  airingSchedule    Json? // AiringEdgeWrapper
-  nextAiringEpisode Json? // AiringEpisode
+  characters        AnilistCharacter[] @relation("AnilistCharacters")
+  studios           AnilistStudio[] @relation("AnilistStudios")
+  airingSchedule    AnilistAiringSchedule[] @relation("AnilistAiringSchedules")
+  nextAiringEpisode AnilistNextAiringEpisode? @relation("AnilistNextAiringEpisode")
   stats             Json? // Stats (including scoreDistribution and statusDistribution)
 
   // Normalized collections (stored in separate tables)
-  tags              Json?
-  externalLinks     Json?
-  streamingEpisodes Json?
-  BasicIdAni        Json?
+  tags              AnilistTag[] @relation("AnilistTags")
+  externalLinks     AnilistExternalLink[] @relation("AnilistExternalLinks")
+  streamingEpisodes AnilistStreamingEpisode[] @relation("AnilistStreamingEpisodes")
+
+  titleId           Int?
+  coverId           Int?
+  startDateId		Int?
+  endDateId			Int?
+}
+
+model AnilistTitle {
+  id               Int      @id @default(autoincrement())
+  romaji    String?
+  english   String?
+  native    String?
+  anilist   Anilist[]
+}
+
+model StartDate {
+  id               Int      @id @default(autoincrement())
+  day       Int?
+  month     Int?
+  year      Int?
+  anilist	Anilist[]
+}
+
+model EndDate {
+  id               Int      @id @default(autoincrement())
+  day       Int?
+  month     Int?
+  year      Int?
+  anilist	Anilist[]
+}
+
+model AnilistCover {
+  id               Int      @id @default(autoincrement())
+  color     String?
+  large     String?
+  medium    String?
+  extraLarge String?
+  anilist	Anilist[]
 }
 
 model AnilistIndex {
   id        String   @id
   updatedAt DateTime @default(now()) @updatedAt
   createdAt DateTime @default(now())
+}
+
+model AnilistCharacter {
+  id          Int      @id @default(autoincrement())
+  releaseId   Int
+  characterId Int?
+  name        String?
+  image       String?  // Store the medium image URL
+
+  anilist     Anilist  @relation("AnilistCharacters", fields: [releaseId], references: [id])
 }
 
 model AnilistTag {
@@ -64,6 +111,8 @@ model AnilistTag {
   isMediaSpoiler   Boolean?
   isAdult          Boolean?
   userId           Int?
+
+  anilist          Anilist  @relation("AnilistTags", fields: [releaseId], references: [id])
 }
 
 model AnilistExternalLink {
@@ -79,6 +128,8 @@ model AnilistExternalLink {
   icon       String?
   notes      String?
   isDisabled Boolean?
+
+  anilist          Anilist  @relation("AnilistExternalLinks", fields: [releaseId], references: [id])
 }
 
 model AnilistStreamingEpisode {
@@ -88,6 +139,38 @@ model AnilistStreamingEpisode {
   thumbnail String?
   url       String?
   site      String?
+
+  anilist          Anilist  @relation("AnilistStreamingEpisodes", fields: [releaseId], references: [id])
+}
+
+model AnilistStudio {
+  id         Int      @id @default(autoincrement())
+  releaseId  Int
+  studioId   Int?
+  name       String?
+  isMain     Boolean?
+
+  anilist    Anilist  @relation("AnilistStudios", fields: [releaseId], references: [id])
+}
+
+model AnilistAiringSchedule {
+  id              Int      @id @default(autoincrement())
+  releaseId       Int
+  scheduleId      Int?
+  episode         Int?
+  airingAt        Int?
+
+  anilist         Anilist  @relation("AnilistAiringSchedules", fields: [releaseId], references: [id])
+}
+
+model AnilistNextAiringEpisode {
+  id              Int      @id @default(autoincrement())
+  releaseId       Int      @unique
+  episode         Int?
+  airingAt        Int?
+  timeUntilAiring Int?
+
+  anilist         Anilist  @relation("AnilistNextAiringEpisode", fields: [releaseId], references: [id])
 }
 
 model BasicIdAni {
@@ -122,57 +205,4 @@ model BasicRelease {
   isAdult           Boolean?
   genres            String[]
   nextAiringEpisode Json?
-}
-
-model ReleaseFilter {
-  id                  Int      @id @default(autoincrement())
-  sort                String[]
-  perPage             Int?
-  page                Int?
-  sourceIn            String[]
-  popularityLesser    Int?
-  popularityGreater   Int?
-  popularityNot       Int?
-  averageScoreLesser  Int?
-  averageScoreGreater Int?
-  averageScoreNot     Int?
-  licensedByIdIn      String[]
-  licensedByIn        String[]
-  tagCategoryNotIn    String[]
-  tagCategoryIn       String[]
-  tagNotIn            String[]
-  tagIn               String[]
-  genreNotIn          String[]
-  genreIn             String[]
-  durationLesser      Int?
-  durationGreater     Int?
-  episodesLesser      Int?
-  episodesGreater     Int?
-  statusNotIn         String[]
-  statusNot           String?
-  statusIn            String[]
-  formatNotIn         String[]
-  formatNot           String?
-  formatIn            String[]
-  endDateLike         String?
-  endDateLesser       String?
-  endDateGreater      String?
-  startDateLike       String?
-  startDateLesser     String?
-  startDateGreater    String?
-  idMalNotIn          Int[]
-  idMalIn             Int[]
-  idMalNot            Int?
-  idNotIn             Int[]
-  idIn                Int[]
-  idNot               Int?
-  search              String?
-  isLicensed          Boolean?
-  countryOfOrigin     String?
-  isAdult             Boolean?
-  format              String?
-  type                String?
-  status              String?
-  season              String?
-  idMal               Int?
 }

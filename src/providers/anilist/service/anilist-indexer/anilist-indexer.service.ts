@@ -47,22 +47,22 @@ export class AnilistIndexerService {
       const existing = await this.prisma.releaseIndex.findUnique({
         where: { id: id.toString() },
       });
-  
-      if (!existing) {
-        try {
-          console.log('Indexing new release: ' + id);
-          await this.service.getAnilist(id, true);
-  
-          await this.prisma.releaseIndex.create({
-            data: {
-              id: id.toString(),
-            },
-          });
-  
-          await this.sleep(delay);
-        } catch (e) {
-          console.error('Failed index update:', e);
-        }
+
+      if (existing) continue;
+
+      try {
+        console.log('Indexing new release: ' + id)
+        await this.service.getAnilist(id, true)
+
+        await this.prisma.releaseIndex.create({
+          data: {
+            id: id.toString(),
+          },
+        })
+
+        await this.sleep(delay)
+      } catch (e) {
+        console.error('Failed index update:', e)
       }
     }
   

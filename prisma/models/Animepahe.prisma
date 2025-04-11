@@ -5,6 +5,7 @@ model Animepahe {
   image          String?
   cover          String?
   hasSub         Boolean?
+  externalLinks  Json?
   status         String?
   type           String?
   releaseDate    String?
@@ -21,4 +22,10 @@ model AnimepaheEpisode {
   image       String?
   duration    String?
   url         String?
+}
+
+model AnimepaheExternalLink {
+  id          String   @id
+  url         String
+  sourceName  String
 }

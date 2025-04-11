@@ -15,9 +15,7 @@ model Shikimori {
   episodesAired Int?
   duration      Int?
   airedOn       Json?
-  airedOnId     Int?
   releasedOn    Json?
-  releasedOnId  Int?
   url           String?
   season        String?
   poster        Json?
