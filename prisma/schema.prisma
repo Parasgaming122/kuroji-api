@@ -572,7 +572,7 @@ model User {
   username         String        @unique
   email            String        @unique
   name             String
-  password         String
+  password         String?
   status           AccountStatus @default(ACTIVE)
   reputation       Float         @default(100.0)
   isOnline         Boolean       @default(false)
@@ -682,10 +682,10 @@ model UserAnime {
 
 model File {
   id           BigInt   @id @default(autoincrement())
-  filename     String
-  originalName String
-  mimeType     String
-  size         Int
+  filename     String?
+  originalName String?
+  mimeType     String?
+  size         Int?
   path         String
   uploadedAt   DateTime @default(now())
   User         User[]
