@@ -13,10 +13,14 @@ Object.defineProperty(BigInt.prototype, 'toJSON', {
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
-  // app.enableCors({
-  //   origin: ['http://localhost:3000', 'veanime.cc'],
-  //   credentials: true,
-  // });
+  app.enableCors({
+    origin: [
+      'http://localhost:3000',
+      'https://veanime.cc',
+      'https://www.veanime.cc',
+    ],
+    credentials: true,
+  });
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true, // Optionally, transforms payloads to DTOs
