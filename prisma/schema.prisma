@@ -43,16 +43,16 @@ model Anilist {
   synonyms          String[]
   // Complex embedded collections stored as JSON:
   recommendations   Json? // RecommendationEdgeWrapper<BasicId>
-  characters        Json? // CharacterEdgeWrapper
-  studios           Json? // StudioEdgeWrapper
-  airingSchedule    Json? // AiringEdgeWrapper
-  nextAiringEpisode Json? // AiringEpisode
+  characters        AnilistCharacter[] @relation("AnilistCharacters")
+  studios           AnilistStudio[] @relation("AnilistStudios")
+  airingSchedule    AnilistAiringSchedule[] @relation("AnilistAiringSchedules")
+  nextAiringEpisode AnilistNextAiringEpisode? @relation("AnilistNextAiringEpisode")
   stats             Json? // Stats (including scoreDistribution and statusDistribution)
 
   // Normalized collections (stored in separate tables)
   tags              AnilistTag[] @relation("AnilistTags")
-  externalLinks     Json?
-  streamingEpisodes Json?
+  externalLinks     AnilistExternalLink[] @relation("AnilistExternalLinks")
+  streamingEpisodes AnilistStreamingEpisode[] @relation("AnilistStreamingEpisodes")
 
   titleId           Int?
   coverId           Int?
@@ -99,6 +99,16 @@ model AnilistIndex {
   createdAt DateTime @default(now())
 }
 
+model AnilistCharacter {
+  id          Int      @id @default(autoincrement())
+  releaseId   Int
+  characterId Int?
+  name        String?
+  image       String?  // Store the medium image URL
+
+  anilist     Anilist  @relation("AnilistCharacters", fields: [releaseId], references: [id])
+}
+
 model AnilistTag {
   id               Int      @id @default(autoincrement())
   releaseId        Int
@@ -128,6 +138,8 @@ model AnilistExternalLink {
   icon       String?
   notes      String?
   isDisabled Boolean?
+
+  anilist          Anilist  @relation("AnilistExternalLinks", fields: [releaseId], references: [id])
 }
 
 model AnilistStreamingEpisode {
@@ -137,6 +149,38 @@ model AnilistStreamingEpisode {
   thumbnail String?
   url       String?
   site      String?
+
+  anilist          Anilist  @relation("AnilistStreamingEpisodes", fields: [releaseId], references: [id])
+}
+
+model AnilistStudio {
+  id         Int      @id @default(autoincrement())
+  releaseId  Int
+  studioId   Int?
+  name       String?
+  isMain     Boolean?
+
+  anilist    Anilist  @relation("AnilistStudios", fields: [releaseId], references: [id])
+}
+
+model AnilistAiringSchedule {
+  id              Int      @id @default(autoincrement())
+  releaseId       Int
+  scheduleId      Int?
+  episode         Int?
+  airingAt        Int?
+
+  anilist         Anilist  @relation("AnilistAiringSchedules", fields: [releaseId], references: [id])
+}
+
+model AnilistNextAiringEpisode {
+  id              Int      @id @default(autoincrement())
+  releaseId       Int      @unique
+  episode         Int?
+  airingAt        Int?
+  timeUntilAiring Int?
+
+  anilist         Anilist  @relation("AnilistNextAiringEpisode", fields: [releaseId], references: [id])
 }
 
 model BasicIdAni {
@@ -247,9 +291,7 @@ model Shikimori {
   episodesAired Int?
   duration      Int?
   airedOn       Json?
-  airedOnId     Int?
   releasedOn    Json?
-  releasedOnId  Int?
   url           String?
   season        String?
   poster        Json?

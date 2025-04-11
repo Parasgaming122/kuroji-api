@@ -67,10 +67,34 @@ export class AnilistHelper {
       genres: anime.genres,
       synonyms: anime.synonyms,
       recommendations: anime.recommendations,
-      characters: anime.characters,
-      studios: anime.studios,
-      airingSchedule: anime.airingSchedule,
-      nextAiringEpisode: anime.nextAiringEpisode,
+      characters: {
+        create: anime.characters?.edges?.map((edge: any) => ({
+          characterId: edge?.node?.id ?? null,
+          name: edge?.node?.name?.full ?? null,
+          image: edge?.node?.image?.medium ?? null
+        })) ?? []
+      },
+      studios: {
+        create: anime.studios?.edges?.map((edge: any) => ({
+          studioId: edge?.node?.id ?? null,
+          name: edge?.node?.name ?? null,
+          isMain: edge?.isMain ?? false
+        })) ?? []
+      },
+      airingSchedule: {
+        create: anime.airingSchedule?.edges?.map((edge: any) => ({
+          scheduleId: edge?.node?.id ?? null,
+          episode: edge?.node?.episode ?? null,
+          airingAt: edge?.node?.airingAt ?? null
+        })) ?? []
+      },
+      nextAiringEpisode: anime.nextAiringEpisode ? {
+        create: {
+          episode: anime.nextAiringEpisode?.episode ?? null,
+          airingAt: anime.nextAiringEpisode?.airingAt ?? null,
+          timeUntilAiring: anime.nextAiringEpisode?.timeUntilAiring ?? null
+        }
+      } : undefined,
       stats: anime.stats,
       tags: {
         create: anime.tags?.map((tag: any) => ({
@@ -84,8 +108,28 @@ export class AnilistHelper {
           userId: tag.userId ?? null,
         }))
       },
-      externalLinks: anime.externalLinks,
-      streamingEpisodes: anime.streamingEpisodes,
+      externalLinks: {
+        create: anime.externalLinks?.map((link: any) => ({
+          exLinkId: link.id ?? null,
+          url: link.url ?? null,
+          site: link.site ?? null,
+          siteId: link.siteId ?? null,
+          type: link.type ?? null,
+          language: link.language ?? null,
+          color: link.color ?? null,
+          icon: link.icon ?? null,
+          notes: link.notes ?? null,
+          isDisabled: link.isDisabled ?? false
+        })) ?? []
+      },
+      streamingEpisodes: {
+        create: anime.streamingEpisodes?.map((episode: any) => ({
+          title: episode.title ?? null,
+          thumbnail: episode.thumbnail ?? null,
+          url: episode.url ?? null,
+          site: episode.site ?? null
+        })) ?? []
+      },
     }
   }
 

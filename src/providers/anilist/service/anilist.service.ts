@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Anilist as PrismaAnilist, BasicRelease, Shikimori, AnilistTitle, AnilistCover, StartDate, EndDate, AnilistTag } from '@prisma/client';
+import { Anilist as PrismaAnilist, BasicRelease, Shikimori, AnilistTitle, AnilistCover, StartDate, EndDate, AnilistTag, AnilistExternalLink, AnilistStreamingEpisode, AnilistStudio, AnilistAiringSchedule, AnilistNextAiringEpisode, AnilistCharacter } from '@prisma/client';
 import { ApiResponse } from '../../../api/ApiResponse';
 import { UrlConfig } from '../../../configs/url.config';
 import { CustomHttpService } from '../../../http/http.service';
@@ -34,7 +34,13 @@ export interface AnilistWithRelations
   cover?: AnilistCover;
   startDate?: StartDate;
   endDate?: EndDate;
-  tags?: AnilistTag[]
+  characters?: AnilistCharacter[];
+  studios?: AnilistStudio[];
+  airingSchedule?: AnilistAiringSchedule[];
+  nextAiringEpisode?: AnilistNextAiringEpisode;
+  tags?: AnilistTag[];
+  externalLinks?: AnilistExternalLink[];
+  streamingEpisodes?: AnilistStreamingEpisode[];
   chronology?: BasicRelease[];
   recommendation?: BasicRelease[];
   shikimori?: Shikimori;
@@ -83,7 +89,13 @@ export class AnilistService {
             id: true,
           }
         },
-        tags: true
+        characters: true,
+        studios: true,
+        airingSchedule: true,
+        nextAiringEpisode: true,
+        tags: true,
+        externalLinks: true,
+        streamingEpisodes: true,
       },
     }
 
@@ -157,7 +169,6 @@ export class AnilistService {
     }
 
     const anilist = data.Page.media[0];
-
 
     await this.prisma.lastUpdated.create({
       data: {
