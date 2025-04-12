@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Anilist as PrismaAnilist, BasicRelease, Shikimori, AnilistTitle, AnilistCover, StartDate, EndDate, AnilistTag, AnilistExternalLink, AnilistStreamingEpisode, AnilistStudio, AnilistAiringSchedule, AnilistNextAiringEpisode, AnilistCharacter } from '@prisma/client';
+import { Anilist, BasicRelease, Shikimori, AnilistTitle, AnilistCover, StartDate, EndDate, AnilistTag, AnilistExternalLink, AnilistStreamingEpisode, AnilistStudio, AnilistAiringSchedule, AnilistNextAiringEpisode, AnilistCharacter, BasicIdAni, BasicIdShik } from '@prisma/client';
 import { ApiResponse } from '../../../api/ApiResponse';
 import { UrlConfig } from '../../../configs/url.config';
 import { CustomHttpService } from '../../../http/http.service';
@@ -17,7 +17,7 @@ import { FilterDto } from '../model/FilterDto'
 
 export interface AnilistResponse {
   Page: {
-    media: PrismaAnilist[];
+    media: Anilist[];
     pageInfo: {
       total: number;
       perPage: number;
@@ -29,7 +29,7 @@ export interface AnilistResponse {
 }
 
 export interface AnilistWithRelations
-  extends PrismaAnilist {
+  extends Anilist {
   title?: AnilistTitle;
   cover?: AnilistCover;
   startDate?: StartDate;
@@ -42,7 +42,6 @@ export interface AnilistWithRelations
   externalLinks?: AnilistExternalLink[];
   streamingEpisodes?: AnilistStreamingEpisode[];
   chronology?: BasicRelease[];
-  recommendation?: BasicRelease[];
   shikimori?: Shikimori;
 }
 
@@ -102,13 +101,7 @@ export class AnilistService {
     let existingAnilist = await this.prisma.anilist.findUnique(findUnique);
 
     if (existingAnilist) {
-      const shikimori = await this.shikimoriService.getShikimori(
-        existingAnilist.idMal?.toString() || '',
-      );
-      return {
-        ...existingAnilist,
-        shikimori
-      } as unknown as AnilistWithRelations;
+      return await this.adjustAnilist(existingAnilist);
     }
 
     const data = await this.fetchAnilistFromGraphQL(id);
@@ -116,35 +109,28 @@ export class AnilistService {
       throw new Error('No media found');
     }
 
-    const anilist = data.Page.media[0];
     await this.saveAnilist(data);
-
-    const shikimori = await this.shikimoriService.getShikimori(
-      anilist.idMal?.toString() || '',
-    );
 
     existingAnilist = await this.prisma.anilist.findUnique(findUnique);
 
-    return {
-      ...existingAnilist,
-      shikimori: shikimori || null,
-    } as AnilistWithRelations;
+    if (!existingAnilist) {
+      return Promise.reject(Error('Not found'))
+    }
+    
+    return await this.adjustAnilist(existingAnilist);
   }
 
   async getAnilists(
     filter: FilterDto,
   ): Promise<ApiResponse<BasicAnilist[]>> {
-    // Get paginated anilists based on filter
-    const response = await this.getAnilistByFilter(filter); // returns { data, pageInfo }
+    const response = await this.getAnilistByFilter(filter);
 
-    // Process Shikimori data
     const malIds = response.data
       .map((anilist) => anilist.idMal?.toString() || '')
       .join(',');
     const shikimoriData =
       await this.shikimoriService.saveMultipleShikimori(malIds);
 
-    // Attach screenshots from Shikimori to each anilist
     const data = response.data.map((anilist) => {
       const malId = anilist.idMal?.toString() || '';
       const shikimori = shikimoriData.find(
@@ -163,7 +149,62 @@ export class AnilistService {
     return { data: basicAnilist, pageInfo: response.pageInfo };
   }
 
-  async saveAnilist(data: AnilistResponse): Promise<PrismaAnilist> {
+  async adjustAnilist(anilist: Anilist): Promise<AnilistWithRelations> {
+    const shikimori = await this.shikimoriService.getShikimori(
+      anilist.idMal?.toString() || '',
+    );
+    
+    const recommendations = await this.getRecommendations(anilist.id, 10, 1);
+
+    const chronology = await this.getChronology(anilist.id, 4, 1);
+
+    return {
+      ...anilist,
+      recommendations: recommendations.data || [],
+      chronology: chronology.data || [],
+      shikimori: shikimori || [],
+    } as unknown as AnilistWithRelations;
+  }
+
+  async getChronology(id: number, perPage: number, page: number): Promise<ApiResponse<BasicAnilist[]>> {
+    const existingAnilist = await this.prisma.anilist.findUnique({
+      where: { id },
+    }) as AnilistWithRelations
+
+    const chronologyRaw = await this.shikimoriService.getChronology(String(existingAnilist.idMal)) as BasicIdShik[] || []
+
+    const chronologyIds = chronologyRaw.map(c => Number(c.malId)) as number[] || []
+
+    const chronology = await this.getAnilists(
+      new FilterDto({ idMalIn: chronologyIds, perPage, page })
+    );
+
+    return chronology;
+  }
+
+  async getRecommendations(id: number, perPage: number, page: number): Promise<ApiResponse<BasicAnilist[]>> {
+    const existingAnilist = await this.prisma.anilist.findUnique({
+      where: { id },
+    }) as AnilistWithRelations
+
+    const shikimori = await this.shikimoriService.getShikimori(
+      existingAnilist.idMal?.toString() || '',
+    )
+
+    const recommendationsRaw = (existingAnilist.recommendations && (existingAnilist.recommendations as any).edges)
+      ? ((existingAnilist.recommendations as any).edges.map((edge: any) => edge.node.mediaRecommendation) as BasicIdAni[])
+      : []
+
+    const recommendationIds = recommendationsRaw.map(r => Number(r.idMal)) as number[] || []
+
+    const recommendations = await this.getAnilists(
+      new FilterDto({ idMalIn: recommendationIds, perPage, page })
+    );
+
+    return recommendations;
+  }
+
+  async saveAnilist(data: AnilistResponse): Promise<Anilist> {
     if (!data.Page?.media || data.Page.media.length === 0) {
       throw new Error('No media found');
     }
@@ -216,9 +257,7 @@ export class AnilistService {
 
   async getAnilistByFilter(
     filter: FilterDto,
-  ): Promise<ApiResponse<PrismaAnilist[]>> {
-
-    console.log(filter);
+  ): Promise<ApiResponse<Anilist[]>> {
 
     const conditions = [
       // Basic filters (only include if defined)

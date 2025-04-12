@@ -159,7 +159,7 @@ export default class AnilistQL {
         medium
         color
       }
-      recommendations(sort: RATING_DESC, perPage: 10) {
+      recommendations(sort: RATING_DESC) {
         edges {
           node {
             id
@@ -213,7 +213,7 @@ export default class AnilistQL {
         isMediaSpoiler
         isAdult
       }
-      characters(perPage: 10) {
+      characters {
         edges {
           node {
             id

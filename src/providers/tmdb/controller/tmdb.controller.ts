@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
 import { TmdbService } from '../service/tmdb.service';
 
 @Controller('tmdb')
@@ -6,12 +6,12 @@ export class TmdbController {
   constructor(private readonly service: TmdbService) {}
 
   @Get('info/:id')
-  async getTmdbByAnilist(@Param('id') id: number) {
-    return this.service.getTmdbByAnilist(Number(id));
+  async getTmdbByAnilist(@Param('id', ParseIntPipe) id: number) {
+    return this.service.getTmdbByAnilist(id);
   }
 
   @Get('info/:id/season')
-  async getTmdbSeasonByAnilist(@Param('id') id: number) {
-    return this.service.getTmdbSeasonByAnilist(Number(id));
+  async getTmdbSeasonByAnilist(@Param('id', ParseIntPipe) id: number) {
+    return this.service.getTmdbSeasonByAnilist(id);
   }
 }

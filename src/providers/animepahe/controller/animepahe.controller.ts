@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
 import { AnimepaheService } from '../service/animepahe.service'
 
 @Controller('animepahe')
@@ -6,8 +6,8 @@ export class AnimepaheController {
   constructor(private readonly service: AnimepaheService) {}
 
   @Get('info/:id')
-  async getAnimepaheByAnilist(@Param('id') id: number) {
-    return this.service.getAnimepaheByAnilist(Number(id));
+  async getAnimepaheByAnilist(@Param('id', ParseIntPipe) id: number) {
+    return this.service.getAnimepaheByAnilist(id);
   }
 
   @Get('watch/:id')
