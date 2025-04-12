@@ -64,28 +64,6 @@ export class ShikimoriService {
       throw new NotFoundException(`Shikimori not found for ID: ${id}`);
     }
 
-    if (!shikimori.chronology) {
-      const updatedShikimoriList = (await this.fetchShikimoriFromGraphQL(
-        id,
-        1,
-        1,
-      )) as ShikimoriResponse;
-
-      if (!updatedShikimoriList.animes.length) {
-        throw new NotFoundException(
-          `Failed to update Shikimori chronology for ID: ${id}`,
-        );
-      }
-
-      const updatedShikimori = await this.prisma.shikimori.upsert({
-        where: { id },
-        create: this.helper.getDataForPrisma(updatedShikimoriList.animes[0]),
-        update: this.helper.getDataForPrisma(updatedShikimoriList.animes[0]),
-      });
-
-      return (updatedShikimori.chronology as BasicIdShik[]) || [];
-    }
-
     return (shikimori.chronology as BasicIdShik[]) || [];
   }
 

@@ -18,6 +18,24 @@ export class AnilistController {
     return this.service.getAnilist(id);
   }
 
+  @Get('info/:id/recommendations')
+  async getRecommendations(
+    @Param('id', ParseIntPipe) id: number, 
+    @Query('perPage') perPage: number = 10, 
+    @Query('page') page: number = 1
+  ) {
+    return this.service.getRecommendations(id, perPage, page);
+  }
+
+  @Get('info/:id/chronology')
+  async getChronology(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('perPage') perPage: number = 10,
+    @Query('page') page: number = 1
+  ) {
+    return this.service.getChronology(id, perPage, page)
+  }
+
   @Get('info/:id/episodes')
   async getEpisodes(@Param('id', ParseIntPipe) id: number) {
     return this.streamService.getEpisodes(id);
