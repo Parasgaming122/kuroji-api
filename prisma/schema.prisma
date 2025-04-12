@@ -31,11 +31,13 @@ model Anilist {
   isLicensed        Boolean?
   source            String?
   hashtag           String?
+  moreInfo          String?
   trailer           Json? // corresponds to Trailer
   isLocked          Boolean?
   isAdult           Boolean?
   averageScore      Int?
   meanScore         Int?
+  score             Int?
   popularity        Int?
   trending          Int?
   favourites        Int?

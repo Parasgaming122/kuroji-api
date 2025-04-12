@@ -24,6 +24,7 @@ export interface BasicAnilist {
   format?: string;
   status?: string;
   description?: string;
+  moreInfo?: string;
 
   startDate?: JsonValue;
 
@@ -38,8 +39,7 @@ export interface BasicAnilist {
   popularity?: number;
   favourites?: number;
 
-  averageScore?: number;
-  meanScore?: number;
+  score?: number;
 
   isLocked?: boolean;
   isAdult?: boolean;
@@ -73,8 +73,7 @@ export interface BasicAnilistSmall {
   episodesAired?: number
   duration?: number
 
-  averageScore?: number
-  meanScore?: number
+  score?: number;
 
   isLocked?: boolean
   isAdult?: boolean

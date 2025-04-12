@@ -28,6 +28,12 @@ export interface AnilistResponse {
   };
 }
 
+export interface MoreInfoResponse {
+  data: {
+    moreinfo?: string
+  }
+}
+
 export interface AnilistWithRelations
   extends Anilist {
   title?: AnilistTitle;
@@ -220,6 +226,10 @@ export class AnilistService {
 
     const anilist = data.Page.media[0];
 
+    const moreInfo = await this.fetchMoreInfo(anilist.idMal || 0);
+
+    anilist.moreInfo = moreInfo.data.moreinfo || '';
+
     await this.prisma.lastUpdated.create({
       data: {
         entityId: anilist.id.toString(),
@@ -264,6 +274,15 @@ export class AnilistService {
     );
   }
 
+  async fetchMoreInfo(id: number): Promise<MoreInfoResponse> {
+    try {
+      const url = `${UrlConfig.JIKAN}anime/${id}/moreinfo`;
+      return this.customHttpService.getResponse(url);
+    } catch (error) {
+      return { data: {} };
+    }
+  }
+
   async getAnilistByFilter(
     filter: FilterDto,
   ): Promise<ApiResponse<Anilist[]>> {
@@ -290,29 +309,29 @@ export class AnilistService {
 
       // Numeric comparisons
       filter.durationGreater != null
-        ? { duration: { gt: filter.durationGreater } }
-        : {},
+      ? { duration: { gt: filter.durationGreater } }
+      : {},
       filter.durationLesser != null
-        ? { duration: { lt: filter.durationLesser } }
-        : {},
+      ? { duration: { lt: filter.durationLesser } }
+      : {},
       filter.episodesGreater != null
-        ? { episodes: { gt: filter.episodesGreater } }
-        : {},
+      ? { episodes: { gt: filter.episodesGreater } }
+      : {},
       filter.episodesLesser != null
-        ? { episodes: { lt: filter.episodesLesser } }
-        : {},
+      ? { episodes: { lt: filter.episodesLesser } }
+      : {},
       filter.popularityGreater != null
-        ? { popularity: { gt: filter.popularityGreater } }
-        : {},
+      ? { popularity: { gt: filter.popularityGreater } }
+      : {},
       filter.popularityLesser != null
-        ? { popularity: { lt: filter.popularityLesser } }
-        : {},
+      ? { popularity: { lt: filter.popularityLesser } }
+      : {},
       filter.averageScoreGreater != null
-        ? { averageScore: { gt: filter.averageScoreGreater } }
-        : {},
+      ? { averageScore: { gt: filter.averageScoreGreater } }
+      : {},
       filter.averageScoreLesser != null
-        ? { averageScore: { lt: filter.averageScoreLesser } }
-        : {},
+      ? { averageScore: { lt: filter.averageScoreLesser } }
+      : {},
 
       // Format filters
       filter.formatIn ? { format: { in: filter.formatIn } } : {},
@@ -325,59 +344,89 @@ export class AnilistService {
       filter.statusNot ? { status: { not: filter.statusNot } } : {},
 
       // Search filter
-      filter.search
-        ? {
-          OR: [
-            {
-              title: {
-                romaji: {
-                  contains: filter.search,
-                  mode: 'insensitive',
-                },
-              },
+      filter.query
+      ? {
+        OR: [
+          {
+          title: {
+            romaji: {
+            contains: filter.query,
+            mode: 'insensitive',
             },
-            {
-              title: {
-                english: {
-                  contains: filter.search,
-                  mode: 'insensitive',
-                },
-              },
+          },
+          },
+          {
+          title: {
+            english: {
+            contains: filter.query,
+            mode: 'insensitive',
             },
-            {
-              title: {
-                native: {
-                  contains: filter.search,
-                  mode: 'insensitive',
-                },
-              },
+          },
+          },
+          {
+          title: {
+            native: {
+            contains: filter.query,
+            mode: 'insensitive',
             },
-            {
-              synonyms: {
-                hasSome: [filter.search],
-              },
-            },
-          ],
+          },
+          },
+          {
+          synonyms: {
+            hasSome: [filter.query],
+          },
+          },
+        ],
         } as any
-        : {},
+      : {},
 
-      // Date filters using JSON paths
+      // Date filters using JSON paths and string format "YYYY.M.D"
       filter.startDateGreater
-        ? {
-            startDate: {
-              path: '$.year',
-              gt: parseInt(filter.startDateGreater),
-            },
-          }
-        : {},
+      ? (() => {
+        const [year, month, day] = filter.startDateGreater.split('.').map(Number);
+        return {
+          OR: [
+          { startDate: { path: '$.year', gt: year } },
+          {
+            AND: [
+            { startDate: { path: '$.year', equals: year } },
+            { startDate: { path: '$.month', gt: month } },
+            ],
+          },
+          {
+            AND: [
+            { startDate: { path: '$.year', equals: year } },
+            { startDate: { path: '$.month', equals: month } },
+            { startDate: { path: '$.day', gt: day } },
+            ],
+          },
+          ],
+        };
+        })()
+      : {},
       filter.endDateGreater
-        ? {
-            endDate: {
-              path: '$.year',
-              gt: parseInt(filter.endDateGreater),
-            },
-          }
-        : {},
+      ? (() => {
+        const [year, month, day] = filter.endDateGreater.split('.').map(Number);
+        return {
+          OR: [
+          { endDate: { path: '$.year', gt: year } },
+          {
+            AND: [
+            { endDate: { path: '$.year', equals: year } },
+            { endDate: { path: '$.month', gt: month } },
+            ],
+          },
+          {
+            AND: [
+            { endDate: { path: '$.year', equals: year } },
+            { endDate: { path: '$.month', equals: month } },
+            { endDate: { path: '$.day', gt: day } },
+            ],
+          },
+          ],
+        };
+        })()
+      : {},
     ].filter((condition) => Object.keys(condition).length > 0);
 
     const whereCondition = { AND: conditions };
@@ -386,7 +435,63 @@ export class AnilistService {
     const currentPage = filter.page || 1;
     const skip = (currentPage - 1) * perPage;
 
-    // Fetch the matching items along with the total count
+    let isRecentSort = false
+    let recentIds: number[] = [];
+
+    const orderBy = await (async () => {
+      const sortFields = filter.sort?.map(async (sortField) => {
+        const parts = sortField.split('_')
+        let direction = 'asc'
+
+        const lastPart = parts[parts.length - 1].toLowerCase()
+        if (lastPart === 'asc' || lastPart === 'desc') {
+          direction = lastPart
+          parts.pop()
+        }
+
+        const field = parts.join('_')
+
+        if (field === 'recent') {
+          isRecentSort = true
+          recentIds = await this.getRecentIds()
+          return { id: direction }
+        }
+
+        if (field === 'start_date') {
+          return [
+            { startDate: { year: direction } },
+            { startDate: { month: direction } },
+            { startDate: { day: direction } }
+          ]
+        }
+
+        if (field === 'end_date') {
+          return [
+            { endDate: { year: direction } },
+            { endDate: { month: direction } },
+            { endDate: { day: direction } }
+          ]
+        }
+
+        if (parts.length > 1) {
+          let nested: any = { [parts.pop()!]: direction }
+          while (parts.length) {
+            nested = { [parts.pop()!]: nested }
+          }
+          return nested
+        }
+
+        return { [parts[0]]: direction };
+      }) || [{ id: 'desc' }]
+
+      const resolvedSorts = await Promise.all(sortFields)
+      return resolvedSorts.flat()
+    })();
+
+    if (isRecentSort && recentIds.length > 0) {
+      conditions.push({ id: { in: recentIds } })
+    }
+
     const [data, total] = await Promise.all([
       this.prisma.anilist.findMany({
         where: whereCondition,
@@ -414,35 +519,47 @@ export class AnilistService {
         },
         take: perPage,
         skip,
-        orderBy: filter.sort?.map((sortField) => {
-          const parts = sortField.split('_');
-          let direction = 'asc';
-          if (
-            parts.length > 1 &&
-            (parts[parts.length - 1].toLowerCase() === 'asc' ||
-              parts[parts.length - 1].toLowerCase() === 'desc')
-          ) {
-            direction = parts.pop()!.toLowerCase();
-          }
-          const field = parts.join('_');
-
-          return { [field]: direction };
-        }) || [{ id: 'desc' }],
+        orderBy,
       }),
       this.prisma.anilist.count({
         where: whereCondition,
       }),
     ]);
 
-    const lastPage = Math.ceil(total / perPage);
+    const sortedData = isRecentSort ? await this.getRecentData(data, recentIds) : data
+
+    const lastPage = Math.ceil(total / perPage)
     const pageInfo = {
       total,
       perPage,
       currentPage,
       lastPage,
       hasNextPage: currentPage < lastPage,
-    };
+    }
 
-    return { data, pageInfo };
+    return { data: sortedData, pageInfo };
+  }
+
+  private async getRecentIds(): Promise<number[]> {
+    const recentUpdates = await this.prisma.lastUpdated.findMany({
+      where: {
+        type: UpdateType.ANILIST
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    })
+
+    return recentUpdates.map(update => parseInt(update.entityId))
+  }
+
+  private async getRecentData(data: any[], recentIds: number[]) {
+    const idPositions = new Map(recentIds.map((id, index) => [id, index]))
+
+    return data.sort((a, b) => {
+      const posA = idPositions.get(a.id) ?? Infinity
+      const posB = idPositions.get(b.id) ?? Infinity
+      return posA - posB
+    })
   }
 }

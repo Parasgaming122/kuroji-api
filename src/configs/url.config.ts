@@ -18,6 +18,7 @@ export class UrlConfig {
   public static readonly MAL = 'https://myanimelist.net/anime/';
   public static readonly HIANIME = 'https://hianime.to/';
   public static readonly ANILIST = 'https://anilist.co/anime/';
+  public static readonly JIKAN = 'https://api.jikan.moe/v4/';
 
   public static readonly ZORO = UrlConfig.CONSUMET_BASE + 'anime/zoro/';
   public static readonly ANIMEKAI = UrlConfig.CONSUMET_BASE + 'anime/animekai/';
