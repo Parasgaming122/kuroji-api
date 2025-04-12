@@ -1,12 +1,8 @@
 import { Controller, Get, Param, ParseIntPipe, Put, Query } from '@nestjs/common';
 import { AnilistService } from '../service/anilist.service';
-import AnilistQueryBuilder from '../graphql/query/AnilistQueryBuilder';
-import { MediaSort } from '../graphql/types/MediaEnums';
 import { AnilistIndexerService } from '../service/anilist-indexer/anilist-indexer.service'
 import { StreamService } from '../../stream/service/stream.service'
 import { Provider } from '../../../shared/Provider'
-import { filter } from 'rxjs'
-import { Filter } from '../model/Filter'
 import { FilterDto } from '../model/FilterDto'
 
 @Controller('anilist')
