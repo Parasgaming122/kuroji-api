@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { Anilist, Poster, Prisma, Shikimori } from '@prisma/client'
 import { AnilistWithRelations } from '../service/anilist.service'
-import { BasicAnilist, BasicShikimori } from '../model/BasicAnilist'
+import { BasicAnilist, BasicAnilistSmall, BasicShikimori } from '../model/BasicAnilist'
 import { PrismaService } from '../../../prisma.service'
 
 @Injectable()
@@ -162,6 +162,31 @@ export class AnilistHelper {
       isAdult: anilist.isAdult ?? undefined,
       genres: anilist.genres ?? undefined,
       nextAiringEpisode: anilist.nextAiringEpisode ?? undefined,
+      shikimori: this.convertShikimoriToBasic(anilist.shikimori)
+    }
+  }
+
+  public convertBasicToBasicSmall(anilist: any): BasicAnilistSmall {
+    return {
+      id: anilist.id,
+      idMal: anilist.idMal ?? undefined,
+      siteUrl: anilist.siteUrl ?? undefined,
+      title: anilist.title ?? undefined,
+      coverImage: anilist.coverImage ?? undefined,
+      type: anilist.type ?? undefined,
+      format: anilist.format ?? undefined,
+      status: anilist.status ?? undefined,
+      startDate: anilist.startDate ?? undefined,
+      season: anilist.season ?? undefined,
+      seasonYear: anilist.seasonYear ?? undefined,
+      episodes: anilist.episodes ?? undefined,
+      // If your Anilist model does not have episodesAired explicitly, you can omit or map it if available.
+      episodesAired: (anilist as any).episodesAired ?? undefined,
+      duration: anilist.duration ?? undefined,
+      averageScore: anilist.averageScore ?? undefined,
+      meanScore: anilist.meanScore ?? undefined,
+      isLocked: anilist.isLocked ?? undefined,
+      isAdult: anilist.isAdult ?? undefined,
       shikimori: this.convertShikimoriToBasic(anilist.shikimori)
     }
   }

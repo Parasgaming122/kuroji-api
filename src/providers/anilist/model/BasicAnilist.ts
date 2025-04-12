@@ -50,3 +50,34 @@ export interface BasicAnilist {
 
   shikimori?: BasicShikimori;
 }
+
+export interface BasicAnilistSmall {
+  id: number
+  idMal?: number
+
+  siteUrl?: string
+  title?: JsonValue
+
+  coverImage?: JsonValue
+
+  type?: string
+  format?: string
+  status?: string
+
+  startDate?: JsonValue
+
+  season?: string
+  seasonYear?: number
+
+  episodes?: number
+  episodesAired?: number
+  duration?: number
+
+  averageScore?: number
+  meanScore?: number
+
+  isLocked?: boolean
+  isAdult?: boolean
+
+  shikimori?: BasicShikimori
+}

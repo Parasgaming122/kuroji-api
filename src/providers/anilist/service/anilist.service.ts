@@ -10,7 +10,7 @@ import {
 } from '../../shikimori/service/shikimori.service';
 import AnilistQL from '../graphql/AnilistQL';
 import AnilistQueryBuilder from '../graphql/query/AnilistQueryBuilder';
-import { BasicAnilist } from '../model/BasicAnilist';
+import { BasicAnilist, BasicAnilistSmall } from '../model/BasicAnilist';
 import { AnilistHelper } from '../utils/anilist-helper';
 import { Filter } from '../model/Filter'
 import { FilterDto } from '../model/FilterDto'
@@ -41,7 +41,6 @@ export interface AnilistWithRelations
   tags?: AnilistTag[];
   externalLinks?: AnilistExternalLink[];
   streamingEpisodes?: AnilistStreamingEpisode[];
-  chronology?: BasicRelease[];
   shikimori?: Shikimori;
 }
 
@@ -166,23 +165,28 @@ export class AnilistService {
     } as unknown as AnilistWithRelations;
   }
 
-  async getChronology(id: number, perPage: number, page: number): Promise<ApiResponse<BasicAnilist[]>> {
+  async getChronology(id: number, perPage: number, page: number): Promise<ApiResponse<BasicAnilistSmall[]>> {
     const existingAnilist = await this.prisma.anilist.findUnique({
       where: { id },
     }) as AnilistWithRelations
 
     const chronologyRaw = await this.shikimoriService.getChronology(String(existingAnilist.idMal)) as BasicIdShik[] || []
-
     const chronologyIds = chronologyRaw.map(c => Number(c.malId)) as number[] || []
-
     const chronology = await this.getAnilists(
       new FilterDto({ idMalIn: chronologyIds, perPage, page })
     );
 
-    return chronology;
+    const basicChronology = chronology.data.map((anilist) =>
+      this.helper.convertBasicToBasicSmall(anilist),
+    );
+
+    return {
+      ...chronology,
+      data: basicChronology,
+    };
   }
 
-  async getRecommendations(id: number, perPage: number, page: number): Promise<ApiResponse<BasicAnilist[]>> {
+  async getRecommendations(id: number, perPage: number, page: number): Promise<ApiResponse<BasicAnilistSmall[]>> {
     const existingAnilist = await this.prisma.anilist.findUnique({
       where: { id },
     }) as AnilistWithRelations
@@ -194,14 +198,19 @@ export class AnilistService {
     const recommendationsRaw = (existingAnilist.recommendations && (existingAnilist.recommendations as any).edges)
       ? ((existingAnilist.recommendations as any).edges.map((edge: any) => edge.node.mediaRecommendation) as BasicIdAni[])
       : []
-
     const recommendationIds = recommendationsRaw.map(r => Number(r.idMal)) as number[] || []
-
     const recommendations = await this.getAnilists(
       new FilterDto({ idMalIn: recommendationIds, perPage, page })
     );
 
-    return recommendations;
+    const basicRecommendations = recommendations.data.map((anilist) =>
+      this.helper.convertBasicToBasicSmall(anilist),
+    );
+
+    return {
+      ...recommendations,
+      data: basicRecommendations,
+    };
   }
 
   async saveAnilist(data: AnilistResponse): Promise<Anilist> {
