@@ -1,10 +1,11 @@
-import { Poster, Title, CoverImage, AiringEpisode, DateDetails } from '@prisma/client'
-import { JsonObject, JsonValue } from '@prisma/client/runtime/library'
+import { Poster } from '@prisma/client'
+import { JsonValue } from '@prisma/client/runtime/library'
 
 export interface BasicShikimori {
   id?: string;
   malId?: string;
   url?: string;
+  franchise?: string;
   poster?: Poster;
 }
 

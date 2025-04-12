@@ -37,6 +37,7 @@ export class GraphQL {
       'score',
       'status',
       'episodes',
+      'franchise',
       'episodesAired',
       'duration',
       'airedOn { year month day date }',

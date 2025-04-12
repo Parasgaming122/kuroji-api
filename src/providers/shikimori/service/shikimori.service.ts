@@ -163,6 +163,23 @@ export class ShikimoriService {
     return this.saveShikimori(shikimori);
   }
 
+  async getFranchise(franchise: string): Promise<Shikimori[]> {
+    const shikimoris = await this.prisma.shikimori.findMany({
+      where: { franchise },
+    });
+    return shikimoris;
+  }
+
+  async getFranchiseIds(franchise: string): Promise<BasicIdShik[]> {
+    const shikimoris = await this.getFranchise(franchise);
+
+    const shikimoriBasicId = shikimoris.map((shikimori) => 
+      this.helper.shikimoriToBasicId(shikimori)
+    );
+
+    return shikimoriBasicId;
+  }
+
   adjustShikimori(shikimori: Shikimori): Shikimori {
     const screenshots = shikimori.screenshots as Screenshot[];
 

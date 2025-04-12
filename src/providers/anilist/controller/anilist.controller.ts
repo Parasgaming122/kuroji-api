@@ -4,10 +4,16 @@ import { AnilistIndexerService } from '../service/anilist-indexer/anilist-indexe
 import { StreamService } from '../../stream/service/stream.service'
 import { Provider } from '../../../shared/Provider'
 import { FilterDto } from '../model/FilterDto'
+import { AnilistAddService } from '../service/helper/anilist.add.service'
 
 @Controller('anilist')
 export class AnilistController {
-  constructor(private readonly service: AnilistService, private readonly streamService: StreamService, private readonly indexer: AnilistIndexerService) {}
+  constructor(
+    private readonly service: AnilistService, 
+    private readonly add: AnilistAddService,
+    private readonly streamService: StreamService, 
+    private readonly indexer: AnilistIndexerService
+  ) {}
 
   @Get('info/:id')
   async getAnilist(@Param('id', ParseIntPipe) id: number) {
@@ -20,7 +26,7 @@ export class AnilistController {
     @Query('perPage') perPage: number = 10, 
     @Query('page') page: number = 1
   ) {
-    return this.service.getRecommendations(id, perPage, page);
+    return this.add.getRecommendations(id, perPage, page);
   }
 
   @Get('info/:id/chronology')
@@ -29,7 +35,7 @@ export class AnilistController {
     @Query('perPage') perPage: number = 10,
     @Query('page') page: number = 1
   ) {
-    return this.service.getChronology(id, perPage, page)
+    return this.add.getChronology(id, perPage, page)
   }
 
   @Get('info/:id/episodes')
@@ -67,18 +73,27 @@ export class AnilistController {
 
   @Get('search')
   async searchAnilist(@Query() filter: FilterDto) {
-    return this.service.getAnilists(filter);
+    return this.service.getAnilists(filter, true);
+  }
+
+  @Get('franchise/:franchise')
+  async getFranchise(
+    @Param('franchise') franchise: string,
+    @Query('perPage') perPage: number = 10,
+    @Query('page') page: number = 1
+  ) {
+    return this.add.getFranchise(franchise, perPage, page);
   }
 
   @Put('index')
- index(@Query('resume') resume: boolean = true, @Query('delay') delay: number = 10) {
-   this.indexer.index(resume, delay)
-     .catch((err) => console.error('Indexer failed:', err)); // just in case it blows up
+  index(@Query('resume') resume: boolean = true, @Query('delay') delay: number = 10) {
+    this.indexer.index(resume, delay)
+      .catch((err) => console.error('Indexer failed:', err)); // just in case it blows up
 
-   return {
-     status: 'Indexing started, we vibin’ 🧑‍🍳🔥',
-   };
- }
+    return {
+      status: 'Indexing started, we vibin’ 🧑‍🍳🔥',
+    };
+  }
 
   @Put('index/stop')
   async stopIndex() {

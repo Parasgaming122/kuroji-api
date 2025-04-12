@@ -5,13 +5,23 @@ import { ShikimoriService } from '../service/shikimori.service';
 export class ShikimoriController {
   constructor(private readonly service: ShikimoriService) {}
 
-  @Get(':id')
-  async getShikimori(@Param('id', ParseIntPipe) id: number) {
-    return this.service.getShikimori(id.toString());
+  @Get('info/:id')
+  async getShikimori(@Param('id') id: string) {
+    return this.service.getShikimori(id);
   }
 
-  @Get(':id/update')
-  async updateShikimori(@Param('id', ParseIntPipe) id: number) {
-    return this.service.update(id.toString());
+  @Get('info/:id/update')
+  async updateShikimori(@Param('id') id: string) {
+    return this.service.update(id);
+  }
+
+  @Get('franchise/:franchise')
+  async getFranchise(@Param("franchise") franchise: string) {
+    return this.service.getFranchise(franchise);
+  }
+
+  @Get('franchiseId/:franchise')
+  async getFranchiseId(@Param("franchise") franchise: string) {
+    return this.service.getFranchiseIds(franchise)
   }
 }

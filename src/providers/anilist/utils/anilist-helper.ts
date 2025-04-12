@@ -198,7 +198,52 @@ export class AnilistHelper {
       id: shikimori.id,
       malId: shikimori.malId ?? undefined,
       url: shikimori.url ?? undefined,
+      franchise: shikimori.franchise ?? undefined,
       poster: shikimori.poster as Poster ?? undefined
     }
+  }
+
+  public getFindUnique(id: number): any {
+    const findUnique = {
+      omit: {
+        titleId: true,
+        coverId: true,
+        startDateId: true,
+        endDateId: true,
+        recommendations: true,
+      },
+      where: { id },
+      include: {
+        title: {
+          omit: {
+            id: true,
+          }
+        },
+        coverImage: {
+          omit: {
+            id: true,
+          }
+        },
+        startDate: {
+          omit: {
+            id: true,
+          }
+        },
+        endDate: {
+          omit: {
+            id: true,
+          }
+        },
+        characters: true,
+        studios: true,
+        airingSchedule: true,
+        nextAiringEpisode: true,
+        tags: true,
+        externalLinks: true,
+        streamingEpisodes: true,
+      },
+    }
+
+    return findUnique;
   }
 }

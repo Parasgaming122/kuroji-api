@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, Shikimori } from '@prisma/client';
+import { BasicIdShik, Prisma, Shikimori } from '@prisma/client';
 
 export type CreateShikimoriData = Prisma.ShikimoriCreateInput;
 
@@ -19,6 +19,7 @@ export class ShikimoriHelper {
        rating: anime.rating,
        score: anime.score,
        status: anime.status,
+       franchise: anime.franchise,
        episodes: anime.episodes,
        episodesAired: anime.episodesAired,
        duration: anime.duration,
@@ -34,5 +35,12 @@ export class ShikimoriHelper {
        releasedOn: anime.releasedOn || [],
        poster: anime.poster || [],
     };
+  }
+
+  public shikimoriToBasicId(shikimori: any): BasicIdShik {
+    return {
+      id: shikimori.id,
+      malId: shikimori.malId ?? undefined,
+    }
   }
 }
