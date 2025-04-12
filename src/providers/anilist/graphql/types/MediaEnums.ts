@@ -72,9 +72,8 @@ export enum MediaSort {
   DURATION_DESC = 'duration_desc',
   STATUS = 'status',
   STATUS_DESC = 'status_desc',
-  UPDATED_AT = 'updated_at',
-  UPDATED_AT_DESC = 'updated_at_desc',
   RECENT = 'recent',
+  RECENT_DESC = 'recent_desc',
 }
 
 export enum MediaTrendSort {

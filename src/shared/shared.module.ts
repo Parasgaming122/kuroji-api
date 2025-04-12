@@ -20,6 +20,9 @@ import { ZoroService } from '../providers/zoro/service/zoro.service'
 import { ZoroHelper } from '../providers/zoro/utils/zoro-helper'
 import { StreamService } from '../providers/stream/service/stream.service'
 import { AnilistIndexerService } from '../providers/anilist/service/anilist-indexer/anilist-indexer.service'
+import { AnilistAddService } from '../providers/anilist/service/helper/anilist.add.service'
+import { AnilistFilterService } from '../providers/anilist/service/helper/anilist.filter.service'
+import { AnilistFetchService } from '../providers/anilist/service/helper/anilist.fetch.service'
 
 @Module({
   imports: [HttpModule],
@@ -27,6 +30,9 @@ import { AnilistIndexerService } from '../providers/anilist/service/anilist-inde
     PrismaService,
     CustomHttpService,
     AnilistService,
+    AnilistAddService,
+    AnilistFilterService,
+    AnilistFetchService,
     AnilistIndexerService,
     ShikimoriService,
     AnilistHelper,
@@ -49,6 +55,9 @@ import { AnilistIndexerService } from '../providers/anilist/service/anilist-inde
     PrismaService,
     CustomHttpService,
     AnilistService,
+    AnilistAddService,
+    AnilistFilterService,
+    AnilistFetchService,
     AnilistIndexerService,
     ShikimoriService,
     AnilistHelper,

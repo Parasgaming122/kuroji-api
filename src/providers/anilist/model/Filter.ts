@@ -41,7 +41,7 @@ export interface Filter {
   idNotIn?: number[];
   idIn?: number[];
   idNot?: number;
-  search?: string;
+  query?: string;
   isLicensed?: boolean;
   countryOfOrigin?: string;
   isAdult?: boolean;

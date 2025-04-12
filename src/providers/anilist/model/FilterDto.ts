@@ -223,7 +223,7 @@ export class FilterDto {
 
   @IsOptional()
   @IsString()
-  search?: string;
+  query?: string;
 
   @IsOptional()
   @IsBoolean()

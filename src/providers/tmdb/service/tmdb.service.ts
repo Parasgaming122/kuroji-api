@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import {
   DateDetails,
   Tmdb,
@@ -32,6 +32,7 @@ export interface TmdbResponse {
 export class TmdbService {
   constructor(
     private readonly prisma: PrismaService,
+    @Inject(forwardRef(() => AnilistService))
     private readonly anilistService: AnilistService,
     private readonly customHttpService: CustomHttpService,
     private readonly helper: TmdbHelper,

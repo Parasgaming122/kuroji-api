@@ -31,11 +31,13 @@ model Anilist {
   isLicensed        Boolean?
   source            String?
   hashtag           String?
+  moreInfo          String?
   trailer           Json? // corresponds to Trailer
   isLocked          Boolean?
   isAdult           Boolean?
   averageScore      Int?
   meanScore         Int?
+  score             Int?
   popularity        Int?
   trending          Int?
   favourites        Int?
@@ -188,35 +190,6 @@ model BasicIdAni {
   idMal     Int?
 }
 
-model BasicRelease {
-  id                Int      @id
-  idMal             Int?
-  siteUrl           String?
-  title             Json?
-  synonyms          String[]
-  bannerImage       String?
-  coverImage        Json?
-  type              String?
-  format            String?
-  status            String?
-  description       String?
-  startDate         Json?
-  season            String?
-  seasonYear        Int?
-  episodes          Int?
-  episodesAired     Int?
-  duration          Int?
-  countryOfOrigin   String?
-  popularity        Int?
-  favourites        Int?
-  averageScore      Int?
-  meanScore         Int?
-  isLocked          Boolean?
-  isAdult           Boolean?
-  genres            String[]
-  nextAiringEpisode Json?
-}
-
 // Animekai.prisma
 model AnimeKai {
   id             String        @id
@@ -299,6 +272,7 @@ model Shikimori {
   duration      Int?
   airedOn       Json?
   releasedOn    Json?
+  franchise     String?
   url           String?
   season        String?
   poster        Json?
@@ -347,41 +321,6 @@ model Screenshot {
   originalUrl String?
   x166Url     String?
   x332Url     String?
-}
-
-model BasicReleaseShikimori {
-  id                  Int             @id @default(autoincrement())
-  idMal               Int?
-  siteUrl             String?
-  title               Json?
-  titleId             Int?
-  synonyms            String[]
-  bannerImage         String?
-  coverImage          Json?
-  coverImageId        Int?
-  type                String?
-  format              String?
-  status              String?
-  description         String?
-  startDate           Json?
-  startDateId         Int?
-  season              String?
-  seasonYear          Int?
-  episodes            Int?
-  episodesAired       Int?
-  duration            Int?
-  countryOfOrigin     String?
-  popularity          Int?
-  favourites          Int?
-  averageScore        Int?
-  meanScore           Int?
-  isLocked            Boolean?
-  isAdult             Boolean?
-  genres              String[]
-  nextAiringEpisode   Json?
-  nextAiringEpisodeId Int?
-  shikimori           Json?
-  shikimoriId         Int?
 }
 
 model Title {

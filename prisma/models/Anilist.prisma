@@ -21,11 +21,13 @@ model Anilist {
   isLicensed        Boolean?
   source            String?
   hashtag           String?
+  moreInfo          String?
   trailer           Json? // corresponds to Trailer
   isLocked          Boolean?
   isAdult           Boolean?
   averageScore      Int?
   meanScore         Int?
+  score             Int?
   popularity        Int?
   trending          Int?
   favourites        Int?
@@ -176,33 +178,4 @@ model AnilistNextAiringEpisode {
 model BasicIdAni {
   id        Int      @id @default(autoincrement())
   idMal     Int?
-}
-
-model BasicRelease {
-  id                Int      @id
-  idMal             Int?
-  siteUrl           String?
-  title             Json?
-  synonyms          String[]
-  bannerImage       String?
-  coverImage        Json?
-  type              String?
-  format            String?
-  status            String?
-  description       String?
-  startDate         Json?
-  season            String?
-  seasonYear        Int?
-  episodes          Int?
-  episodesAired     Int?
-  duration          Int?
-  countryOfOrigin   String?
-  popularity        Int?
-  favourites        Int?
-  averageScore      Int?
-  meanScore         Int?
-  isLocked          Boolean?
-  isAdult           Boolean?
-  genres            String[]
-  nextAiringEpisode Json?
 }
