@@ -17,6 +17,10 @@ import {
 } from '../graphql/types/MediaEnums';
 
 export class FilterDto {
+  constructor(partial?: Partial<FilterDto>) {
+    Object.assign(this, partial)
+  }
+
   @IsOptional()
   @IsArray()
   @IsEnum(MediaSort, { each: true })

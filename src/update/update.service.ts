@@ -9,6 +9,7 @@ import { ShikimoriService } from '../providers/shikimori/service/shikimori.servi
 import { TmdbService } from '../providers/tmdb/service/tmdb.service';
 import { UpdateType } from '../shared/UpdateType'
 import { ZoroService } from '../providers/zoro/service/zoro.service'
+import Config from '../configs/Config'
 
 interface IProvider {
   update: (id: any) => any;
@@ -56,6 +57,8 @@ export class UpdateService {
 
   @Cron(CronExpression.EVERY_12_HOURS)
   async update() {
+    if (!Config.UPDATE_ENABLED) return;
+
     for (const provider of this.providers) {
       try {
         const lastUpdates: LastUpdated[] =

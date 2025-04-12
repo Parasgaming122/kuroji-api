@@ -26,7 +26,8 @@ export class ShikimoriService {
   async getShikimori(id: string): Promise<Shikimori> {
     const existingShikimori = await this.prisma.shikimori.findUnique({
       where: { id },
-    });
+      omit: { chronology: true }
+    }) as Shikimori;
     if (existingShikimori) {
       return this.adjustShikimori(existingShikimori);
     }
@@ -44,8 +45,14 @@ export class ShikimoriService {
       throw new NotFoundException(`Shikimori not found for ID: ${id}`);
     }
 
-    const savedShikimori = await this.saveShikimori(anime);
-    return this.adjustShikimori(savedShikimori);
+    await this.saveShikimori(anime);
+
+    const newShikimori = await this.prisma.shikimori.findUnique({
+      where: { id },
+      omit: { chronology: true }
+    }) as Shikimori;
+
+    return this.adjustShikimori(newShikimori);
   }
 
   async getChronology(id: string): Promise<BasicIdShik[]> {
@@ -90,7 +97,8 @@ export class ShikimoriService {
 
     const existingShikimoriList = await this.prisma.shikimori.findMany({
       where: { id: { in: idList } },
-    });
+      omit: { chronology: true }
+    }) as Shikimori[];
 
     const existingIds = existingShikimoriList.map((shikimori) => shikimori.id);
     const idsToFetch = idList.filter((id) => !existingIds.includes(id));
