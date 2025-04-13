@@ -98,6 +98,7 @@ export class AnilistAddService {
       cover: firstFranchise.shikimori?.poster?.originalUrl,
       banner: TMDB.IMAGE_BASE_ORIGINAL_URL + tmdbFirst.backdrop_path || firstFranchise.bannerImage,
       title: firstFranchise.title,
+      franchise: franchiseName,
       description: firstFranchise.description,
     }
   

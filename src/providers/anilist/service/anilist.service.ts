@@ -64,6 +64,7 @@ export interface Franchise {
   cover?: string,
   banner?: string,
   title?: JsonValue,
+  franchise?: string,
   description?: string,
 }
 
@@ -106,8 +107,7 @@ export class AnilistService {
   }
 
   async getAnilists(
-    filter: FilterDto,
-    includeFranchise: boolean = false,
+    filter: FilterDto
   ): Promise<SearcnResponse<BasicAnilist[]>> {
     const response = await this.filter.getAnilistByFilter(filter);
 
@@ -132,23 +132,46 @@ export class AnilistService {
       this.helper.convertAnilistToBasic(anilist),
     );
 
-    const firstBasicFranchise = basicAnilist.find(b => 
-      !!b.shikimori?.franchise && b.shikimori.franchise.trim().length > 0
-    );
+    return { pageInfo: response.pageInfo, data: basicAnilist } as unknown as SearcnResponse<BasicAnilist[]>;
+  }
 
-    if (includeFranchise) {
-      const franchise = await this.add.getFranchise(firstBasicFranchise?.shikimori?.franchise || '', 3, 1) as unknown as FranchiseResponse<BasicAnilist[]>;
+  async searchAnilist(q: string): Promise<SearcnResponse<BasicAnilist[]>> {
+    const response = await this.filter.getAnilistByFilter(new FilterDto({ query: q }))
 
+    const malIds = response.data
+      .map((anilist) => anilist.idMal?.toString() || '')
+      .join(',')
+    const shikimoriData =
+      await this.shikimoriService.saveMultipleShikimori(malIds)
+
+    const data = response.data.map((anilist) => {
+      const malId = anilist.idMal?.toString() || ''
+      const shikimori = shikimoriData.find(
+        (data) => data.malId?.toString() === malId,
+      )
       return {
-        pageInfo: response.pageInfo,
-        franchise: {
-          franchise: franchise.franchise || {},
-          data: franchise.data || [],
-        }, data: basicAnilist
-      } as unknown as SearcnResponse<BasicAnilist[]>;
-    }
+        ...anilist,
+        shikimori: (shikimori as any) || null,
+      } as AnilistWithRelations
+    })
 
-    return { data: basicAnilist, pageInfo: response.pageInfo } as unknown as SearcnResponse<BasicAnilist[]>;
+    const basicAnilist = data.map((anilist) =>
+      this.helper.convertAnilistToBasic(anilist),
+    )
+
+    const firstBasicFranchise = basicAnilist.find(b =>
+      !!b.shikimori?.franchise && b.shikimori.franchise.trim().length > 0
+    )
+
+    const franchise = await this.add.getFranchise(firstBasicFranchise?.shikimori?.franchise || '', 3, 1) as unknown as FranchiseResponse<BasicAnilist[]>
+
+    return {
+      pageInfo: response.pageInfo,
+      franchise: {
+        franchise: franchise.franchise || {},
+        data: franchise.data || [],
+      }, data: basicAnilist
+    } as unknown as SearcnResponse<BasicAnilist[]>
   }
 
   async adjustAnilist(anilist: Anilist): Promise<AnilistWithRelations> {
