@@ -182,6 +182,7 @@ export class AnilistService {
     await this.prisma.lastUpdated.create({
       data: {
         entityId: anilist.id.toString(),
+        externalId: anilist.idMal,
         type: UpdateType.ANILIST,
       },
     });

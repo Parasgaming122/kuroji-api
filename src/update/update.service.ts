@@ -6,14 +6,22 @@ import { AnilistService } from '../providers/anilist/service/anilist.service';
 import { AnimekaiService } from '../providers/animekai/service/animekai.service';
 import { AnimepaheService } from '../providers/animepahe/service/animepahe.service';
 import { ShikimoriService } from '../providers/shikimori/service/shikimori.service';
-import { TmdbService } from '../providers/tmdb/service/tmdb.service';
+import { TmdbService, TmdbStatus } from '../providers/tmdb/service/tmdb.service';
 import { UpdateType } from '../shared/UpdateType'
 import { ZoroService } from '../providers/zoro/service/zoro.service'
 import Config from '../configs/Config'
+import { MediaStatus, MediaType } from '../providers/anilist/graphql/types/MediaEnums'
+import { TvdbService, TvdbStatus } from '../providers/tvdb/service/tvdb.service'
 
 interface IProvider {
   update: (id: any) => any;
   type: UpdateType;
+}
+
+export enum Temperature {
+  HOT,
+  WARM,
+  COLD
 }
 
 @Injectable()
@@ -25,6 +33,7 @@ export class UpdateService {
     private readonly PaheService: AnimepaheService,
     private readonly ShikService: ShikimoriService,
     private readonly TmdbService: TmdbService,
+    private readonly TvdbService: TvdbService,
     private readonly prisma: PrismaService,
   ) {}
 
@@ -53,9 +62,13 @@ export class UpdateService {
       update: (id: any) => this.TmdbService.update(Number(id)),
       type: UpdateType.TMDB,
     },
+    {
+      update: (id: any) => this.TvdbService.update(Number(id)),
+      type: UpdateType.TVDB,
+    },
   ];
 
-  @Cron(CronExpression.EVERY_12_HOURS)
+  @Cron(CronExpression.EVERY_HOUR)
   async update() {
     if (!Config.UPDATE_ENABLED) return;
 
@@ -66,6 +79,7 @@ export class UpdateService {
             where: {
               type: provider.type,
             },
+            distinct: ['entityId'],
           });
         if (!lastUpdates.length) continue;
 
@@ -78,13 +92,102 @@ export class UpdateService {
             lastUpdated.createdAt.getDate(),
           );
 
-          if (lastTime + 12 * 60 * 60 * 1000 < now.getTime()) {
+          const type = lastUpdated.type as UpdateType;
+
+          let temperature;
+
+          if (type !== UpdateType.TMDB && type !== UpdateType.TVDB) {
+            const anilist = await (async () => {
+              switch (type) {
+                case UpdateType.ANILIST:
+                  return await this.AniService.getAnilist(lastUpdated.externalId || 0, true)
+                case UpdateType.SHIKIMORI:
+                  return await this.AniService.getAnilist(lastUpdated.externalId || 0, true)
+                default:
+                  return await this.AniService.getAnilist(lastUpdated.externalId || 0)
+              }
+            })()
+
+            const anilistStatus = anilist.status as MediaStatus
+
+            temperature = (() => {
+              switch (anilistStatus) {
+                case MediaStatus.RELEASING: return Temperature.HOT
+                case MediaStatus.NOT_YET_RELEASED: return Temperature.WARM
+                default: return Temperature.COLD
+              }
+            })();
+          } else {
+            if (type === UpdateType.TMDB) {
+              const tmdb = await this.TmdbService.getTmdb(lastUpdated.externalId || 0);
+              const status = tmdb.status as TmdbStatus;
+
+              temperature = (() => {
+                switch (status) {
+                  case TmdbStatus.InProduction:
+                  case TmdbStatus.PostProduction:
+                    return Temperature.HOT
+
+                  case TmdbStatus.Planned:
+                  case TmdbStatus.Rumored:
+                  case TmdbStatus.ReturningSeries:
+                    return Temperature.WARM
+
+                  case TmdbStatus.Released:
+                  case TmdbStatus.Ended:
+                  case TmdbStatus.Canceled:
+                    return Temperature.COLD
+
+                  default:
+                    return Temperature.COLD
+                }
+              })();
+            } else {
+              const tvdb = await this.TvdbService.getTvdb(lastUpdated.externalId || 0)
+              const status = (tvdb.status as any)?.name as TvdbStatus
+
+              temperature = (() => {
+                switch (status) {
+                  case TvdbStatus.Continuing:
+                    return Temperature.HOT
+
+                  case TvdbStatus.Pilot:
+                    return Temperature.WARM
+
+                  case TvdbStatus.Ended:
+                  case TvdbStatus.Cancelled:
+                    return Temperature.COLD
+
+                  default:
+                    return Temperature.COLD
+                }
+              })();
+            }
+          }
+
+          const updateInterval = (() => {
+            switch(temperature) {
+              case Temperature.HOT:
+                if (type === UpdateType.ANILIST || type === UpdateType.SHIKIMORI || type === UpdateType.TVDB) {
+                  return 8 * 60 * 60 * 1000;
+                }
+                return 3 * 60 * 60 * 1000;
+              case Temperature.WARM:
+                return 3 * 24 * 60 * 60 * 1000;
+              case Temperature.COLD:
+                return 21 * 24 * 60 * 60 * 1000;
+              default:
+                return 21 * 24 * 60 * 60 * 1000;
+            }
+          })();
+
+          if (lastTime + updateInterval < now.getTime()) {
             console.log(
               `Updating ${provider.type} with ID:${lastUpdated.entityId}`,
             );
 
             provider.update(lastUpdated.entityId);
-            await this.sleep(10);
+            await this.sleep(20);
           }
 
           if (lastDatePlusMonth.getTime() < now.getTime()) {

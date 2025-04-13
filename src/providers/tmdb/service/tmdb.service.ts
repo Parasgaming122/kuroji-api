@@ -28,6 +28,17 @@ export interface TmdbResponse {
   results: BasicTmdb[];
 }
 
+export enum TmdbStatus {
+  Rumored = "Rumored",
+  Planned = "Planned",
+  InProduction = "In Production",
+  PostProduction = "Post Production",
+  Released = "Released",
+  ReturningSeries = "Returning Series",
+  Ended = "Ended",
+  Canceled = "Canceled"
+}
+
 @Injectable()
 export class TmdbService {
   constructor(
@@ -37,6 +48,18 @@ export class TmdbService {
     private readonly customHttpService: CustomHttpService,
     private readonly helper: TmdbHelper,
   ) {}
+
+  async getTmdb(id: number): Promise<Tmdb> {
+    const existingTmdb = await this.prisma.tmdb.findUnique({
+      where: { id }
+    });
+
+    if (existingTmdb) return existingTmdb;
+
+    const tmdb = await this.fetchTmdb(id, await this.detectType(id));
+
+    return await this.saveTmdb(tmdb);
+  }
 
   async getTmdbByAnilist(id: number): Promise<Tmdb> {
     try {
@@ -137,6 +160,7 @@ export class TmdbService {
     await this.prisma.lastUpdated.create({
       data: {
         entityId: String(tmdb.id),
+        externalId: tmdb.id,
         type: UpdateType.TMDB,
       },
     });

@@ -60,6 +60,7 @@ export class ZoroService {
     await this.prisma.lastUpdated.create({
       data: {
         entityId: zoro.id,
+        externalId: zoro.alID,
         type: UpdateType.ANIWATCH,
       },
     });

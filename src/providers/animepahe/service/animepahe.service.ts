@@ -55,6 +55,7 @@ export class AnimepaheService {
     await this.prisma.lastUpdated.create({
       data: {
         entityId: animepahe.id,
+        externalId: animepahe.alId,
         type: UpdateType.ANIMEPAHE,
       },
     });

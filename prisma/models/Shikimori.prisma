@@ -115,10 +115,3 @@ model ReleaseIndex {
   addedAt   DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
-
-model LastUpdated {
-  id        Int   @id @default(autoincrement())
-  entityId  String
-  type      String
-  createdAt DateTime @default(now())
-}

@@ -11,6 +11,7 @@ model Tvdb {
   year                 String?
   nameTranslations     String[]           // list of translations
   overviewTranslations String[]           // list of translations
+  status               Json?
 
   aliases              Json?
   artworks             Json?

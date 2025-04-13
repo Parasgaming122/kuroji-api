@@ -253,6 +253,15 @@ model AnimepaheExternalLink {
   sourceName  String
 }
 
+// LastUpdated.prisma
+model LastUpdated {
+  id        Int   @id @default(autoincrement())
+  entityId  String
+  externalId Int?
+  type      String
+  createdAt DateTime @default(now())
+}
+
 // Shikimori.prisma
 model Shikimori {
   id            String        @id
@@ -372,13 +381,6 @@ model ReleaseIndex {
   updatedAt DateTime @updatedAt
 }
 
-model LastUpdated {
-  id        Int   @id @default(autoincrement())
-  entityId  String
-  type      String
-  createdAt DateTime @default(now())
-}
-
 
 // Tmdb.prisma
 model Tmdb {
@@ -463,6 +465,7 @@ model Tvdb {
   year                 String?
   nameTranslations     String[]           // list of translations
   overviewTranslations String[]           // list of translations
+  status               Json?
 
   aliases              Json?
   artworks             Json?

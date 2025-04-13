@@ -31,6 +31,13 @@ export interface RemoteId {
   sourceName: string,
 }
 
+export enum TvdbStatus {
+  Continuing = "Continuing",
+  Ended = "Ended",
+  Cancelled = "Cancelled",
+  Pilot = "Pilot"
+}
+
 @Injectable()
 export class TvdbService {
   constructor(
@@ -41,6 +48,18 @@ export class TvdbService {
       private readonly customHttpService: CustomHttpService,
       private readonly helper: TvdbHelper,
   ) {}
+
+  async getTvdb(id: number): Promise<Tvdb> {
+    const existingTvdb = await this.prisma.tvdb.findUnique({
+      where: { id }
+    })
+
+    if (existingTvdb) return existingTvdb;
+
+    const tvdb = await this.fetchTvdb(id, await this.detectType(id));
+
+    return await this.saveTvdb(tvdb);
+  }
 
   async getTvdbByAnilist(id: number): Promise<Tvdb> {
     const tmdb = await this.tmdbService.getTmdbByAnilist(id);
@@ -73,6 +92,7 @@ export class TvdbService {
     await this.prisma.lastUpdated.create({
       data: {
         entityId: String(tvdb.id),
+        externalId: tvdb.id,
         type: UpdateType.TVDB,
       },
     });
@@ -131,4 +151,18 @@ export class TvdbService {
       'data'
     );
   }
+
+  async detectType(id: number): Promise<string> {
+      try {
+        await this.customHttpService.getResponse(TVDB.getSeries(id));
+        return 'tv';
+      } catch (e1) {
+        try {
+          await this.customHttpService.getResponse(TVDB.getMovie(id));
+          return 'movie';
+        } catch (e2) {
+          throw new Error('ID not found in TMDb as Movie or TV Show.');
+        }
+      }
+    }
 }

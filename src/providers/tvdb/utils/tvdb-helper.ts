@@ -17,6 +17,7 @@ export class TvdbHelper {
       year: tvdb.year ?? undefined,
       nameTranslations: tvdb.nameTranslations ?? [],
       overviewTranslations: tvdb.overviewTranslations ?? [],
+      status: tvdb.status ?? {},
       aliases: tvdb.aliases ?? undefined,
       artworks: tvdb.artworks ?? undefined,
       remoteIds: tvdb.remoteIds ?? undefined,
