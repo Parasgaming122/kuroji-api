@@ -96,3 +96,294 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
+# VeAnime API Documentation
+
+## Table of Contents
+- [Authentication](#authentication)
+- [User](#user)
+- [Anilist](#anilist)
+- [Shikimori](#shikimori)
+- [TMDB](#tmdb)
+- [TVDB](#tvdb)
+- [Streaming Sources](#streaming-sources)
+- [Exceptions](#exceptions)
+
+## Authentication
+| Endpoint | Method | Description | Query/Body Parameters |
+|----------|--------|-------------|---------------------|
+| `/auth/register` | POST | Register new user | `CreateUserDto` |
+| `/auth/login` | POST | Login user | `LoginUserDto` |
+| `/auth/oauth2/register` | POST | Register with OAuth2 | `OAuth2Dto` |
+| `/auth/oauth2/login` | POST | Login with OAuth2 | `OAuth2Dto` |
+| `/auth/logout` | POST | Logout user | - |
+| `/auth/refresh` | POST | Refresh access token | - |
+| `/auth/verify-email` | GET | Verify email address | `token` |
+
+## User
+| Endpoint | Method | Description | Query/Body Parameters |
+|----------|--------|-------------|---------------------|
+| `/user/profile` | GET | Get user profile | `id?` (optional) |
+| `/user/avatar/upload` | POST | Upload user avatar | `file` (multipart) |
+
+## Anilist
+| Endpoint | Method | Description | Query/Body Parameters |
+|----------|--------|-------------|---------------------|
+| `/anilist/info/:id` | GET | Get anime details | - |
+| `/anilist/info/:id/recommendations` | GET | Get recommendations | `perPage`, `page` |
+| `/anilist/info/:id/chronology` | GET | Get chronological order | `perPage`, `page` |
+| `/anilist/info/:id/episodes` | GET | Get episode list | - |
+| `/anilist/info/:id/episodes/:number` | GET | Get specific episode | - |
+| `/anilist/watch/:id/episodes/:number` | GET | Get streaming sources | `provider`, `dub` |
+| `/anilist/filter` | GET | Filter anime list | `Filter` |
+| `/anilist/search/:q` | GET | Search anime | - |
+| `/anilist/franchise/:franchise` | GET | Get franchise info | `perPage`, `page` |
+
+### Indexing Endpoints
+| Endpoint | Method | Description | Query Parameters |
+|----------|--------|-------------|-----------------|
+| `/anilist/index` | PUT | Start indexing | `resume`, `delay` |
+| `/anilist/index/stop` | PUT | Stop indexing | - |
+| `/anilist/index/resume` | PUT | Resume indexing | `delay` |
+| `/anilist/index/schedule` | PUT | Schedule indexing | - |
+| `/anilist/index/unschedule` | PUT | Unschedule indexing | - |
+
+## Shikimori
+| Endpoint | Method | Description | Query/Body Parameters |
+|----------|--------|-------------|---------------------|
+| `/shikimori/info/:id` | GET | Get anime info | - |
+| `/shikimori/info/:id/update` | GET | Update anime info | - |
+| `/shikimori/franchise/:franchise` | GET | Get franchise info | - |
+| `/shikimori/franchiseId/:franchise` | GET | Get franchise IDs | - |
+
+## TMDB
+| Endpoint | Method | Description | Query/Body Parameters |
+|----------|--------|-------------|---------------------|
+| `/tmdb/info/:id` | GET | Get TMDB info by Anilist ID | - |
+| `/tmdb/info/:id/season` | GET | Get season info | - |
+
+## TVDB
+| Endpoint | Method | Description | Query/Body Parameters |
+|----------|--------|-------------|---------------------|
+| `/tvdb/info/:id` | GET | Get TVDB info by Anilist ID | - |
+
+## Streaming Sources
+
+### AnimePahe
+| Endpoint | Method | Description | Query/Body Parameters |
+|----------|--------|-------------|---------------------|
+| `/animepahe/info/:id` | GET | Get anime info by Anilist ID | - |
+| `/animepahe/watch/:id` | GET | Get streaming sources | - |
+
+### AnimeKai
+| Endpoint | Method | Description | Query/Body Parameters |
+|----------|--------|-------------|---------------------|
+| `/animekai/info/:id` | GET | Get anime info by Anilist ID | - |
+| `/animekai/watch/:id` | GET | Get streaming sources | `dub` |
+
+### Zoro
+| Endpoint | Method | Description | Query/Body Parameters |
+|----------|--------|-------------|---------------------|
+| `/zoro/info/:id` | GET | Get anime info | - |
+| `/zoro/anilist/:id` | GET | Get Zoro info by Anilist ID | - |
+| `/zoro/watch/:id` | GET | Get streaming sources | `dub` |
+
+## Exceptions
+| Endpoint | Method | Description | Query/Body Parameters |
+|----------|--------|-------------|---------------------|
+| `/exceptions/all` | GET | Get all exceptions | `perPage`, `page` |
+| `/exceptions/delete/:id` | DELETE | Delete exception | - |
+
+## Response Formats
+
+### Basic API Response
+```typescript
+interface ApiResponse<T> {
+  data: T;
+  pageInfo: {
+    total: number;
+    perPage: number;
+    currentPage: number;
+    lastPage: number;
+    hasNextPage: boolean;
+  };
+}
+```
+
+### Error Response
+```typescript
+{
+  statusCode: number;
+  message: string;
+}
+```
+
+### Filter
+```typescript
+export interface Filter {
+  sort?: MediaSort[];
+  perPage?: number;
+  page?: number;
+  sourceIn?: MediaSource[];
+  popularityLesser?: number;
+  popularityGreater?: number;
+  popularityNot?: number;
+  averageScoreLesser?: number;
+  averageScoreGreater?: number;
+  averageScoreNot?: number;
+  licensedByIdIn?: string[];
+  licensedByIn?: string[];
+  tagCategoryNotIn?: string[];
+  tagCategoryIn?: string[];
+  tagNotIn?: string[];
+  tagIn?: string[];
+  genreNotIn?: string[];
+  genreIn?: string[];
+  durationLesser?: number;
+  durationGreater?: number;
+  episodesLesser?: number;
+  episodesGreater?: number;
+  statusNotIn?: MediaStatus[];
+  statusNot?: MediaStatus;
+  statusIn?: MediaStatus[];
+  formatNotIn?: MediaFormat[];
+  formatNot?: MediaFormat;
+  formatIn?: MediaFormat[];
+  endDateLike?: string;
+  endDateLesser?: string;
+  endDateGreater?: string;
+  startDateLike?: string;
+  startDateLesser?: string;
+  startDateGreater?: string;
+  idMalNotIn?: number[];
+  idMalIn?: number[];
+  idMalNot?: number;
+  idNotIn?: number[];
+  idIn?: number[];
+  idNot?: number;
+  query?: string;
+  isLicensed?: boolean;
+  countryOfOrigin?: string;
+  isAdult?: boolean;
+  format?: MediaFormat;
+  type?: MediaType;
+  status?: MediaStatus;
+  season?: MediaSeason;
+  idMal?: number;
+  id?: number;
+}
+```
+
+### Media Enums
+```typescript
+export enum MediaType {
+  ANIME = 'ANIME',
+  MANGA = 'MANGA',
+}
+
+export enum MediaFormat {
+  TV = 'TV',
+  TV_SHORT = 'TV_SHORT',
+  MOVIE = 'MOVIE',
+  SPECIAL = 'SPECIAL',
+  OVA = 'OVA',
+  ONA = 'ONA',
+  MUSIC = 'MUSIC',
+  MANGA = 'MANGA',
+  NOVEL = 'NOVEL',
+  ONE_SHOT = 'ONE_SHOT',
+}
+
+export enum MediaStatus {
+  FINISHED = 'FINISHED',
+  RELEASING = 'RELEASING',
+  NOT_YET_RELEASED = 'NOT_YET_RELEASED',
+  CANCELLED = 'CANCELLED',
+  HIATUS = 'HIATUS',
+}
+
+export enum MediaSeason {
+  WINTER = 'WINTER',
+  SPRING = 'SPRING',
+  SUMMER = 'SUMMER',
+  FALL = 'FALL',
+}
+
+export enum MediaSource {
+  ORIGINAL = 'ORIGINAL',
+  MANGA = 'MANGA',
+  LIGHT_NOVEL = 'LIGHT_NOVEL',
+  VISUAL_NOVEL = 'VISUAL_NOVEL',
+  VIDEO_GAME = 'VIDEO_GAME',
+  OTHER = 'OTHER',
+  NOVEL = 'NOVEL',
+  DOUJINSHI = 'DOUJINSHI',
+  ANIME = 'ANIME',
+}
+
+export enum MediaSort {
+  ID = 'id',
+  ID_DESC = 'id_desc',
+  TITLE_ROMAJI = 'title_romaji',
+  TITLE_ROMAJI_DESC = 'title_romaji_desc',
+  TITLE_ENGLISH = 'title_english',
+  TITLE_ENGLISH_DESC = 'title_english_desc',
+  TITLE_NATIVE = 'title_native',
+  TITLE_NATIVE_DESC = 'title_native_desc',
+  TYPE = 'type',
+  TYPE_DESC = 'type_desc',
+  FORMAT = 'format',
+  FORMAT_DESC = 'format_desc',
+  START_DATE = 'start_date',
+  START_DATE_DESC = 'start_date_desc',
+  END_DATE = 'end_date',
+  END_DATE_DESC = 'end_date_desc',
+  SCORE = 'score',
+  SCORE_DESC = 'score_desc',
+  POPULARITY = 'popularity',
+  POPULARITY_DESC = 'popularity_desc',
+  TRENDING = 'trending',
+  TRENDING_DESC = 'trending_desc',
+  EPISODES = 'episodes',
+  EPISODES_DESC = 'episodes_desc',
+  DURATION = 'duration',
+  DURATION_DESC = 'duration_desc',
+  STATUS = 'status',
+  STATUS_DESC = 'status_desc',
+  RECENT = 'recent',
+  RECENT_DESC = 'recent_desc',
+}
+
+export enum MediaTrendSort {
+  ID = 'id',
+  ID_DESC = 'id_desc',
+  MEDIA_ID = 'media_id',
+  MEDIA_ID_DESC = 'media_id_desc',
+  DATE = 'date',
+  DATE_DESC = 'date_desc',
+  SCORE = 'score',
+  SCORE_DESC = 'score_desc',
+  POPULARITY = 'popularity',
+  POPULARITY_DESC = 'popularity_desc',
+  TRENDING = 'trending',
+  TRENDING_DESC = 'trending_desc',
+}
+
+export enum MediaRelation {
+  ADAPTATION = 'ADAPTATION',
+  PREQUEL = 'PREQUEL',
+  SEQUEL = 'SEQUEL',
+  PARENT = 'PARENT',
+  SIDE_STORY = 'SIDE_STORY',
+  CHARACTER = 'CHARACTER',
+  SPIN_OFF = 'SPIN_OFF',
+  SUMMARY = 'SUMMARY',
+  ALTERNATIVE = 'ALTERNATIVE',
+  OTHER = 'OTHER',
+}
+
+export enum MediaExternalLinkType {
+  INFO = 'INFO',
+  STREAMING = 'STREAMING',
+}
+```
