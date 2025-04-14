@@ -263,7 +263,7 @@ export class AnilistFilterService {
       hasNextPage: currentPage < lastPage,
     }
 
-    return { data: sortedData, pageInfo };
+    return { pageInfo, data: sortedData };
   }
 
   private async getRecentIds(): Promise<number[]> {

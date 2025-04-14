@@ -23,6 +23,7 @@ import { AnilistIndexerService } from '../providers/anilist/service/anilist-inde
 import { AnilistAddService } from '../providers/anilist/service/helper/anilist.add.service'
 import { AnilistFilterService } from '../providers/anilist/service/helper/anilist.filter.service'
 import { AnilistFetchService } from '../providers/anilist/service/helper/anilist.fetch.service'
+import { ExceptionsService } from '../exception/service/exceptions.service'
 
 @Module({
   imports: [HttpModule],
@@ -49,7 +50,8 @@ import { AnilistFetchService } from '../providers/anilist/service/helper/anilist
     TvdbTokenService,
     TvdbHelper,
     UpdateService,
-    StreamService
+    StreamService,
+    ExceptionsService
   ],
   exports: [
     PrismaService,
@@ -72,7 +74,8 @@ import { AnilistFetchService } from '../providers/anilist/service/helper/anilist
     TvdbTokenService,
     TvdbHelper,
     UpdateService,
-    StreamService
+    StreamService,
+    ExceptionsService
   ],
 })
 export class SharedModule {}

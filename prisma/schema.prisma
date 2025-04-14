@@ -253,6 +253,20 @@ model AnimepaheExternalLink {
   sourceName  String
 }
 
+// Exception.prisma
+model Exception {
+  id              Int      @id @default(autoincrement())
+  date            DateTime @default(now())
+  statusCode      Int?
+  timestamp       String?
+  path            String?
+  method          String?
+  message         String?
+  file            String?
+  line            String?
+  stack           String?
+}
+
 // LastUpdated.prisma
 model LastUpdated {
   id        Int   @id @default(autoincrement())

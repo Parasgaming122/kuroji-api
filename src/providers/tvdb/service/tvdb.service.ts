@@ -71,9 +71,7 @@ export class TvdbService {
     });
 
     if (!existingTvdb) {
-      console.log('tvdb is null')
-
-      const basicTvdb = await this.fetchByRemoteId(String(tmdb.id));
+      const basicTvdb = await this.fetchByRemoteId(String(tmdb.id), tmdb.media_type || 'series');
 
       if (!basicTvdb) {
         return Promise.reject(Error('Not found'));
@@ -116,7 +114,7 @@ export class TvdbService {
     }
   }
 
-  async fetchByRemoteId(id: string): Promise<BasicTvdb> {
+  async fetchByRemoteId(id: string, type: string): Promise<BasicTvdb> {
     const searchResponse = await this.customHttpService.getResponse(
       TVDB.getRemoteId(id),
       {
@@ -130,12 +128,12 @@ export class TvdbService {
       return Promise.reject(Error("Not found"));
     }
 
-    const match = searchResponse.data.find(item => item.series || item.movie);
+    const match = searchResponse.data.find(item => type === 'movie' ? item.movie : item.series);
     if (!match) {
       return Promise.reject(Error("Not found"));
     }
 
-    return match.movie ? match.movie : match.series;
+    return type === 'movie' ? match.movie : match.series;
   }
 
   async fetchTvdb(id: number, type: string): Promise<Tvdb> {
