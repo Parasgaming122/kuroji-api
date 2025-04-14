@@ -128,9 +128,14 @@ export class TmdbService {
         if (startIndex === -1) continue;
   
         const trimmedEpisodes: TmdbSeasonEpisode[] = [];
+
+        const today = new Date().toISOString().split('T')[0];
   
         for (let i = startIndex; i < episodes.length; i++) {
           const ep = { ...episodes[i], episode_number: trimmedEpisodes.length + 1 };
+
+          if (ep.air_date && ep.air_date > today) break;
+
           trimmedEpisodes.push(ep);
           if (ep.air_date === anilistEndDateString) break;
         }

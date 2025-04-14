@@ -21,6 +21,9 @@ export class TvdbHelper {
       aliases: tvdb.aliases ?? undefined,
       artworks: tvdb.artworks ?? undefined,
       remoteIds: tvdb.remoteIds ?? undefined,
+      trailers: tvdb.trailers ?? undefined,
+      airsDays: tvdb.airsDays ?? undefined,
+      airsTime: tvdb.airsTime ?? undefined,
     };
   }
 

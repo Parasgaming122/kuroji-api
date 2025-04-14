@@ -4,7 +4,7 @@ export interface Source {
   outro: IntroOutro;
   sources: Source.SourceInfo[];
   subtitles: Source.SubtitleInfo[];
-  // download: string;
+  download: string;
 }
 
 export interface IntroOutro {

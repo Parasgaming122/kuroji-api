@@ -16,6 +16,10 @@ model Tvdb {
   aliases              Json?
   artworks             Json?
   remoteIds            Json?
+  trailers             Json?
+
+  airsDays             Json?
+  airsTime             String?
 }
 
 model TvdbAlias {
