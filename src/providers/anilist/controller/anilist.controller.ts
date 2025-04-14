@@ -71,9 +71,14 @@ export class AnilistController {
     return this.streamService.getSources(providerEnum, number, id, dub);
   }
 
-  @Get('search')
-  async searchAnilist(@Query() filter: FilterDto) {
-    return this.service.getAnilists(filter, true);
+  @Get('filter')
+  async filterAnilist(@Query() filter: FilterDto) {
+    return this.service.getAnilists(filter);
+  }
+
+  @Get('search/:q')
+  async searchAnilist(@Param('q') q: string) {
+    return this.service.searchAnilist(q);
   }
 
   @Get('franchise/:franchise')

@@ -253,6 +253,29 @@ model AnimepaheExternalLink {
   sourceName  String
 }
 
+// Exception.prisma
+model Exception {
+  id              Int      @id @default(autoincrement())
+  date            DateTime @default(now())
+  statusCode      Int?
+  timestamp       String?
+  path            String?
+  method          String?
+  message         String?
+  file            String?
+  line            String?
+  stack           String?
+}
+
+// LastUpdated.prisma
+model LastUpdated {
+  id        Int   @id @default(autoincrement())
+  entityId  String
+  externalId Int?
+  type      String
+  createdAt DateTime @default(now())
+}
+
 // Shikimori.prisma
 model Shikimori {
   id            String        @id
@@ -372,13 +395,6 @@ model ReleaseIndex {
   updatedAt DateTime @updatedAt
 }
 
-model LastUpdated {
-  id        Int   @id @default(autoincrement())
-  entityId  String
-  type      String
-  createdAt DateTime @default(now())
-}
-
 
 // Tmdb.prisma
 model Tmdb {
@@ -463,6 +479,7 @@ model Tvdb {
   year                 String?
   nameTranslations     String[]           // list of translations
   overviewTranslations String[]           // list of translations
+  status               Json?
 
   aliases              Json?
   artworks             Json?
@@ -503,6 +520,25 @@ model TvdbLogin {
   token      String   
   createDate DateTime @default(now())
   expired    Boolean  @default(false)
+}
+
+model TvdbLanguageTranslation {
+  id         Int      @id @default(autoincrement())
+  tvdbId     Int
+  name       String?
+  overview   String?
+  isAlias    Boolean?
+  isPrimary  Boolean?
+  language   String?
+  tagline    String?
+  aliases    String[]
+}
+
+model TvdbLanguage {
+  id         String      @id
+  name       String?
+  nativeName String?
+  shortCode  String?
 }
 
 // User.prisma

@@ -14,6 +14,7 @@ import { ZoroModule } from './providers/zoro/module/zoro.module';
 import { AuthModule } from './security/auth/auth.module';
 import { UpdateModule } from './update/update.module';
 import { UserModule } from './user/user.module';
+import { ExceptionsModule } from './exception/module/exceptions.module'
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { UserModule } from './user/user.module';
     AuthModule,
     MailerModule,
     CloudinaryModule,
+    ExceptionsModule,
     ConfigModule.forRoot({
       envFilePath: '.env',
       isGlobal: true,

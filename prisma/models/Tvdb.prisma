@@ -11,6 +11,7 @@ model Tvdb {
   year                 String?
   nameTranslations     String[]           // list of translations
   overviewTranslations String[]           // list of translations
+  status               Json?
 
   aliases              Json?
   artworks             Json?
@@ -51,4 +52,23 @@ model TvdbLogin {
   token      String   
   createDate DateTime @default(now())
   expired    Boolean  @default(false)
+}
+
+model TvdbLanguageTranslation {
+  id         Int      @id @default(autoincrement())
+  tvdbId     Int
+  name       String?
+  overview   String?
+  isAlias    Boolean?
+  isPrimary  Boolean?
+  language   String?
+  tagline    String?
+  aliases    String[]
+}
+
+model TvdbLanguage {
+  id         String      @id
+  name       String?
+  nativeName String?
+  shortCode  String?
 }

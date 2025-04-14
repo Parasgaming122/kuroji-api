@@ -130,6 +130,7 @@ export class ShikimoriService {
   async saveShikimoris(shikimoris: Shikimori[]): Promise<void> {
     const lastUpdatedData = shikimoris.map((shikimori) => ({
       entityId: shikimori.id,
+      externalId: Number(shikimori.malId),
       type: UpdateType.SHIKIMORI,
     }));
 

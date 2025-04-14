@@ -1,4 +1,4 @@
-import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Put } from '@nestjs/common';
 import { TvdbService } from '../service/tvdb.service'
 
 @Controller('tvdb')
@@ -8,5 +8,20 @@ export class TvdbController {
   @Get('info/:id')
   async getTvdbByAnilist(@Param('id', ParseIntPipe) id: number) {
     return this.service.getTvdbByAnilist(id);
+  }
+
+  @Get('info/:id/translations/:language')
+  async getTvdbTranslation(@Param('id', ParseIntPipe) id: number, @Param('language') language: string) {
+    return this.service.getTranslations(id, language);
+  }
+
+  @Get('languages')
+  async getLanguages() {
+    return this.service.getLanguages();
+  }
+
+  @Put('languages')
+  async updateLanguages() {
+    return this.service.updateLanguages()
   }
 }

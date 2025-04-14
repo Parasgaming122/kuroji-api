@@ -56,6 +56,7 @@ export class AnimekaiService {
     await this.prisma.lastUpdated.create({
       data: {
         entityId: animekai.id,
+        externalId: animekai.anilistId,
         type: UpdateType.ANIMEKAI,
       },
     });

@@ -263,20 +263,20 @@ export class AnilistFilterService {
       hasNextPage: currentPage < lastPage,
     }
 
-    return { data: sortedData, pageInfo };
+    return { pageInfo, data: sortedData };
   }
 
   private async getRecentIds(): Promise<number[]> {
     const recentUpdates = await this.prisma.lastUpdated.findMany({
       where: {
-        type: UpdateType.ANILIST
+        type: UpdateType.ANIWATCH
       },
       orderBy: {
         createdAt: 'desc'
       }
     })
 
-    return recentUpdates.map(update => parseInt(update.entityId))
+    return recentUpdates.map(update => update.externalId || 0)
   }
 
   private async getRecentData(data: any[], recentIds: number[]) {

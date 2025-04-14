@@ -17,4 +17,16 @@ export class TVDB {
   static getSeries(id: number): string {
     return `${TVDB.URL}series/${id}/extended`;
   }
+
+  static getMovieTranslations(id: number, translations: string): string {
+    return `${TVDB.URL}movies/${id}/translations/${translations}`
+  }
+
+  static getSeriesTranslations(id: number, translations: string): string {
+    return `${TVDB.URL}series/${id}/translations/${translations}`
+  }
+
+  static getLanguages(): string {
+    return `${TVDB.URL}languages`; 
+  }
 }
