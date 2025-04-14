@@ -583,12 +583,12 @@ model UserPrivacy {
 }
 
 model Socials {
-  id        BigInt @id @default(autoincrement())
-  github    String
-  telegram  String
-  discord   String
-  instagram String
-  tiktok    String
+  id        BigInt  @id @default(autoincrement())
+  github    String?
+  telegram  String?
+  discord   String?
+  instagram String?
+  tiktok    String?
   User      User[]
 }
 
