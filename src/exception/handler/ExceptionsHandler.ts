@@ -30,7 +30,8 @@ export class ExceptionsHandler implements ExceptionFilter {
     }
 
     if (exception instanceof Error) {
-      stack = exception.stack
+      stack = exception.stack;
+      console.log(stack);
       const stackLines = stack?.split('\n')[1]?.trim()?.match(/\((.*):(\d+):(\d+)\)/)
       if (stackLines) {
         const absolutePath = stackLines[1]

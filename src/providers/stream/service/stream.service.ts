@@ -85,7 +85,7 @@ export class StreamService {
 
       return episodes;
     } catch (e) {
-      return [];
+      throw new Error(e);
     }
   }
 
@@ -99,7 +99,10 @@ export class StreamService {
       return false;
     }
 
-    const episode = episodes.find(e => e.number === episodeNumber) as EpisodeZoro;
+    const episode = episodes.find(e => e.number === episodeNumber);
+    if (!episode) {
+      return false;
+    }
 
     if (isSub) {
       return episode.isSubbed;
