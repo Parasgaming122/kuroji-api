@@ -6,7 +6,7 @@ import { AnilistService } from '../../anilist/service/anilist.service'
 import { TmdbService } from '../../tmdb/service/tmdb.service'
 import { TvdbTokenService } from './token/tvdb.token.service'
 import { TVDB } from '../../../configs/tvdb.config'
-import { Tvdb } from '@prisma/client'
+import { Tvdb, TvdbLanguage, TvdbLanguageTranslation } from '@prisma/client'
 import { UpdateType } from '../../../shared/UpdateType'
 
 export interface BasicTvdb {
@@ -86,6 +86,35 @@ export class TvdbService {
     return existingTvdb;
   }
 
+  async getTranslations(id: number, translation: string): Promise<TvdbLanguageTranslation> {
+    const tvdb = await this.getTvdbByAnilist(id);
+
+    const existingTranslation = await this.prisma.tvdbLanguageTranslation.findFirst({
+      where: {
+        tvdbId: tvdb.id,
+        language: translation
+      }
+    });
+
+    if (existingTranslation) return existingTranslation;
+
+    const tmdb = await this.tmdbService.getTmdbByAnilist(id);
+
+    const translations = await this.fetchTranslations(tvdb.id, tmdb.media_type || 'series', translation);
+    translations.tvdbId = tvdb.id;
+    return await this.saveTranslation(translations);
+  }
+
+  async getLanguages(): Promise<TvdbLanguage[]> {
+    const existingLanguages = await this.prisma.tvdbLanguage.findMany({}) as TvdbLanguage[];
+
+    if (existingLanguages.length > 0) return existingLanguages;
+
+    const languages = await this.fetchLanguages();
+
+    return await this.saveLanguages(languages);
+  }
+
   async saveTvdb(tvdb: Tvdb): Promise<Tvdb> {
     await this.prisma.lastUpdated.create({
       data: {
@@ -95,11 +124,17 @@ export class TvdbService {
       },
     });
 
-    return this.prisma.tvdb.upsert({
+    return await this.prisma.tvdb.upsert({
       where: { id: tvdb.id },
       update: this.helper.getTvdbData(tvdb),
       create: this.helper.getTvdbData(tvdb)
     })
+  }
+
+  async saveTranslation(translation: TvdbLanguageTranslation): Promise<TvdbLanguageTranslation> {
+    return await this.prisma.tvdbLanguageTranslation.create({
+      data: this.helper.getTvdbLanguageTranslationData(translation)
+    });
   }
 
   async update(id: number) {
@@ -112,6 +147,26 @@ export class TvdbService {
     if (tvdb !== existingTvdb) {
       await this.saveTvdb(tvdb);
     }
+  }
+
+  async updateLanguages(): Promise<TvdbLanguage[]> {
+    const languages = await this.fetchLanguages();
+    return await this.saveLanguages(languages);
+  }
+
+  async saveLanguages(languages: TvdbLanguage[]): Promise<TvdbLanguage[]> {
+    await this.prisma.tvdbLanguage.createMany({
+      data: languages.map(language => this.helper.getTvdbLanguageData(language)),
+      skipDuplicates: true
+    });
+
+    return await this.prisma.tvdbLanguage.findMany({
+      where: {
+        id: {
+          in: languages.map(lang => lang.id)
+        }
+      }
+    });
   }
 
   async fetchByRemoteId(id: string, type: string): Promise<BasicTvdb> {
@@ -141,6 +196,32 @@ export class TvdbService {
 
     return await this.customHttpService.getResponse(
       url,
+      {
+        headers: {
+          Authorization: `Bearer ${await this.tokenService.getToken()}`,
+        },
+      },
+      'data'
+    );
+  }
+
+  async fetchTranslations(id: number, type: string, translations: string): Promise<TvdbLanguageTranslation> {
+    const url = type === 'movie' ? TVDB.getMovieTranslations(id, translations) : TVDB.getSeriesTranslations(id, translations);
+
+    return await this.customHttpService.getResponse(
+      url,
+      {
+        headers: {
+          Authorization: `Bearer ${await this.tokenService.getToken()}`,
+        },
+      },
+      'data'
+    );
+  }
+
+  async fetchLanguages(): Promise<TvdbLanguage[]> {
+    return await this.customHttpService.getResponse(
+      TVDB.getLanguages(),
       {
         headers: {
           Authorization: `Bearer ${await this.tokenService.getToken()}`,

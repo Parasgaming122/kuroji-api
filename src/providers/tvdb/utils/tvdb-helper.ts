@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, Tvdb, TvdbLogin } from '@prisma/client';
+import { Prisma, Tvdb, TvdbLogin, TvdbLanguageTranslation, TvdbLanguage } from '@prisma/client';
 
 @Injectable()
 export class TvdbHelper {
@@ -29,6 +29,28 @@ export class TvdbHelper {
       token: tvdb.token,
       createDate: tvdb.createDate ?? new Date(),
       expired: tvdb.expired ?? false,
+    };
+  }
+
+  getTvdbLanguageTranslationData(translation: TvdbLanguageTranslation): Prisma.TvdbLanguageTranslationCreateInput {
+    return {
+      tvdbId: translation.tvdbId,
+      name: translation.name ?? undefined,
+      overview: translation.overview ?? undefined,
+      isAlias: translation.isAlias ?? undefined,
+      isPrimary: translation.isPrimary ?? undefined,
+      language: translation.language ?? undefined,
+      tagline: translation.tagline ?? undefined,
+      aliases: translation.aliases ?? [],
+    };
+  }
+
+  getTvdbLanguageData(language: TvdbLanguage): Prisma.TvdbLanguageCreateInput {
+    return {
+      id: language.id,
+      name: language.name ?? undefined,
+      nativeName: language.nativeName ?? undefined,
+      shortCode: language.shortCode ?? undefined,
     };
   }
 }

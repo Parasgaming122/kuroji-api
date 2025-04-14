@@ -1,4 +1,4 @@
-import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Put } from '@nestjs/common';
 import { ShikimoriService } from '../service/shikimori.service';
 
 @Controller('shikimori')
@@ -10,7 +10,7 @@ export class ShikimoriController {
     return this.service.getShikimori(id);
   }
 
-  @Get('info/:id/update')
+  @Put('info/:id')
   async updateShikimori(@Param('id') id: string) {
     return this.service.update(id);
   }

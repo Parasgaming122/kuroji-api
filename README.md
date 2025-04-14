@@ -152,7 +152,7 @@ Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
 | Endpoint | Method | Description | Query/Body Parameters |
 |----------|--------|-------------|---------------------|
 | `/shikimori/info/:id` | GET | Get anime info | - |
-| `/shikimori/info/:id/update` | GET | Update anime info | - |
+| `/shikimori/info/:id` | PUT | Update anime info | - |
 | `/shikimori/franchise/:franchise` | GET | Get franchise info | - |
 | `/shikimori/franchiseId/:franchise` | GET | Get franchise IDs | - |
 
@@ -166,6 +166,9 @@ Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
 | Endpoint | Method | Description | Query/Body Parameters |
 |----------|--------|-------------|---------------------|
 | `/tvdb/info/:id` | GET | Get TVDB info by Anilist ID | - |
+| `/info/:id/translations/:language` | GET | Get TVDB translation by Anilist ID and language | - |
+| `/languages` | GET | Get TVDB available languages | - |
+| `/languages` | PUT | Update TVDB languages | - |
 
 ## Streaming Sources
 
