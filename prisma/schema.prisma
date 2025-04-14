@@ -520,16 +520,13 @@ model User {
   isEmailVerified  Boolean     @default(false)
   emailToken       String?
   emailTokenExpiry DateTime?
-  favorites        String[]
   stats            UserStats   @relation(fields: [userStatsId], references: [id])
-  nameHistory      NameHistory @relation(fields: [nameHistoryId], references: [id])
   socials          Socials     @relation(fields: [socialsId], references: [id])
   roles            String[]
   privacy          UserPrivacy @relation(fields: [userPrivacyId], references: [id])
   avatar           File?       @relation(fields: [avatarId], references: [id])
   avatarId         BigInt?
   userStatsId      BigInt
-  nameHistoryId    Int
   socialsId        BigInt
   userPrivacyId    BigInt
 }
@@ -564,7 +561,6 @@ model NameHistory {
   name  String
   time  DateTime
   first Boolean
-  User  User[]
 }
 
 model UserStats {
