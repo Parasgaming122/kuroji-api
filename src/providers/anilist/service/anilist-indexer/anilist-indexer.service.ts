@@ -25,30 +25,30 @@ export class AnilistIndexerService {
 
   public async index(resume: boolean, delay: number) {
     if (this.isRunning) {
-      console.log('Already running, skip this round.');
-      return;
+      console.log('Already running, skip this round.')
+      return
     }
-  
-    this.isRunning = true;
-  
+
+    this.isRunning = true
+
     if (!resume) {
-      this.lastProcessedIndex.set(0);
+      this.lastProcessedIndex.set(0)
     }
-  
-    this.allIds = await this.getIds();
-  
+
+    this.allIds = (await this.getIds()).sort(() => Math.random() - 0.5)
+
     for (let id of this.allIds) {
       if (!this.isRunning) {
-        console.log('Indexing manually stopped 🚫');
-        this.isRunning = false;
-        return; // dip out the loop
+        console.log('Indexing manually stopped 🚫')
+        this.isRunning = false
+        return
       }
-  
+
       const existing = await this.prisma.releaseIndex.findUnique({
         where: { id: id.toString() },
-      });
+      })
 
-      if (existing) continue;
+      if (existing) continue
 
       try {
         console.log('Indexing new release: ' + id)
@@ -60,14 +60,15 @@ export class AnilistIndexerService {
           },
         })
 
-        await this.sleep(delay)
+        const randomDelay = Math.floor(Math.random() * (55)) + (delay - 5)
+        await this.sleep(randomDelay)
       } catch (e) {
         console.error('Failed index update:', e)
       }
     }
-  
-    this.isRunning = false;
-    console.log('Indexing complete, shutting it down 🛑');
+
+    this.isRunning = false
+    console.log('Indexing complete, shutting it down 🛑')
   }
 
   public async sleep(delay: number): Promise<void> {
