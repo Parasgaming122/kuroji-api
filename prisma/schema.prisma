@@ -562,13 +562,21 @@ model User {
   emailTokenExpiry DateTime?
   stats            UserStats   @relation(fields: [userStatsId], references: [id])
   socials          Socials     @relation(fields: [socialsId], references: [id])
-  roles            String[]
+  roles            Role[]
   privacy          UserPrivacy @relation(fields: [userPrivacyId], references: [id])
   avatar           File?       @relation(fields: [avatarId], references: [id])
   avatarId         BigInt?
   userStatsId      BigInt
   socialsId        BigInt
   userPrivacyId    BigInt
+}
+
+model Role {
+  id          BigInt  @id @default(autoincrement())
+  name        String
+  description String?
+  User        User?   @relation(fields: [userId], references: [id])
+  userId      BigInt?
 }
 
 enum UserAccess {
