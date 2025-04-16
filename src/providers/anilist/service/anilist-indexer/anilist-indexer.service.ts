@@ -52,17 +52,16 @@ export class AnilistIndexerService {
 
       try {
         console.log('Indexing new release: ' + id)
-        await this.service.getAnilist(id, true)
+        await this.safeGetAnilist(id);
 
         await this.prisma.releaseIndex.create({
           data: {
             id: id.toString(),
           },
-        })
+        });
 
-        const randomDelay = Math.floor(Math.random() * (55)) + (delay - 5)
-        await this.sleep(randomDelay)
-      } catch (e) {
+        await this.sleep(this.getRandomInt(delay - 5, delay + 50))
+      } catch (e: any) {
         console.error('Failed index update:', e)
       }
     }
@@ -106,15 +105,15 @@ export class AnilistIndexerService {
       ) {
         try {
           console.log('Indexing new release: ' + id);
-          await this.service.getAnilist(parseInt(id), true);
+          await this.safeGetAnilist(+id);
 
           await this.prisma.releaseIndex.create({
             data: {
               id: id,
             },
           });
-          await this.sleep(10);
-        } catch (e) {
+          await this.sleep(this.getRandomInt(10 - 5, 10 + 50));
+        } catch (e: any) {
           console.error('Failed scheduled index update:', e);
         }
       }
@@ -137,5 +136,31 @@ export class AnilistIndexerService {
     ) as Ids;
 
     return [...ids.sfw, ...ids.nsfw];
+  }
+
+  private async safeGetAnilist(id: number, retries = 3): Promise<void> {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        await this.service.getAnilist(id, true)
+        return
+      } catch (e: any) {
+        if (e.response?.status === 429) {
+          const retryAfter = e.response.headers['retry-after']
+            ? parseInt(e.response.headers['retry-after'], 10)
+            : this.getRandomInt(30, 60)
+
+          console.warn(`⚠️ 429 hit - Attempt ${attempt}/${retries}. Sleeping ${retryAfter}s`)
+          await this.sleep(retryAfter)
+        } else {
+          throw e
+        }
+      }
+    }
+
+    throw new Error(`Failed to fetch Anilist after ${retries} attempts for ID: ${id}`)
+  }
+
+  private getRandomInt(min: number, max: number): number {
+    return Math.floor(Math.random() * (max - min + 1)) + min
   }
 }

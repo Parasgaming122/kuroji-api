@@ -44,11 +44,9 @@ export class CustomHttpService {
       }
 
       return data;
-    } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
-      console.error(`Failed to fetch response from ${url}:`, errorMessage);
-      throw new Error(`Failed to fetch response: ${errorMessage}`);
+    } catch (error) {
+      console.log(`Failed to get response: ${error}`)
+      throw error;
     }
   }
 
@@ -71,11 +69,9 @@ export class CustomHttpService {
       }
 
       return data;
-    } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
-      console.error(`Failed to post response to ${url}:`, errorMessage);
-      throw new Error(`Failed to post response: ${errorMessage}`);
+    } catch (error) {
+      console.log(`Failed to get post response: ${error}`)
+      throw error;
     }
   }
 
@@ -101,14 +97,12 @@ export class CustomHttpService {
         return (data as { data: T }).data;
       }
       return data;
-    } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
+    } catch (error) {
       console.error(
         `Failed to fetch GraphQL response from ${url}:`,
-        errorMessage,
+        error,
       );
-      throw new Error(`Failed to fetch GraphQL response: ${errorMessage}`);
+      throw error;
     }
   }
 
