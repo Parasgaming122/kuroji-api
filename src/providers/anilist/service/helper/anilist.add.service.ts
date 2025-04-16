@@ -49,16 +49,17 @@ export class AnilistAddService {
   async getRecommendations(id: number, perPage: number, page: number): Promise<ApiResponse<BasicAnilistSmall[]>> {
     const existingAnilist = await this.prisma.anilist.findUnique({
       where: { id },
-    }) as AnilistWithRelations
+      include: { recommendations: true }
+    }) as {
+      idMal: number,
+      recommendations: BasicIdAni[]
+    }
 
     const shikimori = await this.shikimoriService.getShikimori(
       existingAnilist.idMal?.toString() || '',
     )
 
-    const recommendationsRaw = (existingAnilist.recommendations && (existingAnilist.recommendations as any).edges)
-      ? ((existingAnilist.recommendations as any).edges.map((edge: any) => edge.node.mediaRecommendation) as BasicIdAni[])
-      : []
-    const recommendationIds = recommendationsRaw.map(r => Number(r.idMal)) as number[] || []
+    const recommendationIds = existingAnilist.recommendations.map(r => Number(r.idMal)) as number[] || []
     const recommendations = await this.anilist.getAnilists(
       new FilterDto({ idMalIn: recommendationIds, perPage, page })
     );

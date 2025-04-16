@@ -1,5 +1,5 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { Anilist, Shikimori, AnilistTitle, AnilistCover, StartDate, EndDate, AnilistTag, AnilistExternalLink, AnilistStreamingEpisode, AnilistStudio, AnilistAiringSchedule, AnilistNextAiringEpisode, AnilistCharacter } from '@prisma/client';
+import { Anilist, Shikimori, AnilistTitle, AnilistCover, StartDate, EndDate, AnilistTag, AnilistExternalLink, AnilistStreamingEpisode, AnilistStudio, AnilistAiringSchedule, AnilistNextAiringEpisode, AnilistCharacter, AnilistTrailer } from '@prisma/client';
 import { PageInfo } from '../../../api/ApiResponse';
 import { PrismaService } from '../../../prisma.service';
 import { UpdateType } from '../../../shared/UpdateType';
@@ -50,6 +50,7 @@ export interface AnilistWithRelations extends Anilist {
   cover?: AnilistCover;
   startDate?: StartDate;
   endDate?: EndDate;
+  trailer?: AnilistTrailer;
   characters?: AnilistCharacter[];
   studios?: AnilistStudio[];
   airingSchedule?: AnilistAiringSchedule[];

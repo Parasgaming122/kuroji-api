@@ -2,17 +2,12 @@ model Anilist {
   id                Int      @id
   idMal             Int?
   siteUrl           String?
-  // Embedded objects stored as JSON
-  title             AnilistTitle? @relation(fields: [titleId], references: [id]) // corresponds to Release.Title
-  coverImage        AnilistCover? @relation(fields: [coverId], references: [id]) // corresponds to Release.CoverImage
   bannerImage       String?
   status            String?
   type              String?
   format            String?
   updatedAt         Int?
   description       String?
-  startDate         StartDate? @relation(fields: [startDateId], references: [id]) // corresponds to Date (with start_year, start_month, start_day)
-  endDate           EndDate? @relation(fields: [endDateId], references: [id]) // corresponds to Date (with end_year, end_month, end_day)
   season            String?
   seasonYear        Int?
   episodes          Int?
@@ -22,7 +17,6 @@ model Anilist {
   source            String?
   hashtag           String?
   moreInfo          String?
-  trailer           Json? // corresponds to Trailer
   isLocked          Boolean?
   isAdult           Boolean?
   averageScore      Int?
@@ -31,58 +25,63 @@ model Anilist {
   popularity        Int?
   trending          Int?
   favourites        Int?
-  genres            String[] // Element collection of strings
+  genres            String[]
   synonyms          String[]
-  // Complex embedded collections stored as JSON:
-  recommendations   Json? // RecommendationEdgeWrapper<BasicId>
-  characters        AnilistCharacter[] @relation("AnilistCharacters")
-  studios           AnilistStudio[] @relation("AnilistStudios")
-  airingSchedule    AnilistAiringSchedule[] @relation("AnilistAiringSchedules")
+
+  // FKs handled in child models
+  title             AnilistTitle?          @relation("AnilistTitle")
+  coverImage        AnilistCover?          @relation("AnilistCover")
+  startDate         StartDate?             @relation("AnilistStartDate")
+  endDate           EndDate?               @relation("AnilistEndDate")
+  trailer           AnilistTrailer?        @relation("AnilistTrailer")
   nextAiringEpisode AnilistNextAiringEpisode? @relation("AnilistNextAiringEpisode")
-  stats             Json? // Stats (including scoreDistribution and statusDistribution)
+  stats             Json?
 
-  // Normalized collections (stored in separate tables)
-  tags              AnilistTag[] @relation("AnilistTags")
-  externalLinks     AnilistExternalLink[] @relation("AnilistExternalLinks")
+  // Normalized collections
+  recommendations   BasicIdAni[]           @relation("AnilistRecs")
+  characters        AnilistCharacter[]     @relation("AnilistCharacters")
+  studios           AnilistStudio[]        @relation("AnilistStudios")
+  airingSchedule    AnilistAiringSchedule[]@relation("AnilistAiringSchedules")
+  tags              AnilistTag[]           @relation("AnilistTags")
+  externalLinks     AnilistExternalLink[]  @relation("AnilistExternalLinks")
   streamingEpisodes AnilistStreamingEpisode[] @relation("AnilistStreamingEpisodes")
-
-  titleId           Int?
-  coverId           Int?
-  startDateId		Int?
-  endDateId			Int?
 }
 
 model AnilistTitle {
   id               Int      @id @default(autoincrement())
+  releaseId       Int      @unique
   romaji    String?
   english   String?
   native    String?
-  anilist   Anilist[]
+  anilist   Anilist  @relation("AnilistTitle", fields: [releaseId], references: [id])
 }
 
 model StartDate {
   id               Int      @id @default(autoincrement())
+  releaseId       Int      @unique
   day       Int?
   month     Int?
   year      Int?
-  anilist	Anilist[]
+  anilist   Anilist  @relation("AnilistStartDate", fields: [releaseId], references: [id])
 }
 
 model EndDate {
   id               Int      @id @default(autoincrement())
+  releaseId       Int      @unique
   day       Int?
   month     Int?
   year      Int?
-  anilist	Anilist[]
+  anilist   Anilist  @relation("AnilistEndDate", fields: [releaseId], references: [id])
 }
 
 model AnilistCover {
   id               Int      @id @default(autoincrement())
+  releaseId       Int      @unique
   color     String?
   large     String?
   medium    String?
   extraLarge String?
-  anilist	Anilist[]
+  anilist   Anilist  @relation("AnilistCover", fields: [releaseId], references: [id])
 }
 
 model AnilistIndex {
@@ -175,7 +174,33 @@ model AnilistNextAiringEpisode {
   anilist         Anilist  @relation("AnilistNextAiringEpisode", fields: [releaseId], references: [id])
 }
 
+model AnilistTrailer {
+  id              String      @id
+  releaseId       Int      @unique
+  site            String?
+  thumbnail       String?
+
+  anilist   Anilist  @relation("AnilistTrailer", fields: [releaseId], references: [id])
+}
+
+// model AnilistStats {
+//   id                Int           @id @default(autoincrement())
+//   releaseId       Int      @unique
+//   scoreDistribution AnilistScore? @relation("AnilistScore")
+//   anilist         Anilist  @relation("AnilistStats", fields: [releaseId], references: [id])
+// }
+
+// model AnilistScore {
+//   id       Int             @id @default(autoincrement())
+//   anilistStatsId  Int @unique
+//   score    Int?
+//   amount   Int?
+//   anilistStats         AnilistStats  @relation("AnilistScore", fields: [anilistStatsId], references: [id])
+// }
+
 model BasicIdAni {
-  id        Int      @id @default(autoincrement())
+  id        Int      @id
   idMal     Int?
+
+  Anilist Anilist[] @relation("AnilistRecs")
 }

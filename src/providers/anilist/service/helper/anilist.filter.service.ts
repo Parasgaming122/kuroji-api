@@ -4,10 +4,11 @@ import { ApiResponse } from '../../../../api/ApiResponse'
 import { UpdateType } from '../../../../shared/UpdateType'
 import { FilterDto } from '../../model/FilterDto'
 import { PrismaService } from '../../../../prisma.service'
+import { AnilistHelper } from '../../utils/anilist-helper'
 
 @Injectable()
 export class AnilistFilterService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService, private readonly helper: AnilistHelper) {}
 
   async getAnilistByFilter(
     filter: FilterDto,
@@ -221,28 +222,7 @@ export class AnilistFilterService {
     const [data, total] = await Promise.all([
       this.prisma.anilist.findMany({
         where: whereCondition,
-        include: {
-          title: {
-            omit: {
-              id: true,
-            }
-          },
-          coverImage: {
-            omit: {
-              id: true,
-            }
-          },
-          startDate: {
-            omit: {
-              id: true,
-            }
-          },
-          endDate: {
-            omit: {
-              id: true,
-            }
-          },
-        },
+        include: this.helper.getInclude(),
         take: perPage,
         skip,
         orderBy,

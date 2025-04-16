@@ -57,7 +57,13 @@ export class AnilistHelper {
       source: anime.source,
       hashtag: anime.hashtag,
       moreInfo: anime.moreInfo,
-      trailer: anime.trailer,
+      trailer: anime.trailer ? {
+        create: {
+          id: anime.trailer?.id ?? null,
+          site: anime.trailer?.site ?? null,
+          thumbnail: anime.trailer?.thumbnail ?? null
+        }
+      } : undefined,
       isLocked: anime.isLocked,
       isAdult: anime.isAdult,
       averageScore: anime.averageScore,
@@ -68,7 +74,12 @@ export class AnilistHelper {
       favourites: anime.favourites,
       genres: anime.genres,
       synonyms: anime.synonyms,
-      recommendations: anime.recommendations,
+      recommendations: {
+        create: anime.recommendations?.edges?.map((edge: any) => ({
+          id: edge?.node?.mediaRecommendation.id ?? null,
+          idMal: edge?.node?.mediaRecommendation.idMal ?? null
+        })) ?? []
+      },
       characters: {
         create: anime.characters?.edges?.map((edge: any) => ({
           characterId: edge?.node?.id ?? null,
@@ -97,7 +108,17 @@ export class AnilistHelper {
           timeUntilAiring: anime.nextAiringEpisode?.timeUntilAiring ?? null
         }
       } : undefined,
-      stats: anime.stats,
+      // stats: {
+      //   create: {
+      //     scoreDistribution: {
+      //       create: {
+      //         score: anime.stats.scoreDistribution.score,
+      //         amount: anime.stats.scoreDistribution.amount,
+      //       },
+      //     },
+      //   },
+      // },
+      stats: anime.stats ?? [],
       tags: {
         create: anime.tags?.map((tag: any) => ({
           name: tag.name,
@@ -206,44 +227,83 @@ export class AnilistHelper {
   public getFindUnique(id: number): any {
     const findUnique = {
       omit: {
-        titleId: true,
-        coverId: true,
-        startDateId: true,
-        endDateId: true,
         recommendations: true,
       },
       where: { id },
-      include: {
-        title: {
-          omit: {
-            id: true,
-          }
-        },
-        coverImage: {
-          omit: {
-            id: true,
-          }
-        },
-        startDate: {
-          omit: {
-            id: true,
-          }
-        },
-        endDate: {
-          omit: {
-            id: true,
-          }
-        },
-        characters: true,
-        studios: true,
-        airingSchedule: true,
-        nextAiringEpisode: true,
-        tags: true,
-        externalLinks: true,
-        streamingEpisodes: true,
-      },
+      include: this.getInclude(),
     }
 
     return findUnique;
+  }
+
+  public getInclude(): any {
+    const include = {
+      title: {
+        omit: {
+          id: true,
+          releaseId: true,
+        }
+      },
+      coverImage: {
+        omit: {
+          id: true,
+          releaseId: true,
+        }
+      },
+      startDate: {
+        omit: {
+          id: true,
+          releaseId: true,
+        }
+      },
+      endDate: {
+        omit: {
+          id: true,
+          releaseId: true,
+        }
+      },
+      trailer: {
+        omit: {
+          releaseId: true,
+        }
+      },
+      characters: {
+        omit: {
+          releaseId: true,
+        }
+      },
+      studios: {
+        omit: {
+          releaseId: true,
+        }
+      },
+      airingSchedule: {
+        omit: {
+          releaseId: true,
+        }
+      },
+      nextAiringEpisode: {
+        omit: {
+          releaseId: true,
+        }
+      },
+      tags: {
+        omit: {
+          releaseId: true,
+        }
+      },
+      externalLinks: {
+        omit: {
+          releaseId: true,
+        }
+      },
+      streamingEpisodes: {
+        omit: {
+          releaseId: true,
+        }
+      },
+    }
+
+    return include;
   }
 }
