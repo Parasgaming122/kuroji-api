@@ -13,6 +13,7 @@ import { JsonValue } from '@prisma/client/runtime/library'
 import { AnilistAddService } from './helper/anilist.add.service'
 import { AnilistFilterService } from './helper/anilist.filter.service'
 import { AnilistFetchService } from './helper/anilist.fetch.service'
+import { MediaType } from '../graphql/types/MediaEnums'
 
 export interface AnilistResponse {
   Page: {
@@ -94,6 +95,11 @@ export class AnilistService {
     const data = await this.fetch.fetchAnilistFromGraphQL(id);
     if (!data.Page?.media || data.Page.media.length === 0) {
       throw new Error('No media found');
+    }
+
+    const type = data.Page.media[0].type as unknown as MediaType;
+    if (type == MediaType.MANGA) {
+      return Promise.reject(Error('Nuh uh, no mangas here'));
     }
 
     await this.saveAnilist(data);
