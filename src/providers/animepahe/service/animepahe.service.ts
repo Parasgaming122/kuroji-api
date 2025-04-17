@@ -4,11 +4,13 @@ import { UrlConfig } from '../../../configs/url.config';
 import { CustomHttpService } from '../../../http/http.service';
 import { PrismaService } from '../../../prisma.service';
 import { ScrapeHelper } from '../../../scrapper/scrape-helper';
-import { Source } from '../../../shared/Source';
+import { Source } from '../../stream/model/Source';
 import { UpdateType } from '../../../shared/UpdateType';
 import { AnilistService } from '../../anilist/service/anilist.service';
 import { AnimePaheHelper } from '../utils/animepahe-helper';
 import { TmdbService } from '../../tmdb/service/tmdb.service'
+import { InjectRedis } from '@nestjs-modules/ioredis'
+import Redis from 'ioredis'
 
 export interface BasicAnimepahe {
   id: string;
@@ -30,6 +32,7 @@ export class AnimepaheService {
     private readonly tmdbService: TmdbService,
     private readonly customHttpService: CustomHttpService,
     private readonly helper: AnimePaheHelper,
+    @InjectRedis() private readonly redis: Redis,
   ) {}
 
   async getAnimepaheByAnilist(id: number): Promise<Animepahe | null> {
@@ -46,9 +49,25 @@ export class AnimepaheService {
   }
 
   async getSources(episodeId: string): Promise<Source> {
-    return await this.customHttpService.getResponse(
-      UrlConfig.ANIMEPAHE + 'watch/' + episodeId,
+    const key = `animepahe:sources:${episodeId}`
+
+    const cached = await this.redis.get(key)
+    if (cached) {
+      return JSON.parse(cached) as Source
+    }
+
+    const animepahe = await this.customHttpService.getResponse(
+      UrlConfig.ANIMEPAHE + 'watch?episodeId=' + episodeId,
     );
+
+    await this.redis.set(
+      key,
+      JSON.stringify(animepahe),
+      'EX',
+      process.env.SOURCES_REDIS_TIME ? parseInt(process.env.SOURCES_REDIS_TIME) : 3600
+    );
+
+    return animepahe as Source;
   }
 
   async saveAnimepahe(animepahe: Animepahe): Promise<Animepahe> {

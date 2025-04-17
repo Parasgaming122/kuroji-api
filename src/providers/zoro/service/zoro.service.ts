@@ -7,8 +7,10 @@ import { ZoroHelper } from '../utils/zoro-helper';
 import { UpdateType } from '../../../shared/UpdateType';
 import { AnilistService } from '../../../providers/anilist/service/anilist.service'
 import { ScrapeHelper } from '../../../scrapper/scrape-helper'
-import { Source } from '../../../shared/Source'
+import { Source } from '../../stream/model/Source'
 import { TmdbService } from '../../tmdb/service/tmdb.service'
+import { InjectRedis } from '@nestjs-modules/ioredis'
+import Redis from 'ioredis'
 
 export interface BasicZoro {
   id: string;
@@ -29,7 +31,8 @@ export class ZoroService {
     private readonly anilistService: AnilistService,
     private readonly tmdbService: TmdbService,
     private readonly http: CustomHttpService,
-    private readonly helper: ZoroHelper
+    private readonly helper: ZoroHelper,
+    @InjectRedis() private readonly redis: Redis,
   ) {}
 
   async getZoro(id: string): Promise<Zoro> {
@@ -94,8 +97,24 @@ export class ZoroService {
   }
 
   async getSources(episodeId: string, dub: boolean): Promise<Source> {
-    const zoro = await this.http.getResponse(UrlConfig.ZORO + 'watch/' + episodeId + '?dub=' + dub);
-    return zoro as Source;
+    const key = `zoro:sources:${episodeId}:${dub ? 'dub' : 'sub'}`
+    const cached = await this.redis.get(key)
+    if (cached) {
+      return JSON.parse(cached) as Source
+    }
+
+    const zoro = await this.http.getResponse(
+      UrlConfig.ZORO + 'watch/' + episodeId + '?dub=' + dub
+    )
+
+    await this.redis.set(
+      key, 
+      JSON.stringify(zoro), 
+      'EX', 
+      process.env.SOURCES_REDIS_TIME ? parseInt(process.env.SOURCES_REDIS_TIME) : 3600
+    );
+
+    return zoro as Source
   }
 
   async fetchZoro(id: string): Promise<Zoro> {

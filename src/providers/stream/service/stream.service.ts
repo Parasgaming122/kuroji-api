@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { Provider } from '../../../shared/Provider'
-import { SourceType } from '../../../shared/SourceType'
+import { Provider } from '../model/Provider'
+import { SourceType } from '../model/SourceType'
 import { ZoroService } from '../../zoro/service/zoro.service'
 import { AnimekaiService } from '../../animekai/service/animekai.service'
 import { AnimepaheService } from '../../animepahe/service/animepahe.service'
 import { AnilistService } from '../../anilist/service/anilist.service'
 import { TmdbService } from '../../tmdb/service/tmdb.service'
 import { AnilistStreamingEpisode, AnimeKai, AnimekaiEpisode, Animepahe, AnimepaheEpisode, EpisodeZoro, TmdbSeasonEpisode, Zoro } from '@prisma/client'
-import { Source } from '../../../shared/Source'
+import { Source } from '../model/Source'
 
 export interface Episode {
   image: string,
@@ -111,86 +111,105 @@ export class StreamService {
     }
   }
 
-  async getProviders(id: number, ep: number): Promise<ProviderInfo[]> {
-    const providers: ProviderInfo[] = [];
+  async getProvidersSingle(id: number, ep: number): Promise<ProviderInfo[]> {
+    const zoroProviders: ProviderInfo[] = []
+    const paheProviders: ProviderInfo[] = []
+    const kaiProviders: ProviderInfo[] = []
 
     const zoroPromise = this.aniwatch.getZoroByAnilist(id)
       .then((zoro: Zoro) => {
         if (zoro && zoro.episodes) {
-          const zoroEps = zoro.episodes as EpisodeZoro[];
-          const zoroEp = zoroEps.find((e: EpisodeZoro) => e.number === ep);
+          const zoroEps = zoro.episodes as EpisodeZoro[]
+          const zoroEp = zoroEps.find((e: EpisodeZoro) => e.number === ep)
           if (zoroEp) {
             if (zoroEp.isSubbed) {
-              providers.push({
+              zoroProviders.push({
                 id: zoroEp.id,
                 filler: zoroEp.isFiller,
                 provider: Provider.ANIWATCH,
                 type: SourceType.SOFT_SUB,
-              });
+              })
             }
             if (zoroEp.isDubbed) {
-              providers.push({
+              zoroProviders.push({
                 id: zoroEp.id,
                 filler: zoroEp.isFiller,
                 provider: Provider.ANIWATCH,
                 type: SourceType.DUB,
-              });
+              })
             }
           }
         }
       })
-      .catch(() => {});
-
-    const animeKaiPromise = this.animekai.getAnimekaiByAnilist(id)
-      .then((animeKai: AnimeKai) => {
-        if (animeKai && animeKai.episodes) {
-          const kaiEps = animeKai.episodes as AnimekaiEpisode[];
-          const kaiEp = kaiEps.find((e: AnimekaiEpisode) => e.number === ep);
-          if (kaiEp) {
-            if (kaiEp.isSubbed) {
-              providers.push({
-                id: kaiEp.id,
-                filler: kaiEp.isFiller || false,
-                provider: Provider.ANIMEKAI,
-                type: SourceType.HARD_SUB,
-              });
-            }
-            if (kaiEp.isDubbed) {
-              providers.push({
-                id: kaiEp.id,
-                filler: kaiEp.isFiller || false,
-                provider: Provider.ANIMEKAI,
-                type: SourceType.DUB,
-              });
-            }
-          }
-        }
-      })
-      .catch(() => {});
+      .catch(() => { })
 
     const animepahePromise = this.animepahe.getAnimepaheByAnilist(id)
       .then((animepahe: Animepahe) => {
         if (animepahe && animepahe.episodes) {
-          const paheEps = animepahe.episodes as AnimepaheEpisode[];
-          const paheEp = paheEps.find((e: AnimepaheEpisode) => e.number === ep);
+          const paheEps = animepahe.episodes as AnimepaheEpisode[]
+          const paheEp = paheEps.find((e: AnimepaheEpisode) => e.number === ep)
           if (paheEp) {
-            providers.push({
+            paheProviders.push({
               id: paheEp.id,
               filler: false,
               provider: Provider.ANIMEPAHE,
-              type: SourceType.HARD_SUB,
-            });
+              type: SourceType.BOTH,
+            })
           }
         }
       })
-      .catch(() => {});
+      .catch(() => { })
 
-    await Promise.all([zoroPromise, animeKaiPromise, animepahePromise]);
-    return providers;
+    const animeKaiPromise = this.animekai.getAnimekaiByAnilist(id)
+      .then((animeKai: AnimeKai) => {
+        if (animeKai && animeKai.episodes) {
+          const kaiEps = animeKai.episodes as AnimekaiEpisode[]
+          const kaiEp = kaiEps.find((e: AnimekaiEpisode) => e.number === ep)
+          if (kaiEp) {
+            if (kaiEp.isSubbed) {
+              kaiProviders.push({
+                id: kaiEp.id,
+                filler: kaiEp.isFiller || false,
+                provider: Provider.ANIMEKAI,
+                type: SourceType.HARD_SUB,
+              })
+            }
+            if (kaiEp.isDubbed) {
+              kaiProviders.push({
+                id: kaiEp.id,
+                filler: kaiEp.isFiller || false,
+                provider: Provider.ANIMEKAI,
+                type: SourceType.DUB,
+              })
+            }
+          }
+        }
+      })
+      .catch(() => { })
+
+    await Promise.all([zoroPromise, animepahePromise, animeKaiPromise])
+
+    return [...zoroProviders, ...paheProviders, ...kaiProviders]
+  }
+
+  async getProvidersMultiple(id: number): Promise<(Episode & { providers: ProviderInfo[] })[]> {
+    const episodes = await this.getEpisodes(id)
+
+    const enrichedEpisodes = await Promise.all(
+      episodes.map(async (ep) => {
+        const providers = await this.getProvidersSingle(id, ep.number)
+        return {
+          ...ep,
+          providers,
+        }
+      })
+    )
+
+    return enrichedEpisodes
   }
 
   async getSources(provider: Provider, ep: number, alId: number, dub: boolean): Promise<Source> {
-    const providers = await this.getProviders(alId, ep)
+    const providers = await this.getProvidersSingle(alId, ep)
     const epId = providers.find(p => p.provider === provider)?.id;
     
     switch (provider) {

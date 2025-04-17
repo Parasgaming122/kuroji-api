@@ -4,11 +4,13 @@ import { UrlConfig } from '../../../configs/url.config';
 import { CustomHttpService } from '../../../http/http.service';
 import { PrismaService } from '../../../prisma.service';
 import { ScrapeHelper } from '../../../scrapper/scrape-helper';
-import { Source } from '../../../shared/Source';
+import { Source } from '../../stream/model/Source';
 import { UpdateType } from '../../../shared/UpdateType';
 import { AnilistService } from '../../anilist/service/anilist.service';
 import { AnimeKaiHelper } from '../utils/animekai-helper';
 import { TmdbService } from '../../tmdb/service/tmdb.service'
+import { InjectRedis } from '@nestjs-modules/ioredis'
+import Redis from 'ioredis'
 
 export interface BasicAnimekai {
   id: string;
@@ -31,6 +33,7 @@ export class AnimekaiService {
     private readonly tmdbService: TmdbService,
     private readonly customHttpService: CustomHttpService,
     private readonly helper: AnimeKaiHelper,
+    @InjectRedis() private readonly redis: Redis,
   ) {}
 
   async getAnimekaiByAnilist(id: number): Promise<AnimeKai> {
@@ -47,9 +50,24 @@ export class AnimekaiService {
   }
 
   async getSources(episodeId: string, dub: boolean): Promise<Source> {
-    return this.customHttpService.getResponse(
-      UrlConfig.ANIMEKAI + 'watch/' + episodeId + '?dub=' + dub,
+    const key = `animekai:sources:${episodeId}:${dub ? 'dub' : 'sub'}`
+    const cached = await this.redis.get(key)
+    if (cached) {
+      return JSON.parse(cached) as Source
+    }
+
+    const animekai = await this.customHttpService.getResponse(
+      UrlConfig.ANIMEKAI + 'watch/' + episodeId + '?dub=' + dub
+    )
+
+    await this.redis.set(
+      key,
+      JSON.stringify(animekai),
+      'EX',
+      process.env.SOURCES_REDIS_TIME ? parseInt(process.env.SOURCES_REDIS_TIME) : 3600
     );
+
+    return animekai as Source
   }
 
   async saveAnimekai(animekai: AnimeKai): Promise<AnimeKai> {

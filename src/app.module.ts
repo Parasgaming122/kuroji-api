@@ -15,6 +15,7 @@ import { AuthModule } from './security/auth/auth.module';
 import { UpdateModule } from './update/update.module';
 import { UserModule } from './user/user.module';
 import { ExceptionsModule } from './exception/module/exceptions.module'
+import { RedisModule } from '@nestjs-modules/ioredis'
 
 @Module({
   imports: [
@@ -34,6 +35,13 @@ import { ExceptionsModule } from './exception/module/exceptions.module'
     ConfigModule.forRoot({
       envFilePath: '.env',
       isGlobal: true,
+    }),
+    RedisModule.forRoot({
+      options: {
+        host: process.env.REDIS_HOST ?? 'localhost',
+        port: process.env.REDIS_PORT ? parseInt(process.env.REDIS_PORT) : 6379
+      },
+      type: 'single'
     }),
   ],
   controllers: [AppController],

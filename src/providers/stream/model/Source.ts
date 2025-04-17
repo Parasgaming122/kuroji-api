@@ -1,10 +1,12 @@
+import { JsonValue } from '@prisma/client/runtime/library'
+
 export interface Source {
-  headers: Source.Headers;
-  intro: IntroOutro;
-  outro: IntroOutro;
-  sources: Source.SourceInfo[];
-  subtitles: Source.SubtitleInfo[];
-  download: string;
+  headers: JsonValue;
+  intro: JsonValue;
+  outro: JsonValue;
+  sources: JsonValue;
+  subtitles: JsonValue;
+  download: JsonValue;
 }
 
 export interface IntroOutro {
