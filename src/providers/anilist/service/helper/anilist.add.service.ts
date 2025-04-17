@@ -61,7 +61,7 @@ export class AnilistAddService {
 
     const recommendationIds = existingAnilist.recommendations.map(r => Number(r.idMal)) as number[] || []
     const recommendations = await this.anilist.getAnilists(
-      new FilterDto({ idMalIn: recommendationIds, perPage, page })
+      new FilterDto({ idMalIn: recommendationIds, perPage, page, sort: [MediaSort.SCORE_DESC] })
     );
 
     const basicRecommendations = recommendations.data.map((anilist) =>

@@ -160,7 +160,7 @@ export default class AnilistQL {
         medium
         color
       }
-      recommendations(sort: RATING_DESC) {
+      recommendations {
         edges {
           node {
             id
@@ -267,6 +267,10 @@ export default class AnilistQL {
       stats {
         scoreDistribution {
           score
+          amount
+        }
+        statusDistribution {
+          status
           amount
         }
       }
