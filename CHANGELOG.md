@@ -1,3 +1,12 @@
+## [0.1.1](https://github.com/veaquer/veanime__nestend/compare/v0.1.0...v0.1.1) (2025-04-17)
+
+
+### Bug Fixes
+
+* anilist include ([42d5676](https://github.com/veaquer/veanime__nestend/commit/42d5676a74e7d1acf54d73fb35aa78b90939e0ee))
+
+
+
 # [0.1.0](https://github.com/veaquer/veanime__nestend/compare/v0.0.4...v0.1.0) (2025-04-17)
 
 
