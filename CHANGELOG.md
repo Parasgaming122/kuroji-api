@@ -1,3 +1,12 @@
+# [0.1.0](https://github.com/veaquer/veanime__nestend/compare/v0.0.4...v0.1.0) (2025-04-17)
+
+
+### Features
+
+* console controller ([57db3ec](https://github.com/veaquer/veanime__nestend/commit/57db3ec3a206eb6a6500cb5d25480f8fedb626ae))
+
+
+
 ## [0.0.4](https://github.com/veaquer/veanime__nestend/compare/v0.0.3...v0.0.4) (2025-04-17)
 
 
