@@ -60,7 +60,7 @@ export class AnilistIndexerService {
           },
         });
 
-        await this.sleep(this.getRandomInt(delay - 5, delay + 50))
+        await this.sleep(this.getRandomInt(delay - 5, delay + 25))
       } catch (e: any) {
         console.error('Failed index update:', e)
       }
@@ -112,7 +112,7 @@ export class AnilistIndexerService {
               id: id,
             },
           });
-          await this.sleep(this.getRandomInt(10 - 5, 10 + 50));
+          await this.sleep(this.getRandomInt(10 - 5, 10 + 25));
         } catch (e: any) {
           console.error('Failed scheduled index update:', e);
         }
