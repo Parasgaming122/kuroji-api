@@ -269,36 +269,43 @@ export class AnilistHelper {
       },
       characters: {
         omit: {
+          id: true,
           releaseId: true,
         }
       },
       studios: {
         omit: {
+          id: true,
           releaseId: true,
         }
       },
       airingSchedule: {
         omit: {
+          id: true,
           releaseId: true,
         }
       },
       nextAiringEpisode: {
         omit: {
+          id: true,
           releaseId: true,
         }
       },
       tags: {
         omit: {
+          id: true,
           releaseId: true,
         }
       },
       externalLinks: {
         omit: {
+          id: true,
           releaseId: true,
         }
       },
       streamingEpisodes: {
         omit: {
+          id: true,
           releaseId: true,
         }
       },
