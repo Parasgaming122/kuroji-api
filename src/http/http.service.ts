@@ -45,7 +45,7 @@ export class CustomHttpService {
 
       return data;
     } catch (error) {
-      console.log(`Failed to get response: ${error}`)
+      console.error(`Failed to get response: ${error}`)
       throw error;
     }
   }
@@ -70,7 +70,7 @@ export class CustomHttpService {
 
       return data;
     } catch (error) {
-      console.log(`Failed to get post response: ${error}`)
+      console.error(`Failed to get post response: ${error}`)
       throw error;
     }
   }
