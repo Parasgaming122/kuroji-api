@@ -5,12 +5,13 @@ import { TMDB } from '../../../../configs/tmdb.config'
 import { MediaSort } from '../../graphql/types/MediaEnums'
 import { BasicAnilistSmall, BasicAnilist } from '../../model/BasicAnilist'
 import { FilterDto } from '../../model/FilterDto'
-import { AnilistService, AnilistWithRelations, FranchiseResponse } from '../anilist.service'
+import { AnilistService } from '../anilist.service'
 import { CustomHttpService } from '../../../../http/http.service'
 import { PrismaService } from '../../../../prisma.service'
 import { ShikimoriService } from '../../../shikimori/service/shikimori.service'
 import { TmdbService } from '../../../tmdb/service/tmdb.service'
 import { AnilistHelper } from '../../utils/anilist-helper'
+import { AnilistWithRelations, FranchiseResponse } from '../../model/AnilistModels'
 
 @Injectable()
 export class AnilistAddService {
@@ -43,7 +44,7 @@ export class AnilistAddService {
     return {
       ...chronology,
       data: basicChronology,
-    };
+    } as ApiResponse<BasicAnilistSmall[]>;
   }
 
   async getRecommendations(id: number, perPage: number, page: number): Promise<ApiResponse<BasicAnilistSmall[]>> {
@@ -71,7 +72,7 @@ export class AnilistAddService {
     return {
       ...recommendations,
       data: basicRecommendations,
-    };
+    } as ApiResponse<BasicAnilistSmall[]>;
   }
 
   async getFranchise(franchiseName: string, perPage: number, page: number): Promise<FranchiseResponse<BasicAnilist[]>> {

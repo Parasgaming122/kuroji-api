@@ -16,6 +16,7 @@ import { UpdateModule } from './update/update.module';
 import { UserModule } from './user/user.module';
 import { ExceptionsModule } from './exception/module/exceptions.module'
 import { RedisModule } from '@nestjs-modules/ioredis'
+import { ConsoleModule } from './console/module/console.module'
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { RedisModule } from '@nestjs-modules/ioredis'
     MailerModule,
     CloudinaryModule,
     ExceptionsModule,
+    ConsoleModule,
     ConfigModule.forRoot({
       envFilePath: '.env',
       isGlobal: true,

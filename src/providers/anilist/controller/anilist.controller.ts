@@ -5,12 +5,14 @@ import { StreamService } from '../../stream/service/stream.service'
 import { Provider } from '../../stream/model/Provider'
 import { FilterDto } from '../model/FilterDto'
 import { AnilistAddService } from '../service/helper/anilist.add.service'
+import { AnilistScheduleService } from '../service/helper/anilist.schedule.service'
 
 @Controller('anilist')
 export class AnilistController {
   constructor(
     private readonly service: AnilistService, 
     private readonly add: AnilistAddService,
+    private readonly schedule: AnilistScheduleService,
     private readonly streamService: StreamService, 
     private readonly indexer: AnilistIndexerService
   ) {}
@@ -84,6 +86,11 @@ export class AnilistController {
   @Get('search/:q')
   async searchAnilist(@Param('q') q: string) {
     return this.service.searchAnilist(q);
+  }
+
+  @Get('schedule')
+  async getSchedule() {
+    return this.schedule.getSchedule();
   }
 
   @Get('franchise/:franchise')

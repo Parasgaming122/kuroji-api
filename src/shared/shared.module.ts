@@ -24,6 +24,7 @@ import { AnilistAddService } from '../providers/anilist/service/helper/anilist.a
 import { AnilistFilterService } from '../providers/anilist/service/helper/anilist.filter.service'
 import { AnilistFetchService } from '../providers/anilist/service/helper/anilist.fetch.service'
 import { ExceptionsService } from '../exception/service/exceptions.service'
+import { AnilistScheduleService } from '../providers/anilist/service/helper/anilist.schedule.service'
 
 @Module({
   imports: [HttpModule],
@@ -34,6 +35,7 @@ import { ExceptionsService } from '../exception/service/exceptions.service'
     AnilistAddService,
     AnilistFilterService,
     AnilistFetchService,
+    AnilistScheduleService,
     AnilistIndexerService,
     ShikimoriService,
     AnilistHelper,
@@ -60,6 +62,7 @@ import { ExceptionsService } from '../exception/service/exceptions.service'
     AnilistAddService,
     AnilistFilterService,
     AnilistFetchService,
+    AnilistScheduleService,
     AnilistIndexerService,
     ShikimoriService,
     AnilistHelper,

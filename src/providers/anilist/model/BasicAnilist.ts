@@ -1,4 +1,4 @@
-import { Poster } from '@prisma/client'
+import { AnilistNextAiringEpisode, Poster } from '@prisma/client'
 import { JsonValue } from '@prisma/client/runtime/library'
 
 export interface BasicShikimori {
@@ -47,7 +47,7 @@ export interface BasicAnilist {
 
   genres?: string[];
 
-  nextAiringEpisode?: JsonValue;
+  nextAiringEpisode?: AnilistNextAiringEpisode;
 
   shikimori?: BasicShikimori;
 }
@@ -78,6 +78,8 @@ export interface BasicAnilistSmall {
 
   isLocked?: boolean
   isAdult?: boolean
+
+  nextAiringEpisode?: AnilistNextAiringEpisode;
 
   shikimori?: BasicShikimori
 }

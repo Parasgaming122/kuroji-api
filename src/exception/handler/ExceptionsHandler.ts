@@ -18,7 +18,7 @@ export class ExceptionsHandler implements ExceptionFilter {
     const response = ctx.getResponse<Response>()
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR
-    let message = 'Something went wrong, fam 😤'
+    let message = 'Something went wrong'
     let stack: string | undefined
     let file: string | undefined
     let line: number | undefined
@@ -31,6 +31,7 @@ export class ExceptionsHandler implements ExceptionFilter {
 
     if (exception instanceof Error) {
       stack = exception.stack;
+      message = exception.message
       console.log(stack);
       const stackLines = stack?.split('\n')[1]?.trim()?.match(/\((.*):(\d+):(\d+)\)/)
       if (stackLines) {

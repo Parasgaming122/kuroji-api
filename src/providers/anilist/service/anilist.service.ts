@@ -1,6 +1,5 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { Anilist, Shikimori, AnilistTitle, AnilistCover, StartDate, EndDate, AnilistTag, AnilistExternalLink, AnilistStreamingEpisode, AnilistStudio, AnilistAiringSchedule, AnilistNextAiringEpisode, AnilistCharacter, AnilistTrailer } from '@prisma/client';
-import { PageInfo } from '../../../api/ApiResponse';
+import { Anilist } from '@prisma/client';
 import { PrismaService } from '../../../prisma.service';
 import { UpdateType } from '../../../shared/UpdateType';
 import {
@@ -9,65 +8,11 @@ import {
 import { BasicAnilist } from '../model/BasicAnilist';
 import { AnilistHelper } from '../utils/anilist-helper';
 import { FilterDto } from '../model/FilterDto'
-import { JsonValue } from '@prisma/client/runtime/library'
 import { AnilistAddService } from './helper/anilist.add.service'
 import { AnilistFilterService } from './helper/anilist.filter.service'
 import { AnilistFetchService } from './helper/anilist.fetch.service'
-
-export interface AnilistResponse {
-  Page: {
-    media: Anilist[];
-    pageInfo: {
-      total: number;
-      perPage: number;
-      currentPage: number;
-      lastPage: number;
-      hasNextPage: boolean;
-    };
-  };
-}
-
-export interface FranchiseResponse<T> {
-  franchise: Franchise
-  data: T
-  pageInfo: PageInfo
-}
-
-export interface SearcnResponse<T> {
-  franchise: any
-  data: T
-  pageInfo: PageInfo
-}
-
-export interface MoreInfoResponse {
-  data: {
-    moreinfo?: string
-  }
-}
-
-export interface AnilistWithRelations extends Anilist {
-  title?: AnilistTitle;
-  cover?: AnilistCover;
-  startDate?: StartDate;
-  endDate?: EndDate;
-  trailer?: AnilistTrailer;
-  characters?: AnilistCharacter[];
-  studios?: AnilistStudio[];
-  airingSchedule?: AnilistAiringSchedule[];
-  nextAiringEpisode?: AnilistNextAiringEpisode;
-  tags?: AnilistTag[];
-  externalLinks?: AnilistExternalLink[];
-  streamingEpisodes?: AnilistStreamingEpisode[];
-  shikimori?: Shikimori;
-}
-
-export interface Franchise {
-  cover?: string,
-  banner?: string,
-  title?: JsonValue,
-  franchise?: string,
-  description?: string,
-}
+import { MediaType } from '../graphql/types/MediaEnums'
+import { AnilistWithRelations, SearcnResponse, FranchiseResponse, AnilistResponse } from '../model/AnilistModels'
 
 @Injectable()
 export class AnilistService {
@@ -94,6 +39,11 @@ export class AnilistService {
     const data = await this.fetch.fetchAnilistFromGraphQL(id);
     if (!data.Page?.media || data.Page.media.length === 0) {
       throw new Error('No media found');
+    }
+
+    const type = data.Page.media[0].type as unknown as MediaType;
+    if (type == MediaType.MANGA) {
+      return Promise.reject(Error('Nuh uh, no mangas here'));
     }
 
     await this.saveAnilist(data);
