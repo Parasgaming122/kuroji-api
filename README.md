@@ -108,6 +108,7 @@ Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
 - [TVDB](#tvdb)
 - [Streaming Sources](#streaming-sources)
 - [Exceptions](#exceptions)
+- [Console](#console)
 
 ## Authentication
 | Endpoint | Method | Description | Query/Body Parameters |
@@ -134,7 +135,10 @@ Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
 | `/anilist/info/:id/chronology` | GET | Get chronological order | `perPage`, `page` |
 | `/anilist/info/:id/episodes` | GET | Get episode list | - |
 | `/anilist/info/:id/episodes/:number` | GET | Get specific episode | - |
+| `/anilist/info/:id/providers` | GET | Get episodes list with providers | - |
+| `/anilist/info/:id/providers/:number` | GET | Get specific episode provider | - |
 | `/anilist/watch/:id/episodes/:number` | GET | Get streaming sources | `provider`, `dub` |
+| `/anilist/schedule` | GET | Get anime airing schedule | - |
 | `/anilist/filter` | GET | Filter anime list | `Filter` |
 | `/anilist/search/:q` | GET | Search anime | - |
 | `/anilist/franchise/:franchise` | GET | Get franchise info | `perPage`, `page` |
@@ -197,6 +201,13 @@ Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
 | `/exceptions/all` | GET | Get all exceptions | `perPage`, `page` |
 | `/exceptions/delete/:id` | DELETE | Delete exception | - |
 
+## Console
+| Endpoint | Method | Description | Query/Body Parameters |
+|----------|--------|-------------|---------------------|
+| `/console/logs` | GET | Get logs from console | - |
+| `/console/warns` | GET | Get warns from console | - |
+| `/console/errors` | GET | Get errors from console | - |
+
 ## Response Formats
 
 ### Basic API Response
@@ -242,6 +253,7 @@ export interface Filter {
   tagIn?: string[];
   genreNotIn?: string[];
   genreIn?: string[];
+  tagsIn?: string[];
   durationLesser?: number;
   durationGreater?: number;
   episodesLesser?: number;
