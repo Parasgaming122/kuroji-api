@@ -1,3 +1,12 @@
+## [0.1.3](https://github.com/veaquer/veanime__nestend/compare/v0.1.2...v0.1.3) (2025-04-17)
+
+
+### Bug Fixes
+
+* no more mangas in anilist ([b69120d](https://github.com/veaquer/veanime__nestend/commit/b69120db146c4219cf72d1be5b44e7efee1fc1c5))
+
+
+
 ## [0.1.2](https://github.com/veaquer/veanime__nestend/compare/v0.1.1...v0.1.2) (2025-04-17)
 
 
@@ -21,15 +30,6 @@
 
 
 ## [0.0.4](https://github.com/veaquer/veanime__nestend/compare/v0.0.3...v0.0.4) (2025-04-17)
-
-
-
-## [0.0.3](https://github.com/veaquer/veanime__nestend/compare/v0.0.2...v0.0.3) (2025-04-17)
-
-
-### Bug Fixes
-
-* workflow ([43073d7](https://github.com/veaquer/veanime__nestend/commit/43073d7207021886dbc583b17f9f1515abf5560f))
 
 
 
