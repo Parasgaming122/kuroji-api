@@ -1,3 +1,12 @@
+# [0.2.0](https://github.com/veaquer/veanime__nestend/compare/v0.1.3...v0.2.0) (2025-04-18)
+
+
+### Features
+
+* anilist schedule ([0c1148b](https://github.com/veaquer/veanime__nestend/commit/0c1148b5f460589b2c2704d18102c562bae0d40e))
+
+
+
 ## [0.1.3](https://github.com/veaquer/veanime__nestend/compare/v0.1.2...v0.1.3) (2025-04-17)
 
 
@@ -26,10 +35,6 @@
 ### Features
 
 * console controller ([57db3ec](https://github.com/veaquer/veanime__nestend/commit/57db3ec3a206eb6a6500cb5d25480f8fedb626ae))
-
-
-
-## [0.0.4](https://github.com/veaquer/veanime__nestend/compare/v0.0.3...v0.0.4) (2025-04-17)
 
 
 
