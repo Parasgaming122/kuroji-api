@@ -1,3 +1,18 @@
+# [0.3.0](https://github.com/veaquer/veanime__nestend/compare/v0.2.0...v0.3.0) (2025-04-18)
+
+
+### Bug Fixes
+
+* anilist model ([1d9fd52](https://github.com/veaquer/veanime__nestend/commit/1d9fd528db4f77a268576f92dbda4123d1009d51))
+
+
+### Features
+
+* anilist model and filter improved ([01c1188](https://github.com/veaquer/veanime__nestend/commit/01c1188945049792fded84738cd2e978a5ed0335))
+* update service with anilist improved ([c1aad50](https://github.com/veaquer/veanime__nestend/commit/c1aad5088b4982f63228cda22d99d61469079961))
+
+
+
 # [0.2.0](https://github.com/veaquer/veanime__nestend/compare/v0.1.3...v0.2.0) (2025-04-18)
 
 
@@ -26,15 +41,6 @@
 ### Bug Fixes
 
 * anilist include ([42d5676](https://github.com/veaquer/veanime__nestend/commit/42d5676a74e7d1acf54d73fb35aa78b90939e0ee))
-
-
-
-# [0.1.0](https://github.com/veaquer/veanime__nestend/compare/v0.0.4...v0.1.0) (2025-04-17)
-
-
-### Features
-
-* console controller ([57db3ec](https://github.com/veaquer/veanime__nestend/commit/57db3ec3a206eb6a6500cb5d25480f8fedb626ae))
 
 
 
