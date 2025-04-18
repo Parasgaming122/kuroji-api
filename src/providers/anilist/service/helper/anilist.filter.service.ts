@@ -31,8 +31,10 @@ export class AnilistFilterService {
       filter.genreNotIn ? { genres: { hasNone: filter.genreNotIn } } : {},
       filter.idIn ? { id: { in: filter.idIn } } : {},
       filter.idNotIn ? { id: { notIn: filter.idNotIn } } : {},
+      filter.idNot != null ? { id: { not: filter.idNot } } : {},
       filter.idMalIn ? { idMal: { in: filter.idMalIn } } : {},
       filter.idMalNotIn ? { idMal: { notIn: filter.idMalNotIn } } : {},
+      filter.idMalNot != null ? { idMal: { not: filter.idMalNot } } : {},
 
       // Numeric comparisons
       filter.durationGreater != null
@@ -69,6 +71,32 @@ export class AnilistFilterService {
       filter.statusIn ? { status: { in: filter.statusIn } } : {},
       filter.statusNotIn ? { status: { notIn: filter.statusNotIn } } : {},
       filter.statusNot ? { status: { not: filter.statusNot } } : {},
+
+      filter.tagsIn
+        ? {
+          tags: {
+            some: {
+              name: {
+                in: filter.tagsIn,
+              },
+            },
+          },
+        }
+        : {},
+
+      filter.tagsNotIn
+        ? {
+          NOT: {
+            tags: {
+              some: {
+                name: {
+                  in: filter.tagsNotIn,
+                },
+              },
+            },
+          },
+        }
+        : {},
 
       // Search filter
       filter.query

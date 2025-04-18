@@ -214,6 +214,16 @@ export default class AnilistQL {
         isMediaSpoiler
         isAdult
       }
+      rankings {
+        id
+        rank
+        type
+        format
+        year
+        season
+        allTime
+        context
+      }
       characters {
         edges {
           node {

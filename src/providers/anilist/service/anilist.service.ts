@@ -134,12 +134,14 @@ export class AnilistService {
 
     const chronology = await this.add.getChronology(anilist.id, 4, 1);
 
-    return {
+    const AnilistWithRelations = {
       ...anilist,
       recommendations: recommendations.data || [],
       chronology: chronology.data || [],
       shikimori: shikimori || [],
-    } as unknown as AnilistWithRelations;
+    };
+
+    return this.helper.reorderItems(AnilistWithRelations) as unknown as AnilistWithRelations;
   }
 
   async saveAnilist(data: AnilistResponse): Promise<Anilist> {
@@ -163,8 +165,8 @@ export class AnilistService {
 
     return await this.prisma.anilist.upsert({
       where: { id: anilist.id },
-      create: this.helper.getDataForPrisma(anilist),
-      update: this.helper.getDataForPrisma(anilist),
+      create: await this.helper.getDataForPrisma(anilist),
+      update: await this.helper.getDataForPrisma(anilist),
     });
   }
 

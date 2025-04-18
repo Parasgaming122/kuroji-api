@@ -5,8 +5,8 @@ import {
   IsEnum,
   IsString,
   IsArray,
-} from 'class-validator';
-import { Type, Transform } from 'class-transformer';
+} from 'class-validator'
+import { Type, Transform } from 'class-transformer'
 import {
   MediaFormat,
   MediaSeason,
@@ -14,7 +14,10 @@ import {
   MediaStatus,
   MediaType,
   MediaSource,
-} from '../graphql/types/MediaEnums';
+} from '../graphql/types/MediaEnums'
+
+const TransformToArray = () =>
+  Transform(({ value }) => (Array.isArray(value) ? value : [value]))
 
 export class FilterDto {
   constructor(partial?: Partial<FilterDto>) {
@@ -23,249 +26,278 @@ export class FilterDto {
 
   @IsOptional()
   @IsArray()
+  @TransformToArray()
   @IsEnum(MediaSort, { each: true })
-  @Transform(({ value }) => (Array.isArray(value) ? value : [value]))
-  sort?: MediaSort[];
+  sort?: MediaSort[]
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  perPage?: number;
+  perPage?: number
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  page?: number;
+  page?: number
 
   @IsOptional()
   @IsArray()
+  @TransformToArray()
   @IsEnum(MediaSource, { each: true })
   @Type(() => String)
-  sourceIn?: MediaSource[];
+  sourceIn?: MediaSource[]
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  popularityLesser?: number;
+  popularityLesser?: number
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  popularityGreater?: number;
+  popularityGreater?: number
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  popularityNot?: number;
+  popularityNot?: number
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  averageScoreLesser?: number;
+  averageScoreLesser?: number
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  averageScoreGreater?: number;
+  averageScoreGreater?: number
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  averageScoreNot?: number;
+  averageScoreNot?: number
 
   @IsOptional()
   @IsArray()
+  @TransformToArray()
   @Type(() => String)
-  licensedByIdIn?: string[];
+  licensedByIdIn?: string[]
 
   @IsOptional()
   @IsArray()
+  @TransformToArray()
   @Type(() => String)
-  licensedByIn?: string[];
+  licensedByIn?: string[]
 
   @IsOptional()
   @IsArray()
+  @TransformToArray()
   @Type(() => String)
-  tagCategoryNotIn?: string[];
+  tagCategoryNotIn?: string[]
 
   @IsOptional()
   @IsArray()
+  @TransformToArray()
   @Type(() => String)
-  tagCategoryIn?: string[];
+  tagCategoryIn?: string[]
 
   @IsOptional()
   @IsArray()
+  @TransformToArray()
   @Type(() => String)
-  tagNotIn?: string[];
+  tagNotIn?: string[]
 
   @IsOptional()
   @IsArray()
+  @TransformToArray()
   @Type(() => String)
-  tagIn?: string[];
+  tagIn?: string[]
 
   @IsOptional()
   @IsArray()
+  @TransformToArray()
   @Type(() => String)
-  genreNotIn?: string[];
+  genreNotIn?: string[]
 
   @IsOptional()
   @IsArray()
+  @TransformToArray()
   @Type(() => String)
-  genreIn?: string[];
+  genreIn?: string[]
+
+  @IsOptional()
+  @IsArray()
+  @TransformToArray()
+  @Type(() => String)
+  tagsNotIn?: string[]
+
+  @IsOptional()
+  @IsArray()
+  @TransformToArray()
+  @Type(() => String)
+  tagsIn?: string[]
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  durationLesser?: number;
+  durationLesser?: number
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  durationGreater?: number;
+  durationGreater?: number
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  episodesLesser?: number;
+  episodesLesser?: number
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  episodesGreater?: number;
+  episodesGreater?: number
 
   @IsOptional()
   @IsArray()
+  @TransformToArray()
   @IsEnum(MediaStatus, { each: true })
   @Type(() => String)
-  statusNotIn?: MediaStatus[];
+  statusNotIn?: MediaStatus[]
 
   @IsOptional()
   @IsEnum(MediaStatus)
   @Type(() => String)
-  statusNot?: MediaStatus;
+  statusNot?: MediaStatus
 
   @IsOptional()
   @IsArray()
+  @TransformToArray()
   @IsEnum(MediaStatus, { each: true })
   @Type(() => String)
-  statusIn?: MediaStatus[];
+  statusIn?: MediaStatus[]
 
   @IsOptional()
   @IsArray()
+  @TransformToArray()
   @IsEnum(MediaFormat, { each: true })
   @Type(() => String)
-  formatNotIn?: MediaFormat[];
+  formatNotIn?: MediaFormat[]
 
   @IsOptional()
   @IsEnum(MediaFormat)
   @Type(() => String)
-  formatNot?: MediaFormat;
+  formatNot?: MediaFormat
 
   @IsOptional()
   @IsArray()
+  @TransformToArray()
   @IsEnum(MediaFormat, { each: true })
   @Type(() => String)
-  formatIn?: MediaFormat[];
+  formatIn?: MediaFormat[]
 
   @IsOptional()
   @IsString()
-  endDateLike?: string;
+  endDateLike?: string
 
   @IsOptional()
   @IsString()
-  endDateLesser?: string;
+  endDateLesser?: string
 
   @IsOptional()
   @IsString()
-  endDateGreater?: string;
+  endDateGreater?: string
 
   @IsOptional()
   @IsString()
-  startDateLike?: string;
+  startDateLike?: string
 
   @IsOptional()
   @IsString()
-  startDateLesser?: string;
+  startDateLesser?: string
 
   @IsOptional()
   @IsString()
-  startDateGreater?: string;
+  startDateGreater?: string
 
   @IsOptional()
   @IsArray()
+  @TransformToArray()
   @Type(() => Number)
-  idMalNotIn?: number[];
+  idMalNotIn?: number[]
 
   @IsOptional()
   @IsArray()
+  @TransformToArray()
   @Type(() => Number)
-  idMalIn?: number[];
+  idMalIn?: number[]
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  idMalNot?: number;
+  idMalNot?: number
 
   @IsOptional()
   @IsArray()
+  @TransformToArray()
   @Type(() => Number)
-  idNotIn?: number[];
+  idNotIn?: number[]
 
   @IsOptional()
   @IsArray()
+  @TransformToArray()
   @Type(() => Number)
-  idIn?: number[];
+  idIn?: number[]
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  idNot?: number;
+  idNot?: number
 
   @IsOptional()
   @IsString()
-  query?: string;
+  query?: string
 
   @IsOptional()
   @IsBoolean()
   @Type(() => Boolean)
-  isLicensed?: boolean;
+  isLicensed?: boolean
 
   @IsOptional()
   @IsString()
-  countryOfOrigin?: string;
+  countryOfOrigin?: string
 
   @IsOptional()
   @IsBoolean()
   @Type(() => Boolean)
-  isAdult?: boolean;
+  isAdult?: boolean
 
   @IsOptional()
   @IsEnum(MediaFormat)
   @Type(() => String)
-  format?: MediaFormat;
+  format?: MediaFormat
 
   @IsOptional()
   @IsEnum(MediaType)
   @Type(() => String)
-  type?: MediaType;
+  type?: MediaType
 
   @IsOptional()
   @IsEnum(MediaStatus)
   @Type(() => String)
-  status?: MediaStatus;
+  status?: MediaStatus
 
   @IsOptional()
   @IsEnum(MediaSeason)
   @Type(() => String)
-  season?: MediaSeason;
+  season?: MediaSeason
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  idMal?: number;
+  idMal?: number
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  id?: number;
+  id?: number
 }

@@ -1,4 +1,4 @@
-import { Anilist, AnilistTitle, AnilistCover, StartDate, EndDate, AnilistTrailer, AnilistCharacter, AnilistStudio, AnilistAiringSchedule, AnilistNextAiringEpisode, AnilistTag, AnilistExternalLink, AnilistStreamingEpisode, Shikimori } from '@prisma/client'
+import { Anilist, AnilistTitle, AnilistCover, StartDate, EndDate, AnilistTrailer, AnilistCharacter, AnilistStudio, AnilistAiringSchedule, AnilistNextAiringEpisode, AnilistTag, AnilistExternalLink, AnilistStreamingEpisode, Shikimori, AnilistRanking, AnilistScoreDistribution, AnilistStatusDistribution } from '@prisma/client'
 import { JsonValue } from '@prisma/client/runtime/library'
 import { PageInfo } from '../graphql/types/PageInfo'
 import { BasicAnilistSmall } from './BasicAnilist'
@@ -45,8 +45,11 @@ export interface AnilistWithRelations extends Anilist {
   airingSchedule?: AnilistAiringSchedule[];
   nextAiringEpisode?: AnilistNextAiringEpisode;
   tags?: AnilistTag[];
+  rankings?: AnilistRanking[];
   externalLinks?: AnilistExternalLink[];
   streamingEpisodes?: AnilistStreamingEpisode[];
+  scoreDistribution?: AnilistScoreDistribution[];
+  statusDistribution?: AnilistStatusDistribution[];
   shikimori?: Shikimori;
 }
 

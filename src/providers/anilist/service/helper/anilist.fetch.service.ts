@@ -4,6 +4,7 @@ import AnilistQL from '../../graphql/AnilistQL'
 import AnilistQueryBuilder from '../../graphql/query/AnilistQueryBuilder'
 import { CustomHttpService } from '../../../../http/http.service'
 import { AnilistResponse, MoreInfoResponse } from '../../model/AnilistModels'
+import { MediaType } from '../../graphql/types/MediaEnums'
 
 @Injectable()
 export class AnilistFetchService {
@@ -16,10 +17,12 @@ export class AnilistFetchService {
     const queryBuilder = new AnilistQueryBuilder()
 
     if (isMal) {
-      queryBuilder.setIdMal(id).setPerPage(1)
+      queryBuilder.setIdMal(id).setPerPage(1);
     } else {
-      queryBuilder.setId(id).setPerPage(1)
+      queryBuilder.setId(id).setPerPage(1);
     }
+
+    queryBuilder.setType(MediaType.ANIME);
 
     const query = AnilistQL.getQuery()
 

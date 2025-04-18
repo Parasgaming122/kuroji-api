@@ -15,7 +15,7 @@ export class AnilistHelper {
       siteUrl: anime.siteUrl,
       title: {
         connectOrCreate: {
-          where: { releaseId: anime.id },
+          where: { anilistId: anime.id },
           create: {
             romaji: anime.title?.romaji ?? null,
             english: anime.title?.english ?? null,
@@ -25,7 +25,7 @@ export class AnilistHelper {
       },
       coverImage: {
         connectOrCreate: {
-          where: { releaseId: anime.id },
+          where: { anilistId: anime.id },
           create: {
             color: anime.coverImage?.color ?? null,
             large: anime.coverImage?.large ?? null,
@@ -42,7 +42,7 @@ export class AnilistHelper {
       description: anime.description,
       startDate: {
         connectOrCreate: {
-          where: { releaseId: anime.id },
+          where: { anilistId: anime.id },
           create: {
             day: anime.startDate?.day ?? null,
             month: anime.startDate?.month ?? null,
@@ -52,7 +52,7 @@ export class AnilistHelper {
       },
       endDate: {
         connectOrCreate: {
-          where: { releaseId: anime.id },
+          where: { anilistId: anime.id },
           create: {
             day: anime.endDate?.day ?? null,
             month: anime.endDate?.month ?? null,
@@ -140,10 +140,9 @@ export class AnilistHelper {
           }
         }
       } : undefined,
-      stats: anime.stats ?? [],
       tags: {
         connectOrCreate: anime.tags?.map((tag: any) => ({
-          where: { id: tag.id },
+          where: { name: tag.name },
           create: {
             id: tag.id,
             name: tag.name,
@@ -154,6 +153,21 @@ export class AnilistHelper {
             isMediaSpoiler: tag.isMediaSpoiler ?? false,
             isAdult: tag.isAdult ?? false,
             userId: tag.userId ?? null,
+          }
+        }))
+      },
+      rankings: {
+        connectOrCreate: anime.rankings?.map((ranking: any) => ({
+          where: { id: ranking.id },
+          create: {
+            id: ranking.id,
+            rank: ranking.rank ?? null,
+            type: ranking.type ?? null,
+            format: ranking.format ?? null,
+            year: ranking.year ?? null,
+            season: ranking.season ?? null,
+            allTime: ranking.allTime ?? false,
+            context: ranking.context ?? null,
           }
         }))
       },
@@ -182,6 +196,27 @@ export class AnilistHelper {
           site: episode.site ?? null
         })) ?? []
       },
+      scoreDistribution: {
+        create: anime.stats.scoreDistribution?.map((score: any) => ({
+          score: score.score ?? null,
+          amount: score.amount ?? null,
+        })) ?? []
+      },
+      statusDistribution: {
+        create: anime.stats.statusDistribution?.map((status: any) => ({
+          status: status.status ?? null,
+          amount: status.amount ?? null,
+        })) ?? []
+      }
+    }
+  }
+
+  private async safeConnectOrCreate<T>(model: any, where: any, create: T): Promise<any> {
+    const exists = await model.findUnique({ where })
+    if (exists) {
+      return { connect: where }
+    } else {
+      return { create }
     }
   }
 
@@ -271,72 +306,83 @@ export class AnilistHelper {
       title: {
         omit: {
           id: true,
-          releaseId: true,
+          anilistId: true,
         }
       },
       coverImage: {
         omit: {
           id: true,
-          releaseId: true,
+          anilistId: true,
         }
       },
       startDate: {
         omit: {
           id: true,
-          releaseId: true,
+          anilistId: true,
         }
       },
       endDate: {
         omit: {
           id: true,
-          releaseId: true,
+          anilistId: true,
         }
       },
       trailer: {
         omit: {
-          releaseId: true,
+          anilistId: true,
         }
       },
       characters: {
         omit: {
-          id: true,
-          releaseId: true,
+          anilistId: true,
         }
       },
       studios: {
         omit: {
-          id: true,
-          releaseId: true,
+          anilistId: true,
         }
       },
       airingSchedule: {
         omit: {
-          id: true,
-          releaseId: true,
+          anilistId: true,
         }
       },
       nextAiringEpisode: {
         omit: {
-          id: true,
-          releaseId: true,
+          anilistId: true,
         }
       },
       tags: {
         omit: {
-          id: true,
-          releaseId: true,
+          anilistId: true,
+        }
+      },
+      rankings: {
+        omit: {
+          anilistId: true,
         }
       },
       externalLinks: {
         omit: {
-          id: true,
-          releaseId: true,
+          anilistId: true,
         }
       },
       streamingEpisodes: {
         omit: {
           id: true,
-          releaseId: true,
+          anilistId: true,
+        }
+      },
+      scoreDistribution: {
+        omit: {
+          id: true,
+          anilistId: true,
+        }
+      },
+      statusDistribution: {
+        omit: {
+          id: true,
+          anilistId: true,
         }
       },
     }
@@ -349,5 +395,60 @@ export class AnilistHelper {
       current,
       data: data.sort((a, b) => a.nextAiringEpisode?.airingAt!! - b.nextAiringEpisode?.airingAt!!),
     }
+  }
+
+  public reorderItems(raw: any) {
+    if (!raw) return null
+
+    return {
+      id: raw.id,
+      idMal: raw.idMal,
+      siteUrl: raw.siteUrl,
+      title: raw.title,
+      bannerImage: raw.bannerImage,
+      status: raw.status,
+      type: raw.type,
+      format: raw.format,
+      coverImage: raw.coverImage,
+      updatedAt: raw.updatedAt,
+      description: raw.description,
+      startDate: raw.startDate,
+      endDate: raw.endDate,
+      season: raw.season,
+      seasonYear: raw.seasonYear,
+      episodes: raw.episodes,
+      duration: raw.duration,
+      countryOfOrigin: raw.countryOfOrigin,
+      isLicensed: raw.isLicensed,
+      source: raw.source,
+      hashtag: raw.hashtag,
+      moreInfo: raw.moreInfo,
+      isLocked: raw.isLocked,
+      isAdult: raw.isAdult,
+      averageScore: raw.averageScore,
+      meanScore: raw.meanScore,
+      score: raw.score,
+      popularity: raw.popularity,
+      trending: raw.trending,
+      favourites: raw.favourites,
+      genres: raw.genres,
+      synonyms: raw.synonyms,
+
+      trailer: raw.trailer,
+      nextAiringEpisode: raw.nextAiringEpisode,
+
+      characters: raw.characters,
+      studios: raw.studios,
+      airingSchedule: raw.airingSchedule,
+      tags: raw.tags,
+      rankings: raw.rankings,
+      externalLinks: raw.externalLinks,
+      streamingEpisodes: raw.streamingEpisodes,
+      scoreDistribution: raw.scoreDistribution,
+      statusDistribution: raw.statusDistribution,
+      recommendations: raw.recommendations,
+      chronology: raw.chronology,
+      shikimori: raw.shikimori,
+    };
   }
 }
