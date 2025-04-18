@@ -111,11 +111,28 @@ export class UpdateService {
             const anilistStatus = anilist.status as MediaStatus
 
             temperature = (() => {
-              switch (anilistStatus) {
-                case MediaStatus.RELEASING: return Temperature.HOT
-                case MediaStatus.NOT_YET_RELEASED: return Temperature.WARM
-                default: return Temperature.COLD
+              const { popularity, trending, averageScore, favourites, rankings } = anilist
+
+              const rank = rankings?.find(r => r.allTime)?.rank ?? 9999
+              const highScore = averageScore!! >= 80
+              const hype = trending!! > 5000 || popularity!! > 100000
+              const isTopRanked = rank <= 100
+
+              if (anilistStatus === MediaStatus.RELEASING) {
+                if (isTopRanked || (hype && highScore)) {
+                  return Temperature.HOT
+                } else if (hype || highScore) {
+                  return Temperature.WARM
+                } else {
+                  return Temperature.COLD
+                }
               }
+
+              if (anilistStatus === MediaStatus.NOT_YET_RELEASED) {
+                return hype ? Temperature.WARM : Temperature.COLD
+              }
+
+              return highScore || isTopRanked ? Temperature.WARM : Temperature.COLD
             })();
           } else {
             if (type === UpdateType.TMDB) {
