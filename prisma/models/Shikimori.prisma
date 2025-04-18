@@ -6,6 +6,7 @@ model Shikimori {
   licenseNameRu String?
   english       String?
   japanese      String?
+  poster        Json?
   synonyms      String[]
   kind          String?
   rating        String?
@@ -19,8 +20,6 @@ model Shikimori {
   franchise     String?
   url           String?
   season        String?
-  poster        Json?
-  posterId      Int?
   createdAt     DateTime?
   updatedAt     DateTime?
   nextEpisodeAt DateTime?

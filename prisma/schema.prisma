@@ -12,12 +12,16 @@ model Anilist {
   id                Int      @id
   idMal             Int?
   siteUrl           String?
+  title             AnilistTitle?          @relation("AnilistTitle")
   bannerImage       String?
   status            String?
   type              String?
   format            String?
+  coverImage        AnilistCover?          @relation("AnilistCover")
   updatedAt         Int?
   description       String?
+  startDate         StartDate?             @relation("AnilistStartDate")
+  endDate           EndDate?               @relation("AnilistEndDate")
   season            String?
   seasonYear        Int?
   episodes          Int?
@@ -38,11 +42,6 @@ model Anilist {
   genres            String[]
   synonyms          String[]
 
-  // FKs handled in child models
-  title             AnilistTitle?          @relation("AnilistTitle")
-  coverImage        AnilistCover?          @relation("AnilistCover")
-  startDate         StartDate?             @relation("AnilistStartDate")
-  endDate           EndDate?               @relation("AnilistEndDate")
   trailer           AnilistTrailer?        @relation("AnilistTrailer")
   nextAiringEpisode AnilistNextAiringEpisode? @relation("AnilistNextAiringEpisode")
 
@@ -322,6 +321,7 @@ model Shikimori {
   licenseNameRu String?
   english       String?
   japanese      String?
+  poster        Json?
   synonyms      String[]
   kind          String?
   rating        String?
@@ -335,8 +335,6 @@ model Shikimori {
   franchise     String?
   url           String?
   season        String?
-  poster        Json?
-  posterId      Int?
   createdAt     DateTime?
   updatedAt     DateTime?
   nextEpisodeAt DateTime?
