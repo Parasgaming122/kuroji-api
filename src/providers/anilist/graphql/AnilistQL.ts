@@ -249,6 +249,7 @@ export default class AnilistQL {
           node {
             id
             airingAt
+            timeUntilAiring
             episode
           }
         }

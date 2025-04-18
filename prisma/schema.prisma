@@ -103,7 +103,6 @@ model AnilistIndex {
 model AnilistCharacter {
   id          Int      @id @default(autoincrement())
   releaseId   Int
-  characterId Int?
   name        String?
   image       String?  // Store the medium image URL
 
@@ -113,7 +112,6 @@ model AnilistCharacter {
 model AnilistTag {
   id               Int      @id @default(autoincrement())
   releaseId        Int
-  tagId            Int?
   name             String?
   description      String?
   category         String?
@@ -129,7 +127,6 @@ model AnilistTag {
 model AnilistExternalLink {
   id         Int      @id @default(autoincrement())
   releaseId  Int
-  exLinkId   Int?
   url        String?
   site       String?
   siteId     Int?
@@ -157,7 +154,6 @@ model AnilistStreamingEpisode {
 model AnilistStudio {
   id         Int      @id @default(autoincrement())
   releaseId  Int
-  studioId   Int?
   name       String?
   isMain     Boolean?
 
@@ -167,9 +163,9 @@ model AnilistStudio {
 model AnilistAiringSchedule {
   id              Int      @id @default(autoincrement())
   releaseId       Int
-  scheduleId      Int?
   episode         Int?
   airingAt        Int?
+  timeUntilAiring Int?
 
   anilist         Anilist  @relation("AnilistAiringSchedules", fields: [releaseId], references: [id])
 }
@@ -185,7 +181,7 @@ model AnilistNextAiringEpisode {
 }
 
 model AnilistTrailer {
-  id              String      @id
+  id              String   @id @default(uuid())
   releaseId       Int      @unique
   site            String?
   thumbnail       String?

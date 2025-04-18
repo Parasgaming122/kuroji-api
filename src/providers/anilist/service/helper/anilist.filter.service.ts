@@ -36,29 +36,29 @@ export class AnilistFilterService {
 
       // Numeric comparisons
       filter.durationGreater != null
-      ? { duration: { gt: filter.durationGreater } }
-      : {},
+        ? { duration: { gt: filter.durationGreater } }
+        : {},
       filter.durationLesser != null
-      ? { duration: { lt: filter.durationLesser } }
-      : {},
+        ? { duration: { lt: filter.durationLesser } }
+        : {},
       filter.episodesGreater != null
-      ? { episodes: { gt: filter.episodesGreater } }
-      : {},
+        ? { episodes: { gt: filter.episodesGreater } }
+        : {},
       filter.episodesLesser != null
-      ? { episodes: { lt: filter.episodesLesser } }
-      : {},
+        ? { episodes: { lt: filter.episodesLesser } }
+        : {},
       filter.popularityGreater != null
-      ? { popularity: { gt: filter.popularityGreater } }
-      : {},
+        ? { popularity: { gt: filter.popularityGreater } }
+        : {},
       filter.popularityLesser != null
-      ? { popularity: { lt: filter.popularityLesser } }
-      : {},
+        ? { popularity: { lt: filter.popularityLesser } }
+        : {},
       filter.averageScoreGreater != null
-      ? { averageScore: { gt: filter.averageScoreGreater } }
-      : {},
+        ? { averageScore: { gt: filter.averageScoreGreater } }
+        : {},
       filter.averageScoreLesser != null
-      ? { averageScore: { lt: filter.averageScoreLesser } }
-      : {},
+        ? { averageScore: { lt: filter.averageScoreLesser } }
+        : {},
 
       // Format filters
       filter.formatIn ? { format: { in: filter.formatIn } } : {},
@@ -72,98 +72,98 @@ export class AnilistFilterService {
 
       // Search filter
       filter.query
-      ? {
-        OR: [
-          {
-          title: {
-            romaji: {
-            contains: filter.query,
-            mode: 'insensitive',
+        ? {
+          OR: [
+            {
+              title: {
+                romaji: {
+                  contains: filter.query,
+                  mode: 'insensitive',
+                },
+              },
             },
-          },
-          },
-          {
-          title: {
-            english: {
-            contains: filter.query,
-            mode: 'insensitive',
+            {
+              title: {
+                english: {
+                  contains: filter.query,
+                  mode: 'insensitive',
+                },
+              },
             },
-          },
-          },
-          {
-          title: {
-            native: {
-            contains: filter.query,
-            mode: 'insensitive',
+            {
+              title: {
+                native: {
+                  contains: filter.query,
+                  mode: 'insensitive',
+                },
+              },
             },
-          },
-          },
-          {
-          synonyms: {
-            hasSome: [filter.query],
-          },
-          },
-        ],
+            {
+              synonyms: {
+                hasSome: [filter.query],
+              },
+            },
+          ],
         } as any
-      : {},
+        : {},
 
       // Date filters using JSON paths and string format "YYYY.M.D"
       filter.startDateGreater
-      ? (() => {
-        const [year, month, day] = filter.startDateGreater.split('.').map(Number);
-        return {
-          OR: [
-          { startDate: { path: '$.year', gt: year } },
-          {
-            AND: [
-            { startDate: { path: '$.year', equals: year } },
-            { startDate: { path: '$.month', gt: month } },
+        ? (() => {
+          const [year, month, day] = filter.startDateGreater.split('.').map(Number)
+          return {
+            OR: [
+              { startDate: { path: '$.year', gt: year } },
+              {
+                AND: [
+                  { startDate: { path: '$.year', equals: year } },
+                  { startDate: { path: '$.month', gt: month } },
+                ],
+              },
+              {
+                AND: [
+                  { startDate: { path: '$.year', equals: year } },
+                  { startDate: { path: '$.month', equals: month } },
+                  { startDate: { path: '$.day', gt: day } },
+                ],
+              },
             ],
-          },
-          {
-            AND: [
-            { startDate: { path: '$.year', equals: year } },
-            { startDate: { path: '$.month', equals: month } },
-            { startDate: { path: '$.day', gt: day } },
-            ],
-          },
-          ],
-        };
+          }
         })()
-      : {},
+        : {},
       filter.endDateGreater
-      ? (() => {
-        const [year, month, day] = filter.endDateGreater.split('.').map(Number);
-        return {
-          OR: [
-          { endDate: { path: '$.year', gt: year } },
-          {
-            AND: [
-            { endDate: { path: '$.year', equals: year } },
-            { endDate: { path: '$.month', gt: month } },
+        ? (() => {
+          const [year, month, day] = filter.endDateGreater.split('.').map(Number)
+          return {
+            OR: [
+              { endDate: { path: '$.year', gt: year } },
+              {
+                AND: [
+                  { endDate: { path: '$.year', equals: year } },
+                  { endDate: { path: '$.month', gt: month } },
+                ],
+              },
+              {
+                AND: [
+                  { endDate: { path: '$.year', equals: year } },
+                  { endDate: { path: '$.month', equals: month } },
+                  { endDate: { path: '$.day', gt: day } },
+                ],
+              },
             ],
-          },
-          {
-            AND: [
-            { endDate: { path: '$.year', equals: year } },
-            { endDate: { path: '$.month', equals: month } },
-            { endDate: { path: '$.day', gt: day } },
-            ],
-          },
-          ],
-        };
+          }
         })()
-      : {},
-    ].filter((condition) => Object.keys(condition).length > 0);
+        : {},
+    ].filter((condition) => Object.keys(condition).length > 0)
 
-    const whereCondition = { AND: conditions };
+    const whereCondition = { AND: conditions }
 
-    const perPage = filter.perPage || 25;
-    const currentPage = filter.page || 1;
-    const skip = (currentPage - 1) * perPage;
+    const perPage = filter.perPage || 25
+    const currentPage = filter.page || 1
+    const skip = (currentPage - 1) * perPage
 
     let isRecentSort = false
-    let recentIds: number[] = [];
+    let recentIds: number[] = []
 
     const orderBy = await (async () => {
       const sortFields = filter.sort?.map(async (sortField) => {
@@ -208,12 +208,12 @@ export class AnilistFilterService {
           return nested
         }
 
-        return { [parts[0]]: direction };
+        return { [parts[0]]: direction }
       }) || [{ id: 'desc' }]
 
       const resolvedSorts = await Promise.all(sortFields)
       return resolvedSorts.flat()
-    })();
+    })()
 
     if (isRecentSort && recentIds.length > 0) {
       conditions.push({ id: { in: recentIds } })
@@ -230,7 +230,7 @@ export class AnilistFilterService {
       this.prisma.anilist.count({
         where: whereCondition,
       }),
-    ]);
+    ])
 
     const sortedData = isRecentSort ? await this.getRecentData(data, recentIds) : data
 
@@ -243,7 +243,7 @@ export class AnilistFilterService {
       hasNextPage: currentPage < lastPage,
     }
 
-    return { pageInfo, data: sortedData };
+    return { pageInfo, data: sortedData }
   }
 
   private async getRecentIds(): Promise<number[]> {

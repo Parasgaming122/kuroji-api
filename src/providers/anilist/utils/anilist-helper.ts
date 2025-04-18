@@ -14,18 +14,24 @@ export class AnilistHelper {
       idMal: anime.idMal,
       siteUrl: anime.siteUrl,
       title: {
-        create: {
-          romaji: anime.title?.romaji ?? null,
-          english: anime.title?.english ?? null,
-          native: anime.title?.native ?? null,
+        connectOrCreate: {
+          where: { releaseId: anime.id },
+          create: {
+            romaji: anime.title?.romaji ?? null,
+            english: anime.title?.english ?? null,
+            native: anime.title?.native ?? null,
+          }
         }
       },
       coverImage: {
-        create: {
-          color: anime.coverImage?.color ?? null,
-          large: anime.coverImage?.large ?? null,
-          medium: anime.coverImage?.medium ?? null,
-          extraLarge: anime.coverImage?.extraLarge ?? null
+        connectOrCreate: {
+          where: { releaseId: anime.id },
+          create: {
+            color: anime.coverImage?.color ?? null,
+            large: anime.coverImage?.large ?? null,
+            medium: anime.coverImage?.medium ?? null,
+            extraLarge: anime.coverImage?.extraLarge ?? null
+          }
         }
       },
       bannerImage: anime.bannerImage,
@@ -35,17 +41,23 @@ export class AnilistHelper {
       updatedAt: anime.updatedAt,
       description: anime.description,
       startDate: {
-        create: {
-          day: anime.startDate?.day ?? null,
-          month: anime.startDate?.month ?? null,
-          year: anime.startDate?.year ?? null
+        connectOrCreate: {
+          where: { releaseId: anime.id },
+          create: {
+            day: anime.startDate?.day ?? null,
+            month: anime.startDate?.month ?? null,
+            year: anime.startDate?.year ?? null
+          }
         }
       },
       endDate: {
-        create: {
-          day: anime.endDate?.day ?? null,
-          month: anime.endDate?.month ?? null,
-          year: anime.endDate?.year ?? null
+        connectOrCreate: {
+          where: { releaseId: anime.id },
+          create: {
+            day: anime.endDate?.day ?? null,
+            month: anime.endDate?.month ?? null,
+            year: anime.endDate?.year ?? null
+          }
         }
       },
       season: anime.season,
@@ -58,10 +70,13 @@ export class AnilistHelper {
       hashtag: anime.hashtag,
       moreInfo: anime.moreInfo,
       trailer: anime.trailer ? {
-        create: {
-          id: anime.trailer?.id ?? null,
-          site: anime.trailer?.site ?? null,
-          thumbnail: anime.trailer?.thumbnail ?? null
+        connectOrCreate: {
+          where: { id: anime.trailer?.id },
+          create: {
+            id: anime.trailer?.id ?? undefined,
+            site: anime.trailer?.site ?? null,
+            thumbnail: anime.trailer?.thumbnail ?? null
+          }
         }
       } : undefined,
       isLocked: anime.isLocked,
@@ -75,74 +90,88 @@ export class AnilistHelper {
       genres: anime.genres,
       synonyms: anime.synonyms,
       recommendations: {
-        create: anime.recommendations?.edges?.map((edge: any) => ({
-          id: edge?.node?.mediaRecommendation.id ?? null,
-          idMal: edge?.node?.mediaRecommendation.idMal ?? null
+        connectOrCreate: anime.recommendations?.edges?.map((edge: any) => ({
+          where: { id: edge?.node?.mediaRecommendation.id },
+          create: {
+            id: edge?.node?.mediaRecommendation.id ?? null,
+            idMal: edge?.node?.mediaRecommendation.idMal ?? null
+          }
         })) ?? []
       },
       characters: {
-        create: anime.characters?.edges?.map((edge: any) => ({
-          characterId: edge?.node?.id ?? null,
-          name: edge?.node?.name?.full ?? null,
-          image: edge?.node?.image?.medium ?? null
+        connectOrCreate: anime.characters?.edges?.map((edge: any) => ({
+          where: { id: edge?.node?.id },
+          create: {
+            id: edge?.node?.id ?? null,
+            name: edge?.node?.name?.full ?? null,
+            image: edge?.node?.image?.medium ?? null
+          }
         })) ?? []
       },
       studios: {
-        create: anime.studios?.edges?.map((edge: any) => ({
-          studioId: edge?.node?.id ?? null,
-          name: edge?.node?.name ?? null,
-          isMain: edge?.isMain ?? false
+        connectOrCreate: anime.studios?.edges?.map((edge: any) => ({
+          where: { id: edge?.node?.id },
+          create: {
+            id: edge?.node?.id ?? null,
+            name: edge?.node?.name ?? null,
+            isMain: edge?.isMain ?? false
+          }
         })) ?? []
       },
       airingSchedule: {
-        create: anime.airingSchedule?.edges?.map((edge: any) => ({
-          scheduleId: edge?.node?.id ?? null,
-          episode: edge?.node?.episode ?? null,
-          airingAt: edge?.node?.airingAt ?? null
+        connectOrCreate: anime.airingSchedule?.edges?.map((edge: any) => ({
+          where: { id: edge?.node?.id },
+          create: {
+            id: edge?.node?.id ?? null,
+            episode: edge?.node?.episode ?? null,
+            airingAt: edge?.node?.airingAt ?? null,
+            timeUntilAiring: edge?.node?.timeUntilAiring ?? null
+          }
         })) ?? []
       },
       nextAiringEpisode: anime.nextAiringEpisode ? {
-        create: {
-          episode: anime.nextAiringEpisode?.episode ?? null,
-          airingAt: anime.nextAiringEpisode?.airingAt ?? null,
-          timeUntilAiring: anime.nextAiringEpisode?.timeUntilAiring ?? null
+        connectOrCreate: {
+          where: { id: anime.nextAiringEpisode?.id },
+          create: {
+            id: anime.nextAiringEpisode?.id,
+            episode: anime.nextAiringEpisode?.episode ?? null,
+            airingAt: anime.nextAiringEpisode?.airingAt ?? null,
+            timeUntilAiring: anime.nextAiringEpisode?.timeUntilAiring ?? null
+          }
         }
       } : undefined,
-      // stats: {
-      //   create: {
-      //     scoreDistribution: {
-      //       create: {
-      //         score: anime.stats.scoreDistribution.score,
-      //         amount: anime.stats.scoreDistribution.amount,
-      //       },
-      //     },
-      //   },
-      // },
       stats: anime.stats ?? [],
       tags: {
-        create: anime.tags?.map((tag: any) => ({
-          name: tag.name,
-          description: tag.description ?? null,
-          category: tag.category ?? null,
-          rank: tag.rank ?? null,
-          isGeneralSpoiler: tag.isGeneralSpoiler ?? false,
-          isMediaSpoiler: tag.isMediaSpoiler ?? false,
-          isAdult: tag.isAdult ?? false,
-          userId: tag.userId ?? null,
+        connectOrCreate: anime.tags?.map((tag: any) => ({
+          where: { id: tag.id },
+          create: {
+            id: tag.id,
+            name: tag.name,
+            description: tag.description ?? null,
+            category: tag.category ?? null,
+            rank: tag.rank ?? null,
+            isGeneralSpoiler: tag.isGeneralSpoiler ?? false,
+            isMediaSpoiler: tag.isMediaSpoiler ?? false,
+            isAdult: tag.isAdult ?? false,
+            userId: tag.userId ?? null,
+          }
         }))
       },
       externalLinks: {
-        create: anime.externalLinks?.map((link: any) => ({
-          exLinkId: link.id ?? null,
-          url: link.url ?? null,
-          site: link.site ?? null,
-          siteId: link.siteId ?? null,
-          type: link.type ?? null,
-          language: link.language ?? null,
-          color: link.color ?? null,
-          icon: link.icon ?? null,
-          notes: link.notes ?? null,
-          isDisabled: link.isDisabled ?? false
+        connectOrCreate: anime.externalLinks?.map((link: any) => ({
+          where: { id: link.id },
+          create: {
+            id: link.id,
+            url: link.url ?? null,
+            site: link.site ?? null,
+            siteId: link.siteId ?? null,
+            type: link.type ?? null,
+            language: link.language ?? null,
+            color: link.color ?? null,
+            icon: link.icon ?? null,
+            notes: link.notes ?? null,
+            isDisabled: link.isDisabled ?? false
+          }
         })) ?? []
       },
       streamingEpisodes: {
