@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { UrlConfig } from '../../../../configs/url.config'
 import AnilistQL from '../../graphql/AnilistQL'
 import AnilistQueryBuilder from '../../graphql/query/AnilistQueryBuilder'
-import { AnilistResponse, MoreInfoResponse } from '../anilist.service'
 import { CustomHttpService } from '../../../../http/http.service'
+import { AnilistResponse, MoreInfoResponse } from '../../model/AnilistModels'
 
 @Injectable()
 export class AnilistFetchService {

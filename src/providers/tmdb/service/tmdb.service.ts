@@ -11,11 +11,9 @@ import { CustomHttpService } from '../../../http/http.service';
 import { PrismaService } from '../../../prisma.service';
 import { ScrapeHelper } from '../../../scrapper/scrape-helper';
 import { UpdateType } from '../../../shared/UpdateType';
-import {
-  AnilistService,
-  AnilistWithRelations,
-} from '../../anilist/service/anilist.service';
+import { AnilistService } from '../../anilist/service/anilist.service';
 import { TmdbHelper } from '../utils/tmdb-helper';
+import { AnilistWithRelations } from '../../anilist/model/AnilistModels'
 
 export interface BasicTmdb {
   id: number;

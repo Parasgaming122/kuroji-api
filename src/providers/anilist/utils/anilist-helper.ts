@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import { Anilist, Poster, Prisma, Shikimori } from '@prisma/client'
-import { AnilistWithRelations } from '../service/anilist.service'
 import { BasicAnilist, BasicAnilistSmall, BasicShikimori } from '../model/BasicAnilist'
 import { PrismaService } from '../../../prisma.service'
+import { ScheduleData } from '../model/AnilistModels'
 
 @Injectable()
 export class AnilistHelper {
@@ -207,6 +207,7 @@ export class AnilistHelper {
       score: anilist.score ?? undefined,
       isLocked: anilist.isLocked ?? undefined,
       isAdult: anilist.isAdult ?? undefined,
+      nextAiringEpisode: anilist.nextAiringEpisode ?? undefined,
       shikimori: this.convertShikimoriToBasic(anilist.shikimori)
     }
   }
@@ -312,5 +313,12 @@ export class AnilistHelper {
     }
 
     return include;
+  }
+
+  public createScheduleData(data: BasicAnilistSmall[] = [], current: boolean): ScheduleData {
+    return {
+      current,
+      data: data.sort((a, b) => a.nextAiringEpisode?.airingAt!! - b.nextAiringEpisode?.airingAt!!),
+    }
   }
 }
