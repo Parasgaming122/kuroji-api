@@ -186,12 +186,18 @@ export class UpdateService {
             switch(temperature) {
               case Temperature.HOT:
                 if (type === UpdateType.ANILIST || type === UpdateType.SHIKIMORI || type === UpdateType.TVDB) {
-                  return 8 * 60 * 60 * 1000;
+                  return 24 * 60 * 60 * 1000;
                 }
                 return 3 * 60 * 60 * 1000;
               case Temperature.WARM:
+                if (type === UpdateType.ANILIST || type === UpdateType.SHIKIMORI || type === UpdateType.TVDB) {
+                  return 7 * 24 * 60 * 60 * 1000;
+                }
                 return 3 * 24 * 60 * 60 * 1000;
               case Temperature.COLD:
+                if (type === UpdateType.ANILIST || type === UpdateType.SHIKIMORI || type === UpdateType.TVDB) {
+                  return 28 * 24 * 60 * 60 * 1000
+                }
                 return 21 * 24 * 60 * 60 * 1000;
               default:
                 return 21 * 24 * 60 * 60 * 1000;
