@@ -103,12 +103,12 @@ export class AnilistController {
   }
 
   @Put('index')
-  index(@Query('resume') resume: boolean = true, @Query('delay') delay: number = 10) {
-    this.indexer.index(resume, delay)
+  index(@Query('delay') delay: number = 10) {
+    this.indexer.index(delay)
       .catch((err) => console.error('Indexer failed:', err)); // just in case it blows up
 
     return {
-      status: 'Indexing started, we vibin’ 🧑‍🍳🔥',
+      status: 'Indexing started',
     };
   }
 
@@ -116,18 +116,18 @@ export class AnilistController {
   async stopIndex() {
     this.indexer.stop();
     return {
-      status: 'Indexing stopped, ig?',
+      status: 'Indexing stopped',
     };
   }
 
-  @Put('index/resume')
-  async resumeIndex(@Query('delay') delay: number = 10) {
-    this.indexer.resume(delay)
-     .catch((err) => console.error('Indexer failed:', err)); // just in case it blows up
+  @Put('index/sleep/:sleep')
+  sleep(@Param('sleep', ParseIntPipe) sleep: number) {
+    this.indexer.sleep(sleep)
+      .catch((err) => console.error('Sleeping failed:', err))
 
-   return {
-     status: 'Indexing resumed, we vibin’ 🧑‍🍳🔥',
-   };
+    return {
+      status: `Sleeping for ${sleep}s`,
+    }
   }
 
   @Put('index/schedule')

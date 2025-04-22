@@ -283,6 +283,8 @@ export class AnilistHelper {
     return {
       id: shikimori.id,
       malId: shikimori.malId ?? undefined,
+      russian: shikimori.russian ?? undefined,
+      licenseNameRu: shikimori.licenseNameRu ?? undefined,
       url: shikimori.url ?? undefined,
       franchise: shikimori.franchise ?? undefined,
       poster: shikimori.poster as Poster ?? undefined

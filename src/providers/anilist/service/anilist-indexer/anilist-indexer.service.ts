@@ -15,7 +15,6 @@ export interface Ids {
 export class AnilistIndexerService {
   private isRunning: boolean = false;
   private scheduledUpdatesEnabled: boolean = false;
-  private lastProcessedIndex: AtomicInteger = new AtomicInteger(0);
   private allIds: number[] = [];
   constructor(
     private readonly prisma: PrismaService,
@@ -23,17 +22,13 @@ export class AnilistIndexerService {
     private readonly httpService: CustomHttpService,
   ) {}
 
-  public async index(resume: boolean, delay: number) {
+  public async index(delay: number) {
     if (this.isRunning) {
       console.log('Already running, skip this round.')
       return
     }
 
     this.isRunning = true
-
-    if (!resume) {
-      this.lastProcessedIndex.set(0)
-    }
 
     this.allIds = (await this.getIds()).sort(() => Math.random() - 0.5)
 
@@ -70,19 +65,13 @@ export class AnilistIndexerService {
     console.log('Indexing complete, shutting it down 🛑')
   }
 
+  public stop(): void {
+    this.isRunning = false
+  }
+
   public async sleep(delay: number): Promise<void> {
     console.log(`Sleeping for ${delay} seconds...`);
     return new Promise((resolve) => setTimeout(resolve, delay * 1000));
-  }
-
-  public stop(): void {
-    this.isRunning = false;
-  }
-
-  public async resume(delay: number): Promise<void> {
-    if (!this.isRunning) {
-      await this.index(true, delay);
-    }
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_NOON)

@@ -4,6 +4,8 @@ import { JsonValue } from '@prisma/client/runtime/library'
 export interface BasicShikimori {
   id?: string;
   malId?: string;
+  russian?: string;
+  licenseNameRu?: string;
   url?: string;
   franchise?: string;
   poster?: Poster;
