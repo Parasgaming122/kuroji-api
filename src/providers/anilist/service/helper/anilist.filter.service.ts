@@ -14,6 +14,15 @@ export class AnilistFilterService {
     filter: FilterDto,
   ): Promise<ApiResponse<Anilist[]>> {
 
+    const shikimori = await this.prisma.shikimori.findMany({
+      where: {
+        OR: [
+          { russian: { contains: filter.query, mode: 'insensitive' } },
+          { licenseNameRu: { contains: filter.query, mode: 'insensitive' } }
+        ]
+      }
+    });
+
     const conditions = [
       // Basic filters (only include if defined)
       filter.id !== undefined ? { id: filter.id } : {},
@@ -95,43 +104,6 @@ export class AnilistFilterService {
               },
             },
           },
-        }
-        : {},
-
-      // Search filter
-      filter.query
-        ? {
-          OR: [
-            {
-              title: {
-                romaji: {
-                  contains: filter.query,
-                  mode: 'insensitive',
-                },
-              },
-            },
-            {
-              title: {
-                english: {
-                  contains: filter.query,
-                  mode: 'insensitive',
-                },
-              },
-            },
-            {
-              title: {
-                native: {
-                  contains: filter.query,
-                  mode: 'insensitive',
-                },
-              },
-            },
-            {
-              synonyms: {
-                hasSome: [filter.query],
-              },
-            },
-          ],
         } as any
         : {},
 
@@ -183,6 +155,42 @@ export class AnilistFilterService {
         })()
         : {},
     ].filter((condition) => Object.keys(condition).length > 0)
+
+    const malIdsFromShikimori = shikimori.map(s => +s.malId!).filter(id => !!id)
+
+    const searchOr: any[] = []
+
+    if (filter.query) {
+      searchOr.push({
+        title: {
+          romaji: { contains: filter.query, mode: 'insensitive' }
+        }
+      })
+
+      searchOr.push({
+        title: {
+          english: { contains: filter.query, mode: 'insensitive' }
+        }
+      })
+
+      searchOr.push({
+        title: {
+          native: { contains: filter.query, mode: 'insensitive' }
+        }
+      })
+
+      searchOr.push({
+        synonyms: { hasSome: [filter.query] }
+      })
+    }
+
+    if (malIdsFromShikimori.length) {
+      searchOr.push({ idMal: { in: malIdsFromShikimori } })
+    }
+
+    if (searchOr.length) {
+      conditions.push({ OR: searchOr })
+    }
 
     const whereCondition = { AND: conditions }
 

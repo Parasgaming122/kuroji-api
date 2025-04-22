@@ -15,6 +15,7 @@ export interface Episode {
   number: number,
   overview: string,
   date: string,
+  duration: number,
   filler: boolean,
   sub: boolean,
   dub: boolean
@@ -71,6 +72,7 @@ export class StreamService {
           number,
           overview: tmdbEpisode?.overview ?? "",
           date: tmdbEpisode?.air_date ?? "",
+          duration: tmdbEpisode?.runtime ?? 0,
           filler,
           sub,
           dub,
