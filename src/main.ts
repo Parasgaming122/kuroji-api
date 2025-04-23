@@ -6,6 +6,7 @@ import { AppModule } from './app.module';
 import { config } from 'dotenv';
 import { ExceptionsHandler } from './exception/handler/ExceptionsHandler'
 import { PrismaService } from './prisma.service'
+import { RootPathBlockerMiddleware } from './shared/RootPathBlockerMiddleware'
 config();
 
 Object.defineProperty(BigInt.prototype, 'toJSON', {
@@ -18,6 +19,7 @@ Object.defineProperty(BigInt.prototype, 'toJSON', {
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
+  app.use(new RootPathBlockerMiddleware().use)
   app.enableCors({
     origin: [
       'http://localhost:3000',
