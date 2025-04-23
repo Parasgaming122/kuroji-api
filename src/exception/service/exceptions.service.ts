@@ -20,6 +20,10 @@ export class ExceptionsService {
       where.path = { contains: filter.path, mode: 'insensitive' }
     }
 
+    if (filter.message) {
+      where.message = { contains: filter.message, mode: 'insensitive' }
+    }
+
     if (filter.method) {
       where.method = { equals: filter.method, mode: 'insensitive' }
     }

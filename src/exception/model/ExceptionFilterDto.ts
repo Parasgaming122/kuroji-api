@@ -13,6 +13,10 @@ export class ExceptionFilterDto {
 
   @IsOptional()
   @IsString()
+  message?: string
+
+  @IsOptional()
+  @IsString()
   method?: string
 
   @IsOptional()
