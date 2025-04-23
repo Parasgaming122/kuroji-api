@@ -113,22 +113,22 @@ export class AnilistFilterService {
           const [year, month, day] = filter.startDateGreater.split('.').map(Number)
           return {
             OR: [
-              { startDate: { path: '$.year', gt: year } },
+              { startDate: { year: { gt: year } } },
               {
                 AND: [
-                  { startDate: { path: '$.year', equals: year } },
-                  { startDate: { path: '$.month', gt: month } },
+                  { startDate: { year: { equals: year } } },
+                  { startDate: { month: { gt: month } } },
                 ],
               },
               {
                 AND: [
-                  { startDate: { path: '$.year', equals: year } },
-                  { startDate: { path: '$.month', equals: month } },
-                  { startDate: { path: '$.day', gt: day } },
+                  { startDate: { year: { equals: year } } },
+                  { startDate: { month: { equals: month } } },
+                  { startDate: { day: { gt: day } } },
                 ],
               },
             ],
-          }
+          };
         })()
         : {},
       filter.endDateGreater
@@ -136,22 +136,22 @@ export class AnilistFilterService {
           const [year, month, day] = filter.endDateGreater.split('.').map(Number)
           return {
             OR: [
-              { endDate: { path: '$.year', gt: year } },
+              { endDate: { year: { gt: year } } },
               {
                 AND: [
-                  { endDate: { path: '$.year', equals: year } },
-                  { endDate: { path: '$.month', gt: month } },
+                  { endDate: { year: { equals: year } } },
+                  { endDate: { month: { gt: month } } },
                 ],
               },
               {
                 AND: [
-                  { endDate: { path: '$.year', equals: year } },
-                  { endDate: { path: '$.month', equals: month } },
-                  { endDate: { path: '$.day', gt: day } },
+                  { endDate: { year: { equals: year } } },
+                  { endDate: { month: { equals: month } } },
+                  { endDate: { day: { gt: day } } },
                 ],
               },
             ],
-          }
+          };
         })()
         : {},
     ].filter((condition) => Object.keys(condition).length > 0)

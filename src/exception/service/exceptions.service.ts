@@ -3,21 +3,50 @@ import { PrismaService } from '../../prisma.service'
 import { Exception } from '@prisma/client'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { ApiResponse } from '../../api/ApiResponse'
+import { ExceptionFilterDto } from '../model/ExceptionFilterDto'
 
 @Injectable()
 export class ExceptionsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getExceptions(perPage: number, page: number): Promise<ApiResponse<Exception[]>> {
-    const total = await this.prisma.exception.count();
-    
+  async getExceptions(filter: ExceptionFilterDto): Promise<ApiResponse<Exception[]>> {
+    const where: any = {}
+
+    if (filter.statusCode) {
+      where.statusCode = filter.statusCode
+    }
+
+    if (filter.path) {
+      where.path = { contains: filter.path, mode: 'insensitive' }
+    }
+
+    if (filter.method) {
+      where.method = { equals: filter.method, mode: 'insensitive' }
+    }
+
+    if (filter.fromDate || filter.toDate) {
+      where.date = {}
+      if (filter.fromDate) {
+        where.date.gte = new Date(filter.fromDate)
+      }
+      if (filter.toDate) {
+        where.date.lte = new Date(filter.toDate)
+      }
+    }
+
+    const page = filter.page ?? 1
+    const perPage = filter.perPage ?? 10
+
+    const total = await this.prisma.exception.count({ where })
+
     const exceptions = await this.prisma.exception.findMany({
+      where,
       skip: perPage * (page - 1),
       take: perPage,
       orderBy: {
-        date: 'desc'
-      }
-    });
+        date: 'desc',
+      },
+    })
 
     const lastPage = Math.ceil(total / perPage)
     const pageInfo = {
@@ -28,7 +57,7 @@ export class ExceptionsService {
       hasNextPage: page < lastPage,
     }
 
-    return { pageInfo, data: exceptions };
+    return { pageInfo, data: exceptions }
   }
 
   async delete(id: number): Promise<Exception> {
@@ -44,13 +73,13 @@ export class ExceptionsService {
     const now: Date = new Date();
 
     for (const exception of exceptions) {
-      const datePlusMonth = new Date(
+      const datePlusTime = new Date(
         exception.date.getFullYear(),
-        exception.date.getMonth() + 1,
-        exception.date.getDate(),
+        exception.date.getMonth(),
+        exception.date.getDate() + 7,
       )
 
-      if (datePlusMonth.getTime() < now.getTime()) {
+      if (datePlusTime.getTime() < now.getTime()) {
         await this.prisma.exception.delete({
           where: exception,
         })

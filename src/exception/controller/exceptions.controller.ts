@@ -1,13 +1,14 @@
 import { Controller, Delete, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { ExceptionsService } from '../service/exceptions.service'
+import { ExceptionFilterDto } from '../model/ExceptionFilterDto'
 
 @Controller('exceptions')
 export class ExceptionsController {
   constructor(private readonly service: ExceptionsService) {}
 
-  @Get('all')
-  async getAll(@Query('perPage') perPage: number = 10, @Query('page') page: number = 1) {
-    return this.service.getExceptions(perPage, page);
+  @Get()
+  async getAllExceptions(@Query() filter: ExceptionFilterDto) {
+    return this.service.getExceptions(filter)
   }
 
   @Delete('delete/:id')
