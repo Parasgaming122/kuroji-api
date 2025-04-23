@@ -245,7 +245,7 @@ export class AnilistFilterService {
         }
 
         return { [parts[0]]: direction }
-      }) || [{ id: 'desc' }]
+      }) || [];
 
       const resolvedSorts = await Promise.all(sortFields)
       return resolvedSorts.flat()
