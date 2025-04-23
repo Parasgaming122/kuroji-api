@@ -28,7 +28,7 @@ export class ExceptionsService {
       hasNextPage: page < lastPage,
     }
 
-    return { data: exceptions, pageInfo };
+    return { pageInfo, data: exceptions };
   }
 
   async delete(id: number): Promise<Exception> {

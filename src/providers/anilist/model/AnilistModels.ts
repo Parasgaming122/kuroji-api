@@ -56,7 +56,7 @@ export interface AnilistWithRelations extends Anilist {
 export interface Franchise {
   cover?: string,
   banner?: string,
-  title?: JsonValue,
+  title?: string,
   franchise?: string,
   description?: string,
 }

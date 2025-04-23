@@ -1,5 +1,5 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { BasicIdShik, BasicIdAni } from '@prisma/client'
+import { BasicIdShik, BasicIdAni, AnilistTitle } from '@prisma/client'
 import { ApiResponse } from '../../../../api/ApiResponse'
 import { TMDB } from '../../../../configs/tmdb.config'
 import { MediaSort } from '../../graphql/types/MediaEnums'
@@ -81,27 +81,27 @@ export class AnilistAddService {
     const franchiseIds = franchiseBasic.map(r => Number(r.malId)) as number[] || []
 
     const franchises = await this.anilist.getAnilists(
-      new FilterDto({ idMalIn: franchiseIds, perPage, page, sort: [MediaSort.START_DATE_DESC] })
+      new FilterDto({ idMalIn: franchiseIds, perPage, page, sort: [MediaSort.START_DATE] })
     );
 
     const firstFranchise = franchises.data?.[0];
     
     if (!firstFranchise) {
       return {
+        pageInfo: franchises.pageInfo,
         franchise: {},
-        data: [],
-        pageInfo: franchises.pageInfo
+        data: []
       } as unknown as FranchiseResponse<BasicAnilist[]>;
     }
     
-    const tmdbFirst = await this.tmdbService.getTmdbByAnilist(firstFranchise.id);
+    const tmdbFirst = await this.tmdbService.getTmdbByAnilist(firstFranchise.id).catch(() => null);
 
     const franchise = {
       cover: firstFranchise.shikimori?.poster?.originalUrl,
-      banner: TMDB.IMAGE_BASE_ORIGINAL_URL + tmdbFirst.backdrop_path || firstFranchise.bannerImage,
-      title: firstFranchise.title,
+      banner: TMDB.IMAGE_BASE_ORIGINAL_URL + tmdbFirst?.backdrop_path || firstFranchise.bannerImage,
+      title: tmdbFirst?.name || (firstFranchise.title as AnilistTitle)?.romaji,
       franchise: franchiseName,
-      description: firstFranchise.description,
+      description: tmdbFirst?.overview || firstFranchise.description,
     }
   
     return {

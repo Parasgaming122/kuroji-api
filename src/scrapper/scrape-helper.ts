@@ -46,10 +46,20 @@ export class ScrapeHelper {
    * Compares two titles (after normalization) and checks if one contains the other.
    */
   public static compareTitlesIgnoreCase(title1: string, title2: string): boolean {
-    const norm1 = this.normalizeTitle(title1);
-    const norm2 = this.normalizeTitle(title2);
-    if (!norm1 || !norm2) return false;
-    return norm1.includes(norm2) || norm2.includes(norm1);
+    const norm1 = this.normalizeTitle(title1)
+    const norm2 = this.normalizeTitle(title2)
+
+    if (!norm1 || !norm2) return false
+    if (norm1 === norm2) return true
+
+    if (
+      (norm1.includes(norm2) || norm2.includes(norm1)) &&
+      Math.abs(norm1.length - norm2.length) <= 4
+    ) {
+      return true
+    }
+
+    return false
   }
 
   /**

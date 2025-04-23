@@ -60,103 +60,91 @@ export class TmdbService {
   }
 
   async getTmdbByAnilist(id: number): Promise<Tmdb> {
-    try {
-      return await this.findTmdb(id);
-    } catch (error) {
-      throw new Error(`Error getting TMDb by AniList ID: ${error.message}`);
-    }
+    return await this.findTmdb(id);
   }
 
   async getTmdbSeasonByAnilist(id: number): Promise<TmdbSeason> {
-    try {
-      const anilist = await this.anilistService.getAnilist(id);
-      const tmdb = await this.findTmdb(id);
-  
-      const existTmdbSeason = tmdb.seasons as TmdbReleaseSeason[];
-  
-      if (!existTmdbSeason || existTmdbSeason.length === 0) {
-        throw new Error(`No seasons found for TMDb ID: ${tmdb.id}`);
-      }
-  
-      const { year, month, day } = anilist.startDate as DateDetails || {}
-      const { year: endYear, month: endMonth, day: endDay } = anilist.endDate as DateDetails || {}
+    const anilist = await this.anilistService.getAnilist(id)
+    const tmdb = await this.findTmdb(id)
 
-      let anilistStartDateString: string | null = null
-      let anilistEndDateString: string | null = null
+    const existTmdbSeason = tmdb.seasons as TmdbReleaseSeason[]
 
-      if (year && month && day) {
-        anilistStartDateString = `${year.toString().padStart(4, '0')}-${month
-          .toString()
-          .padStart(2, '0')}-${day.toString().padStart(2, '0')}`
-      }
-
-      if (endYear && endMonth && endDay) {
-        anilistEndDateString = `${endYear.toString().padStart(4, '0')}-${endMonth
-          .toString()
-          .padStart(2, '0')}-${endDay.toString().padStart(2, '0')}`
-      }
-
-      if (!anilistStartDateString) {
-        throw new Error('Missing start date from AniList: ' + anilist.id)
-      }
-  
-      const SEASONS = tmdb.number_of_seasons || 1;
-
-      let seasonNumber = existTmdbSeason.find(
-        (season) =>
-          season.air_date?.toLowerCase() === anilistStartDateString.toLowerCase(),
-      )?.season_number || 1;
-  
-      for (let currentSeason = seasonNumber; currentSeason <= SEASONS; currentSeason++) {
-        let tmdbSeason = await this.prisma.tmdbSeason.findFirst({
-          where: { show_id: tmdb.id, season_number: currentSeason },
-        });
-  
-        if (!tmdbSeason) {
-          tmdbSeason = await this.fetchTmdbSeason(tmdb.id, currentSeason);
-          tmdbSeason.show_id = tmdb.id;
-  
-          await this.saveTmdbSeason(tmdbSeason);
-        }
-  
-        const episodes = tmdbSeason.episodes as TmdbSeasonEpisode[];
-        if (!episodes || episodes.length === 0) continue;
-  
-        let startIndex = episodes.findIndex(ep => ep.air_date === anilistStartDateString);
-        if (startIndex === -1) continue;
-  
-        const trimmedEpisodes: TmdbSeasonEpisode[] = [];
-
-        const today = new Date().toISOString().split('T')[0];
-  
-        for (let i = startIndex; i < episodes.length; i++) {
-          const ep = { ...episodes[i], episode_number: trimmedEpisodes.length + 1 };
-
-          if (ep.air_date && ep.air_date > today) break;
-
-          trimmedEpisodes.push(ep);
-          if (ep.air_date === anilistEndDateString) break;
-        }
-  
-        if (trimmedEpisodes.length === 0) continue;
-  
-        const newSeason: TmdbSeason = {
-          ...tmdbSeason,
-          episodes: trimmedEpisodes,
-          show_id: tmdb.id,
-        };
-  
-        return newSeason;
-      }
-  
-      throw new Error(
-        `Could not find matching season for date range: ${anilistStartDateString} - ${anilistEndDateString}`
-      );
-    } catch (error) {
-      throw new Error(
-        `Error getting TMDb season by AniList ID: ${error.message}`
-      );
+    if (!existTmdbSeason || existTmdbSeason.length === 0) {
+      return Promise.reject(new Error(`No seasons found for TMDb ID: ${tmdb.id}`));
     }
+
+    const { year, month, day } = anilist.startDate as DateDetails || {}
+    const { year: endYear, month: endMonth, day: endDay } = anilist.endDate as DateDetails || {}
+
+    let anilistStartDateString: string | null = null
+    let anilistEndDateString: string | null = null
+
+    if (year && month && day) {
+      anilistStartDateString = `${year.toString().padStart(4, '0')}-${month
+        .toString()
+        .padStart(2, '0')}-${day.toString().padStart(2, '0')}`
+    }
+
+    if (endYear && endMonth && endDay) {
+      anilistEndDateString = `${endYear.toString().padStart(4, '0')}-${endMonth
+        .toString()
+        .padStart(2, '0')}-${endDay.toString().padStart(2, '0')}`
+    }
+
+    if (!anilistStartDateString) {
+      return Promise.reject(new Error('Missing start date from AniList: ' + anilist.id));
+    }
+
+    const SEASONS = tmdb.number_of_seasons || 1
+
+    let seasonNumber = existTmdbSeason.find(
+      (season) =>
+        season.air_date?.toLowerCase() === anilistStartDateString.toLowerCase(),
+    )?.season_number || 1
+
+    for (let currentSeason = seasonNumber; currentSeason <= SEASONS; currentSeason++) {
+      let tmdbSeason = await this.prisma.tmdbSeason.findFirst({
+        where: { show_id: tmdb.id, season_number: currentSeason },
+      })
+
+      if (!tmdbSeason) {
+        tmdbSeason = await this.fetchTmdbSeason(tmdb.id, currentSeason)
+        tmdbSeason.show_id = tmdb.id
+
+        await this.saveTmdbSeason(tmdbSeason)
+      }
+
+      const episodes = tmdbSeason.episodes as TmdbSeasonEpisode[]
+      if (!episodes || episodes.length === 0) continue
+
+      let startIndex = episodes.findIndex(ep => ep.air_date === anilistStartDateString)
+      if (startIndex === -1) continue
+
+      const trimmedEpisodes: TmdbSeasonEpisode[] = []
+
+      const today = new Date().toISOString().split('T')[0]
+
+      for (let i = startIndex; i < episodes.length; i++) {
+        const ep = { ...episodes[i], episode_number: trimmedEpisodes.length + 1 }
+
+        if (ep.air_date && ep.air_date > today) break
+
+        trimmedEpisodes.push(ep)
+        if (ep.air_date === anilistEndDateString) break
+      }
+
+      if (trimmedEpisodes.length === 0) continue
+
+      const newSeason: TmdbSeason = {
+        ...tmdbSeason,
+        episodes: trimmedEpisodes,
+        show_id: tmdb.id,
+      }
+
+      return newSeason
+    }
+
+    return Promise.reject(new Error('Not found'));
   }  
 
   async saveTmdb(tmdb: Tmdb): Promise<Tmdb> {
@@ -325,9 +313,10 @@ export class TmdbService {
   }
 
   isTitleMatch(anilist: AnilistWithRelations, tmdb: Tmdb): boolean {
-    if (anilist.format?.toLowerCase() !== tmdb.media_type?.toLowerCase()) {
+    if (anilist.format?.toLowerCase() != tmdb.media_type?.toLowerCase()) {
       return false;
     }
+
     return ScrapeHelper.compareTitles(
       (anilist.title as { romaji: string }).romaji,
       (anilist.title as { english: string }).english,
