@@ -1,3 +1,18 @@
+# [0.4.0](https://github.com/veaquer/veanime__nestend/compare/v0.3.1...v0.4.0) (2025-04-23)
+
+
+### Bug Fixes
+
+* tmdb search ([c547bd8](https://github.com/veaquer/veanime__nestend/commit/c547bd88ca410f1c726e6290ce094d09cfe14909))
+
+
+### Features
+
+* improved stream service ([3119c09](https://github.com/veaquer/veanime__nestend/commit/3119c09065b1bec640e5dcfca6344d9019496a81))
+* search in russian with shikimori ([e75d982](https://github.com/veaquer/veanime__nestend/commit/e75d982940db3071bfd73b630b7c387290ead620))
+
+
+
 ## [0.3.1](https://github.com/veaquer/veanime__nestend/compare/v0.3.0...v0.3.1) (2025-04-18)
 
 
@@ -32,10 +47,6 @@
 ### Bug Fixes
 
 * no more mangas in anilist ([b69120d](https://github.com/veaquer/veanime__nestend/commit/b69120db146c4219cf72d1be5b44e7efee1fc1c5))
-
-
-
-## [0.1.2](https://github.com/veaquer/veanime__nestend/compare/v0.1.1...v0.1.2) (2025-04-17)
 
 
 
