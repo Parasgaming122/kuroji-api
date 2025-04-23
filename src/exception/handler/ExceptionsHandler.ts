@@ -22,11 +22,13 @@ export class ExceptionsHandler implements ExceptionFilter {
     let stack: string | undefined
     let file: string | undefined
     let line: number | undefined
+    let headers: string | undefined
 
     if (exception instanceof HttpException) {
       status = exception.getStatus()
       const res = exception.getResponse()
       message = typeof res === 'string' ? res : (res as any).message
+      headers = typeof res === 'string' ? res : (res as any).headers
     }
 
     if (exception instanceof Error) {
@@ -41,7 +43,6 @@ export class ExceptionsHandler implements ExceptionFilter {
       }
     }
 
-    // Save error log to DB, but don’t block if it fails
     try {
       await this.prisma.exception.create({
         data: {
@@ -52,14 +53,14 @@ export class ExceptionsHandler implements ExceptionFilter {
           message: message,
           file: file ?? null,
           line: line?.toString() ?? null,
-          stack
+          stack,
+          headers,
         }
       })
     } catch (e) {
       console.error('🔥 Failed to save exception log:', e)
     }
 
-    // Now delegate back to default handler
     if (exception instanceof HttpException) {
       response.status(status).json(exception.getResponse())
     } else {

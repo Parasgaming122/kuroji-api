@@ -128,11 +128,15 @@ export class AnilistIndexerService {
   }
 
   private async safeGetAnilist(id: number, retries = 3): Promise<void> {
+    let lastError: any = null
+
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
         await this.service.getAnilist(id, true)
         return
       } catch (e: any) {
+        lastError = e
+
         if (e.response?.status === 429) {
           const retryAfter = e.response.headers['retry-after']
             ? parseInt(e.response.headers['retry-after'], 10)
@@ -141,12 +145,13 @@ export class AnilistIndexerService {
           console.warn(`⚠️ 429 hit - Attempt ${attempt}/${retries}. Sleeping ${retryAfter}s`)
           await this.sleep(retryAfter)
         } else {
-          throw e
+          console.warn(`❌ Error on attempt ${attempt}/${retries}: ${e.message}`)
+          await this.sleep(this.getRandomInt(5, 10))
         }
       }
     }
 
-    throw new Error(`Failed to fetch Anilist after ${retries} attempts for ID: ${id}`)
+    throw lastError ?? new Error(`Unknown error fetching Anilist for ID: ${id}`)
   }
 
   private getRandomInt(min: number, max: number): number {

@@ -9,4 +9,5 @@ model Exception {
   file            String?
   line            String?
   stack           String?
+  headers         String?
 }
