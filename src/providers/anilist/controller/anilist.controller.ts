@@ -7,7 +7,7 @@ import { FilterDto } from '../model/FilterDto'
 import { AnilistAddService } from '../service/helper/anilist.add.service'
 import { AnilistScheduleService } from '../service/helper/anilist.schedule.service'
 
-@Controller('anilist')
+@Controller('anime')
 export class AnilistController {
   constructor(
     private readonly service: AnilistService, 
