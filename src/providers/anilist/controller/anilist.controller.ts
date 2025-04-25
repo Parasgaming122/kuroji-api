@@ -6,6 +6,7 @@ import { Provider } from '../../stream/model/Provider'
 import { FilterDto } from '../model/FilterDto'
 import { AnilistAddService } from '../service/helper/anilist.add.service'
 import { AnilistScheduleService } from '../service/helper/anilist.schedule.service'
+import Dimens from '../../../configs/Dimens'
 
 @Controller('anime')
 export class AnilistController {
@@ -25,7 +26,7 @@ export class AnilistController {
   @Get('info/:id/recommendations')
   async getRecommendations(
     @Param('id', ParseIntPipe) id: number, 
-    @Query('perPage') perPage: number = 10, 
+    @Query('perPage') perPage: number = Dimens.PER_PAGE, 
     @Query('page') page: number = 1
   ) {
     return this.add.getRecommendations(id, perPage, page);
@@ -34,7 +35,7 @@ export class AnilistController {
   @Get('info/:id/chronology')
   async getChronology(
     @Param('id', ParseIntPipe) id: number,
-    @Query('perPage') perPage: number = 10,
+    @Query('perPage') perPage: number = Dimens.PER_PAGE,
     @Query('page') page: number = 1
   ) {
     return this.add.getChronology(id, perPage, page)
@@ -96,7 +97,7 @@ export class AnilistController {
   @Get('franchise/:franchise')
   async getFranchise(
     @Param('franchise') franchise: string,
-    @Query('perPage') perPage: number = 10,
+    @Query('perPage') perPage: number = Dimens.PER_PAGE,
     @Query('page') page: number = 1
   ) {
     return this.add.getFranchise(franchise, perPage, page);

@@ -1,6 +1,8 @@
+import Config from './Config'
+
 export class TVDB {
   static readonly API_KEY: string = '''';
-  static readonly URL: string = 'https://api4.thetvdb.com/v4/';
+  static readonly URL: string = Config.TVDB || 'https://api4.thetvdb.com/v4/';
 
   static getLoginUrl(): string {
     return `${TVDB.URL}login`;

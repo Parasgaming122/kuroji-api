@@ -9,7 +9,7 @@ export default class AnilistQueryBuilder {
 
   constructor() {
     this.variables.page = 1;
-    this.variables.perPage = parseInt(Dimens.PER_PAGE, 10); // Assuming Dimens.PER_PAGE is a string
+    this.variables.perPage = Dimens.PER_PAGE
   }
 
   public getByQuery(query: any): this {

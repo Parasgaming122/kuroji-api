@@ -1,6 +1,8 @@
+import Config from './Config'
+
 export class TMDB {
   public static readonly API_KEY: string = "''";
-  public static readonly URL: string = "https://api.themoviedb.org/3/";
+  public static readonly URL: string = Config.TMDB || "https://api.themoviedb.org/3/";
   public static readonly IMAGE_BASE_URL: string = "https://image.tmdb.org/t/p/";
   public static readonly IMAGE_BASE_ORIGINAL_URL: string = TMDB.getImageUrl("original");
 
