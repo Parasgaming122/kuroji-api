@@ -66,13 +66,21 @@ export class StreamService {
           return match ? parseInt(match[1]) === number : false
         })
 
+        const airDate = anilist?.airingSchedule?.find(s => s.episode == number)?.airingAt || 0;
+
+        const formattedDate = new Date(airDate * 1000).toLocaleDateString('en-US', {
+          month: 'short',
+          day: '2-digit',
+          year: 'numeric',
+        });
+
         return {
           title: tmdbEpisode?.name || anilistEpisode?.title || zoroTitle,
-          image: tmdbEpisode?.still_path || anilistEpisode?.thumbnail || "",
+          image: tmdbEpisode?.still_path || anilistEpisode?.thumbnail || anilist?.cover?.extraLarge || "",
           number,
           overview: tmdbEpisode?.overview ?? "",
-          date: tmdbEpisode?.air_date ?? "",
-          duration: tmdbEpisode?.runtime ?? 0,
+          date: tmdbEpisode?.air_date || formattedDate || "",
+          duration: tmdbEpisode?.runtime || anilist?.duration || anilist?.shikimori?.duration || 0,
           filler,
           sub,
           dub,
