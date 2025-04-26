@@ -91,6 +91,9 @@ export class ZoroService {
       if (tmdb) {
         await this.tmdbService.update(tmdb.id);
       }
+
+      const anilist = await this.anilistService.getAnilist(zoro.alID);
+      await this.anilistService.updateAtAnilist(anilist);
     }
 
     return this.saveZoro(zoro);

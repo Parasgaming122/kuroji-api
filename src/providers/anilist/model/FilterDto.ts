@@ -19,6 +19,9 @@ import {
 const TransformToArray = () =>
   Transform(({ value }) => (Array.isArray(value) ? value : [value]))
 
+const TransformToBoolean = () =>
+  Transform(({ value }) => value === 'true')
+
 export class FilterDto {
   constructor(partial?: Partial<FilterDto>) {
     Object.assign(this, partial)
@@ -65,17 +68,17 @@ export class FilterDto {
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  averageScoreLesser?: number
+  scoreLesser?: number
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  averageScoreGreater?: number
+  scoreGreater?: number
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  averageScoreNot?: number
+  scoreNot?: number
 
   @IsOptional()
   @IsArray()
@@ -258,18 +261,18 @@ export class FilterDto {
   query?: string
 
   @IsOptional()
-  @IsBoolean()
-  @Type(() => Boolean)
-  isLicensed?: boolean
-
-  @IsOptional()
   @IsString()
   countryOfOrigin?: string
 
   @IsOptional()
   @IsBoolean()
-  @Type(() => Boolean)
+  @TransformToBoolean()
   isAdult?: boolean
+
+  @IsOptional()
+  @IsBoolean()
+  @TransformToBoolean()
+  isLicensed?: boolean
 
   @IsOptional()
   @IsEnum(MediaFormat)

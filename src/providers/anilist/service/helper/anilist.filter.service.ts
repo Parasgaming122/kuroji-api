@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common'
 import { Anilist } from '@prisma/client'
 import { ApiResponse } from '../../../../api/ApiResponse'
 import { UpdateType } from '../../../../shared/UpdateType'
@@ -8,180 +8,138 @@ import { AnilistHelper } from '../../utils/anilist-helper'
 
 @Injectable()
 export class AnilistFilterService {
-  constructor(private readonly prisma: PrismaService, private readonly helper: AnilistHelper) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly helper: AnilistHelper,
+  ) { }
 
   async getAnilistByFilter(
     filter: FilterDto,
   ): Promise<ApiResponse<Anilist[]>> {
-
     const shikimori = await this.prisma.shikimori.findMany({
       where: {
         OR: [
           { russian: { contains: filter.query, mode: 'insensitive' } },
-          { licenseNameRu: { contains: filter.query, mode: 'insensitive' } }
-        ]
+          { licenseNameRu: { contains: filter.query, mode: 'insensitive' } },
+        ],
+      },
+    })
+
+    const malIdsFromShikimori = shikimori
+      .map((s) => +s.malId!)
+      .filter((id) => !!id)
+
+    const conditions: any[] = []
+
+    // ========== Basic Filters ==========
+    const basicFields = [
+      ['id', filter.id],
+      ['idMal', filter.idMal],
+      ['type', filter.type],
+      ['format', filter.format],
+      ['status', filter.status],
+      ['season', filter.season],
+      ['isAdult', filter.isAdult],
+      ['isLicensed', filter.isLicensed],
+      ['countryOfOrigin', filter.countryOfOrigin],
+    ]
+    for (const [key, value] of basicFields) {
+      if (value !== undefined) conditions.push({ [key as any]: value })
+    }
+
+    // ========== Array Filters ==========
+    if (filter.genreIn) conditions.push({ genres: { hasEvery: filter.genreIn } })
+    if (filter.genreNotIn) conditions.push({ genres: { hasNone: filter.genreNotIn } })
+    if (filter.idIn) conditions.push({ id: { in: filter.idIn } })
+    if (filter.idNotIn) conditions.push({ id: { notIn: filter.idNotIn } })
+    if (filter.idNot != null) conditions.push({ id: { not: filter.idNot } })
+    if (filter.idMalIn) conditions.push({ idMal: { in: filter.idMalIn } })
+    if (filter.idMalNotIn) conditions.push({ idMal: { notIn: filter.idMalNotIn } })
+    if (filter.idMalNot != null) conditions.push({ idMal: { not: filter.idMalNot } })
+
+    // ========== Numeric Filters ==========
+    const numericFields = [
+      ['duration', 'gt', filter.durationGreater],
+      ['duration', 'lt', filter.durationLesser],
+      ['episodes', 'gt', filter.episodesGreater],
+      ['episodes', 'lt', filter.episodesLesser],
+      ['popularity', 'gt', filter.popularityGreater],
+      ['popularity', 'lt', filter.popularityLesser],
+      ['score', 'gt', filter.scoreGreater],
+      ['score', 'lt', filter.scoreLesser],
+    ]
+    for (const [field, op, val] of numericFields) {
+      if (val != null) conditions.push({ [field as any]: { [op as any]: val } })
+    }
+
+    // ========== Enum Filters ==========
+    const enumFilters = [
+      ['format', 'in', filter.formatIn],
+      ['format', 'notIn', filter.formatNotIn],
+      ['format', 'not', filter.formatNot],
+      ['status', 'in', filter.statusIn],
+      ['status', 'notIn', filter.statusNotIn],
+      ['status', 'not', filter.statusNot],
+    ]
+    for (const [field, op, val] of enumFilters) {
+      if (val) conditions.push({ [field as any]: { [op as any]: val } })
+    }
+
+    // ========== Tags Filters ==========
+    if (filter.tagsIn) {
+      conditions.push({
+        tags: { some: { name: { in: filter.tagsIn } } },
+      })
+    }
+    if (filter.tagsNotIn) {
+      conditions.push({
+        NOT: {
+          tags: { some: { name: { in: filter.tagsNotIn } } },
+        },
+      } as any)
+    }
+
+    // ========== Date Filters ==========
+    const handleDate = (field: string, value?: string) => {
+      if (!value) return null
+      const [year, month, day] = value.split('.').map(Number)
+      return {
+        OR: [
+          { [field]: { year: { gt: year } } },
+          {
+            AND: [
+              { [field]: { year: { equals: year } } },
+              { [field]: { month: { gt: month } } },
+            ],
+          },
+          {
+            AND: [
+              { [field]: { year: { equals: year } } },
+              { [field]: { month: { equals: month } } },
+              { [field]: { day: { gt: day } } },
+            ],
+          },
+        ],
       }
-    });
+    }
 
-    const conditions = [
-      // Basic filters (only include if defined)
-      filter.id !== undefined ? { id: filter.id } : {},
-      filter.idMal !== undefined ? { idMal: filter.idMal } : {},
-      filter.type ? { type: filter.type } : {},
-      filter.format ? { format: filter.format } : {},
-      filter.status ? { status: filter.status } : {},
-      filter.season ? { season: filter.season } : {},
-      filter.isAdult !== undefined ? { isAdult: filter.isAdult } : {},
-      filter.isLicensed !== undefined ? { isLicensed: filter.isLicensed } : {},
-      filter.countryOfOrigin ? { countryOfOrigin: filter.countryOfOrigin } : {},
+    const startDateCond = handleDate('startDate', filter.startDateGreater)
+    if (startDateCond) conditions.push(startDateCond)
 
-      // Array contains filters
-      filter.genreIn ? { genres: { hasEvery: filter.genreIn } } : {},
-      filter.genreNotIn ? { genres: { hasNone: filter.genreNotIn } } : {},
-      filter.idIn ? { id: { in: filter.idIn } } : {},
-      filter.idNotIn ? { id: { notIn: filter.idNotIn } } : {},
-      filter.idNot != null ? { id: { not: filter.idNot } } : {},
-      filter.idMalIn ? { idMal: { in: filter.idMalIn } } : {},
-      filter.idMalNotIn ? { idMal: { notIn: filter.idMalNotIn } } : {},
-      filter.idMalNot != null ? { idMal: { not: filter.idMalNot } } : {},
+    const endDateCond = handleDate('endDate', filter.endDateGreater)
+    if (endDateCond) conditions.push(endDateCond)
 
-      // Numeric comparisons
-      filter.durationGreater != null
-        ? { duration: { gt: filter.durationGreater } }
-        : {},
-      filter.durationLesser != null
-        ? { duration: { lt: filter.durationLesser } }
-        : {},
-      filter.episodesGreater != null
-        ? { episodes: { gt: filter.episodesGreater } }
-        : {},
-      filter.episodesLesser != null
-        ? { episodes: { lt: filter.episodesLesser } }
-        : {},
-      filter.popularityGreater != null
-        ? { popularity: { gt: filter.popularityGreater } }
-        : {},
-      filter.popularityLesser != null
-        ? { popularity: { lt: filter.popularityLesser } }
-        : {},
-      filter.averageScoreGreater != null
-        ? { averageScore: { gt: filter.averageScoreGreater } }
-        : {},
-      filter.averageScoreLesser != null
-        ? { averageScore: { lt: filter.averageScoreLesser } }
-        : {},
-
-      // Format filters
-      filter.formatIn ? { format: { in: filter.formatIn } } : {},
-      filter.formatNotIn ? { format: { notIn: filter.formatNotIn } } : {},
-      filter.formatNot ? { format: { not: filter.formatNot } } : {},
-
-      // Status filters
-      filter.statusIn ? { status: { in: filter.statusIn } } : {},
-      filter.statusNotIn ? { status: { notIn: filter.statusNotIn } } : {},
-      filter.statusNot ? { status: { not: filter.statusNot } } : {},
-
-      filter.tagsIn
-        ? {
-          tags: {
-            some: {
-              name: {
-                in: filter.tagsIn,
-              },
-            },
-          },
-        }
-        : {},
-
-      filter.tagsNotIn
-        ? {
-          NOT: {
-            tags: {
-              some: {
-                name: {
-                  in: filter.tagsNotIn,
-                },
-              },
-            },
-          },
-        } as any
-        : {},
-
-      // Date filters using JSON paths and string format "YYYY.M.D"
-      filter.startDateGreater
-        ? (() => {
-          const [year, month, day] = filter.startDateGreater.split('.').map(Number)
-          return {
-            OR: [
-              { startDate: { year: { gt: year } } },
-              {
-                AND: [
-                  { startDate: { year: { equals: year } } },
-                  { startDate: { month: { gt: month } } },
-                ],
-              },
-              {
-                AND: [
-                  { startDate: { year: { equals: year } } },
-                  { startDate: { month: { equals: month } } },
-                  { startDate: { day: { gt: day } } },
-                ],
-              },
-            ],
-          };
-        })()
-        : {},
-      filter.endDateGreater
-        ? (() => {
-          const [year, month, day] = filter.endDateGreater.split('.').map(Number)
-          return {
-            OR: [
-              { endDate: { year: { gt: year } } },
-              {
-                AND: [
-                  { endDate: { year: { equals: year } } },
-                  { endDate: { month: { gt: month } } },
-                ],
-              },
-              {
-                AND: [
-                  { endDate: { year: { equals: year } } },
-                  { endDate: { month: { equals: month } } },
-                  { endDate: { day: { gt: day } } },
-                ],
-              },
-            ],
-          };
-        })()
-        : {},
-    ].filter((condition) => Object.keys(condition).length > 0)
-
-    const malIdsFromShikimori = shikimori.map(s => +s.malId!).filter(id => !!id)
-
+    // ========== Query Search ==========
     const searchOr: any[] = []
 
     if (filter.query) {
-      searchOr.push({
-        title: {
-          romaji: { contains: filter.query, mode: 'insensitive' }
-        }
-      })
-
-      searchOr.push({
-        title: {
-          english: { contains: filter.query, mode: 'insensitive' }
-        }
-      })
-
-      searchOr.push({
-        title: {
-          native: { contains: filter.query, mode: 'insensitive' }
-        }
-      })
-
-      searchOr.push({
-        synonyms: { hasSome: [filter.query] }
-      })
+      const q = filter.query
+      searchOr.push(
+        { title: { romaji: { contains: q, mode: 'insensitive' } } },
+        { title: { english: { contains: q, mode: 'insensitive' } } },
+        { title: { native: { contains: q, mode: 'insensitive' } } },
+        { synonyms: { hasSome: [q] } },
+      )
     }
 
     if (malIdsFromShikimori.length) {
@@ -194,67 +152,15 @@ export class AnilistFilterService {
 
     const whereCondition = { AND: conditions }
 
+    // ========== Pagination ==========
     const perPage = filter.perPage || 25
     const currentPage = filter.page || 1
     const skip = (currentPage - 1) * perPage
 
-    let isRecentSort = false
-    let recentIds: number[] = []
+    // ========== Sorting ==========
+    const orderBy = await this.getSortOrder(filter.sort)
 
-    const orderBy = await (async () => {
-      const sortFields = filter.sort?.map(async (sortField) => {
-        const parts = sortField.split('_')
-        let direction = 'asc'
-
-        const lastPart = parts[parts.length - 1].toLowerCase()
-        if (lastPart === 'asc' || lastPart === 'desc') {
-          direction = lastPart
-          parts.pop()
-        }
-
-        const field = parts.join('_')
-
-        if (field === 'recent') {
-          isRecentSort = true
-          recentIds = await this.getRecentIds()
-          return { id: direction }
-        }
-
-        if (field === 'start_date') {
-          return [
-            { startDate: { year: direction } },
-            { startDate: { month: direction } },
-            { startDate: { day: direction } }
-          ]
-        }
-
-        if (field === 'end_date') {
-          return [
-            { endDate: { year: direction } },
-            { endDate: { month: direction } },
-            { endDate: { day: direction } }
-          ]
-        }
-
-        if (parts.length > 1) {
-          let nested: any = { [parts.pop()!]: direction }
-          while (parts.length) {
-            nested = { [parts.pop()!]: nested }
-          }
-          return nested
-        }
-
-        return { [parts[0]]: direction }
-      }) || [];
-
-      const resolvedSorts = await Promise.all(sortFields)
-      return resolvedSorts.flat()
-    })()
-
-    if (isRecentSort && recentIds.length > 0) {
-      conditions.push({ id: { in: recentIds } })
-    }
-
+    // ========== Query DB ==========
     const [data, total] = await Promise.all([
       this.prisma.anilist.findMany({
         where: whereCondition,
@@ -263,13 +169,10 @@ export class AnilistFilterService {
         skip,
         orderBy,
       }),
-      this.prisma.anilist.count({
-        where: whereCondition,
-      }),
+      this.prisma.anilist.count({ where: whereCondition }),
     ])
 
-    const sortedData = isRecentSort ? await this.getRecentData(data, recentIds) : data
-
+    // ========== Pagination Info ==========
     const lastPage = Math.ceil(total / perPage)
     const pageInfo = {
       total,
@@ -279,29 +182,52 @@ export class AnilistFilterService {
       hasNextPage: currentPage < lastPage,
     }
 
-    return { pageInfo, data: sortedData }
+    return { pageInfo, data }
   }
 
-  private async getRecentIds(): Promise<number[]> {
-    const recentUpdates = await this.prisma.lastUpdated.findMany({
-      where: {
-        type: UpdateType.ANIWATCH
-      },
-      orderBy: {
-        createdAt: 'desc'
+  private async getSortOrder(sort?: string[]) {
+    if (!sort) return []
+
+    const sortFields = sort.map(async (sortField) => {
+      const parts = sortField.split('_')
+      let direction = 'asc'
+
+      const lastPart = parts[parts.length - 1].toLowerCase()
+      if (lastPart === 'asc' || lastPart === 'desc') {
+        direction = lastPart
+        parts.pop()
       }
+
+      const field = parts.join('_')
+
+      if (field === 'start_date') {
+        return [
+          { startDate: { year: direction } },
+          { startDate: { month: direction } },
+          { startDate: { day: direction } },
+        ]
+      }
+
+      if (field === 'end_date') {
+        return [
+          { endDate: { year: direction } },
+          { endDate: { month: direction } },
+          { endDate: { day: direction } },
+        ]
+      }
+
+      if (field === 'updated_at') return { updatedAt: direction }
+
+      if (parts.length > 1) {
+        let nested: any = { [parts.pop()!]: direction }
+        while (parts.length) nested = { [parts.pop()!]: nested }
+        return nested
+      }
+
+      return { [parts[0]]: direction }
     })
 
-    return recentUpdates.map(update => update.externalId || 0)
-  }
-
-  private async getRecentData(data: any[], recentIds: number[]) {
-    const idPositions = new Map(recentIds.map((id, index) => [id, index]))
-
-    return data.sort((a, b) => {
-      const posA = idPositions.get(a.id) ?? Infinity
-      const posB = idPositions.get(b.id) ?? Infinity
-      return posA - posB
-    })
+    const resolved = await Promise.all(sortFields)
+    return resolved.flat()
   }
 }

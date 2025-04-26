@@ -149,7 +149,7 @@ export class AnilistService {
       throw new Error('No media found');
     }
 
-    const anilist = data.Page.media[0];
+    let anilist = data.Page.media[0];
 
     const moreInfo = await this.fetch.fetchMoreInfo(anilist.idMal || 0);
 
@@ -169,12 +169,31 @@ export class AnilistService {
       update: await this.helper.getDataForPrisma(anilist),
     });
   }
+  
+  async updateAtAnilist(anilist: AnilistWithRelations, shouldSave: boolean = true): Promise<AnilistWithRelations> {
+    anilist.updatedAt = Math.floor(Date.now() / 1000);
+    
+    if (shouldSave) {
+      return await this.prisma.anilist.upsert({
+        where: { id: anilist.id },
+        create: await this.helper.getDataForPrisma(anilist),
+        update: await this.helper.getDataForPrisma(anilist),
+      });
+    }
+
+    return anilist;
+  }
 
   async update(id: number): Promise<void> {
+    const existingAnilist = await this.getAnilist(id);
     const data = await this.fetch.fetchAnilistFromGraphQL(id);
     if (!data.Page?.media || data.Page.media.length === 0) {
       throw new Error('No media found');
     }
+
+    if (existingAnilist == data.Page.media[0]) Promise.reject('No changes in anilist');
+
+    data.Page.media[0] = await this.updateAtAnilist(data.Page.media[0], false);
 
     await this.saveAnilist(data);
   }
