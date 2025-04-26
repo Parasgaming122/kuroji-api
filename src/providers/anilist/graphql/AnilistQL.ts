@@ -230,10 +230,27 @@ export default class AnilistQL {
             id
             name {
               full
+              native
+              alternative
             }
             image {
+              large
               medium
             }
+          }
+          role
+          voiceActors {
+            id
+            image {
+              large
+              medium
+            }
+            name {
+              full
+              native
+              alternative
+            }
+            languageV2
           }
         }
       }

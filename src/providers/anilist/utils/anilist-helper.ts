@@ -103,8 +103,45 @@ export class AnilistHelper {
           where: { id: edge?.node?.id },
           create: {
             id: edge?.node?.id ?? null,
-            name: edge?.node?.name?.full ?? null,
-            image: edge?.node?.image?.medium ?? null
+            role: edge?.role ?? null,
+
+            name: {
+              create: {
+                full: edge?.node?.name?.full ?? null,
+                native: edge?.node?.name?.native ?? null,
+                alternative: edge?.node?.name?.alternative ?? null,
+              }
+            },
+            image: {
+              create: {
+                large: edge?.node?.image?.large ?? null,
+                medium: edge?.node?.image?.medium ?? null,
+              }
+            },
+
+            voiceActors: {
+              connectOrCreate: edge?.voiceActors?.map((va: any) => ({
+                where: { id: va.id },
+                create: {
+                  id: va.id,
+                  language: va.languageV2 ?? null,
+
+                  name: {
+                    create: {
+                      full: va.name?.full ?? null,
+                      native: va.name?.native ?? null,
+                      alternative: va.name?.alternative ?? null,
+                    }
+                  },
+                  image: {
+                    create: {
+                      large: va.image?.large ?? null,
+                      medium: va.image?.medium ?? null,
+                    }
+                  }
+                }
+              })) ?? []
+            }
           }
         })) ?? []
       },
@@ -337,6 +374,36 @@ export class AnilistHelper {
       characters: {
         omit: {
           anilistId: true,
+        },
+        include: {
+          image: {
+            omit: {
+              id: true,
+              characterId: true
+            }
+          },
+          name: {
+            omit: {
+              id: true,
+              characterId: true
+            }
+          },
+          voiceActors: {
+            include: {
+              image: {
+                omit: {
+                  id: true,
+                  voiceActorId: true
+                }
+              },
+              name: {
+                omit: {
+                  id: true,
+                  voiceActorId: true
+                }
+              },
+            }
+          }
         }
       },
       studios: {

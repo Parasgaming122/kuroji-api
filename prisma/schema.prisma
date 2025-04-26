@@ -104,10 +104,61 @@ model AnilistIndex {
 model AnilistCharacter {
   id          Int      @id @default(autoincrement())
   anilistId   Int
-  name        String?
-  image       String?  // Store the medium image URL
+  role        String?
+
+  name        AnilistCharacterName?    @relation("CharacterName")
+  image       AnilistCharacterImage?   @relation("CharacterImage")
 
   anilist     Anilist  @relation("AnilistCharacters", fields: [anilistId], references: [id])
+  voiceActors VoiceActor[] @relation("CharacterVoiceActors")
+}
+
+model VoiceActor {
+  id          Int      @id @default(autoincrement())
+  language    String?
+
+  name        AnilistVoiceName?    @relation("VoiceActorName")
+  image       AnilistVoiceImage?   @relation("VoiceActorImage")
+
+  characters  AnilistCharacter[] @relation("CharacterVoiceActors")
+}
+
+model AnilistCharacterName {
+  id                Int                @id @default(autoincrement())
+  full              String?
+  native            String?
+  alternative       String[]
+
+  character         AnilistCharacter?  @relation("CharacterName", fields: [characterId], references: [id])
+  characterId       Int? @unique
+}
+
+model AnilistCharacterImage {
+  id                Int                @id @default(autoincrement())
+  large             String?
+  medium            String?
+
+  character         AnilistCharacter?  @relation("CharacterImage", fields: [characterId], references: [id])
+  characterId       Int? @unique
+}
+
+model AnilistVoiceName {
+  id                Int                @id @default(autoincrement())
+  full              String?
+  native            String?
+  alternative       String[]
+
+  voiceActor        VoiceActor?         @relation("VoiceActorName", fields: [voiceActorId], references: [id])
+  voiceActorId      Int? @unique
+}
+
+model AnilistVoiceImage {
+  id                Int                @id @default(autoincrement())
+  large             String?
+  medium            String?
+
+  voiceActor        VoiceActor?         @relation("VoiceActorImage", fields: [voiceActorId], references: [id])
+  voiceActorId      Int? @unique
 }
 
 model AnilistTag {
