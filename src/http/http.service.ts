@@ -8,7 +8,7 @@ import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class CustomHttpService {
-  private readonly rateLimit = 3; // 3 requests per second
+  private readonly rateLimit = 5;
   private lastRequestTime = 0;
 
   constructor(private readonly httpService: HttpService) {}

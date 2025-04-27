@@ -58,7 +58,7 @@ export class ExceptionsHandler implements ExceptionFilter {
         }
       })
     } catch (e) {
-      console.error('🔥 Failed to save exception log:', e)
+      console.error('Failed to save exception log:', e)
     }
 
     if (exception instanceof HttpException) {
