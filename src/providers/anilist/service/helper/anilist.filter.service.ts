@@ -100,23 +100,38 @@ export class AnilistFilterService {
     }
 
     // ========== Date Filters ==========
-    const handleDate = (field: string, value?: string) => {
+    const handleDate = (
+      field: string,
+      value?: string,
+      onlyYear: boolean = false,
+      operator: 'gt' | 'lt' = 'gt',
+    ) => {
       if (!value) return null
+
+      const comp = operator === 'gt' ? 'gt' : 'lt'
+      const eq = 'equals'
+
+      if (onlyYear) {
+        return {
+          OR: [{ [field]: { year: { [comp]: +value } } }],
+        }
+      }
+
       const [year, month, day] = value.split('.').map(Number)
       return {
         OR: [
-          { [field]: { year: { gt: year } } },
+          { [field]: { year: { [comp]: year } } },
           {
             AND: [
-              { [field]: { year: { equals: year } } },
-              { [field]: { month: { gt: month } } },
+              { [field]: { year: { [eq]: year } } },
+              { [field]: { month: { [comp]: month } } },
             ],
           },
           {
             AND: [
-              { [field]: { year: { equals: year } } },
-              { [field]: { month: { equals: month } } },
-              { [field]: { day: { gt: day } } },
+              { [field]: { year: { [eq]: year } } },
+              { [field]: { month: { [eq]: month } } },
+              { [field]: { day: { [comp]: day } } },
             ],
           },
         ],
@@ -128,6 +143,18 @@ export class AnilistFilterService {
 
     const endDateCond = handleDate('endDate', filter.endDateGreater)
     if (endDateCond) conditions.push(endDateCond)
+
+    const startDateLesserCond = handleDate('startDate', filter.startDateLesser, false, 'lt')
+    if (startDateLesserCond) conditions.push(startDateLesserCond)
+
+    const endDateLesserCond = handleDate('endDate', filter.endDateLesser, false, 'lt')
+    if (endDateLesserCond) conditions.push(endDateLesserCond)
+
+    const startDateLikeCond = handleDate('startDate', filter.startDateLike, true)
+    if (startDateLikeCond) conditions.push(startDateLikeCond)
+
+    const endDateLikeCond = handleDate('endDate', filter.endDateLike, true)
+    if (endDateLikeCond) conditions.push(endDateLikeCond)   
 
     // ========== Query Search ==========
     const searchOr: any[] = []
