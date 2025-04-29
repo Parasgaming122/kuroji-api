@@ -371,41 +371,41 @@ export class AnilistHelper {
           anilistId: true,
         }
       },
-      characters: {
-        omit: {
-          anilistId: true,
-        },
-        include: {
-          image: {
-            omit: {
-              id: true,
-              characterId: true
-            }
-          },
-          name: {
-            omit: {
-              id: true,
-              characterId: true
-            }
-          },
-          voiceActors: {
-            include: {
-              image: {
-                omit: {
-                  id: true,
-                  voiceActorId: true
-                }
-              },
-              name: {
-                omit: {
-                  id: true,
-                  voiceActorId: true
-                }
-              },
-            }
-          }
-        }
-      },
+      // characters: {
+      //   omit: {
+      //     anilistId: true,
+      //   },
+      //   include: {
+      //     image: {
+      //       omit: {
+      //         id: true,
+      //         characterId: true
+      //       }
+      //     },
+      //     name: {
+      //       omit: {
+      //         id: true,
+      //         characterId: true
+      //       }
+      //     },
+      //     voiceActors: {
+      //       include: {
+      //         image: {
+      //           omit: {
+      //             id: true,
+      //             voiceActorId: true
+      //           }
+      //         },
+      //         name: {
+      //           omit: {
+      //             id: true,
+      //             voiceActorId: true
+      //           }
+      //         },
+      //       }
+      //     }
+      //   }
+      // },
       studios: {
         omit: {
           anilistId: true,

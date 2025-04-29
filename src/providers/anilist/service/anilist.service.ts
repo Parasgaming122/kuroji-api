@@ -130,14 +130,8 @@ export class AnilistService {
       anilist.idMal?.toString() || '',
     );
     
-    const recommendations = await this.add.getRecommendations(anilist.id, 10, 1);
-
-    const chronology = await this.add.getChronology(anilist.id, 4, 1);
-
     const AnilistWithRelations = {
       ...anilist,
-      recommendations: recommendations.data || [],
-      chronology: chronology.data || [],
       shikimori: shikimori || [],
     };
 

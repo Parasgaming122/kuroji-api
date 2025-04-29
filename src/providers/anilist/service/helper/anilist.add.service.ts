@@ -1,5 +1,5 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { BasicIdShik, BasicIdAni, AnilistTitle } from '@prisma/client'
+import { BasicIdShik, BasicIdAni, AnilistTitle, AnilistCharacter } from '@prisma/client'
 import { ApiResponse } from '../../../../api/ApiResponse'
 import { TMDB } from '../../../../configs/tmdb.config'
 import { MediaSort } from '../../graphql/types/MediaEnums'
@@ -73,6 +73,70 @@ export class AnilistAddService {
       ...recommendations,
       data: basicRecommendations,
     } as ApiResponse<BasicAnilistSmall[]>;
+  }
+
+  async getCharacters(id: number, perPage: number, page: number): Promise<ApiResponse<AnilistCharacter[]>> {
+    const existingAnilist = await this.prisma.anilist.findUnique({
+      where: { id },
+      include: {
+        characters: true,
+      }
+    }) as unknown as AnilistWithRelations;
+
+    const charactersIds = existingAnilist.characters?.map(c => c.id) as number[];
+
+    const [data, total] = await Promise.all([
+      this.prisma.anilistCharacter.findMany({
+        where: { id: { in: charactersIds } },
+        omit: {
+          anilistId: true,
+        },
+        include: {
+          image: {
+            omit: {
+              id: true,
+              characterId: true
+            }
+          },
+          name: {
+            omit: {
+              id: true,
+              characterId: true
+            }
+          },
+          voiceActors: {
+            include: {
+              image: {
+                omit: {
+                  id: true,
+                  voiceActorId: true
+                }
+              },
+              name: {
+                omit: {
+                  id: true,
+                  voiceActorId: true
+                }
+              },
+            }
+          }
+        },
+        skip: perPage * (page - 1),
+        take: perPage
+      }),
+      this.prisma.anilistCharacter.count(),
+    ]);
+
+    const lastPage = Math.ceil(total / perPage)
+    const pageInfo = {
+      total,
+      perPage,
+      page,
+      lastPage,
+      hasNextPage: page < lastPage,
+    }
+
+    return { pageInfo, data } as unknown as ApiResponse<AnilistCharacter[]>;
   }
 
   async getFranchise(franchiseName: string, perPage: number, page: number): Promise<FranchiseResponse<BasicAnilist[]>> {

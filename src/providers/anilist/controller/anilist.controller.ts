@@ -32,13 +32,22 @@ export class AnilistController {
     return this.add.getRecommendations(id, perPage, page);
   }
 
+  @Get('info/:id/characters')
+  async getCharacters(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('perPage') perPage: number = Dimens.PER_PAGE,
+    @Query('page') page: number = 1
+  ) {
+    return this.add.getCharacters(id, perPage, page);
+  }
+
   @Get('info/:id/chronology')
   async getChronology(
     @Param('id', ParseIntPipe) id: number,
     @Query('perPage') perPage: number = Dimens.PER_PAGE,
     @Query('page') page: number = 1
   ) {
-    return this.add.getChronology(id, perPage, page)
+    return this.add.getChronology(id, perPage, page);
   }
 
   @Get('info/:id/episodes')
@@ -56,7 +65,7 @@ export class AnilistController {
 
   @Get('info/:id/providers')
   async getProvidersMultiple(@Param('id', ParseIntPipe) id: number) {
-    return this.streamService.getProvidersMultiple(id)
+    return this.streamService.getProvidersMultiple(id);
   }
 
   @Get('info/:id/episodes/:number')
