@@ -228,6 +228,7 @@ export default class AnilistQL {
         edges {
           node {
             id
+            siteUrl
             name {
               full
               native
@@ -241,6 +242,7 @@ export default class AnilistQL {
           role
           voiceActors {
             id
+            siteUrl
             image {
               large
               medium
