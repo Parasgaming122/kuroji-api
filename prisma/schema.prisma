@@ -9,89 +9,89 @@ datasource db {
 
 // Anilist.prisma
 model Anilist {
-  id                Int      @id
-  idMal             Int?
-  title             AnilistTitle?          @relation("AnilistTitle")
-  bannerImage       String?
-  status            String?
-  type              String?
-  format            String?
-  coverImage        AnilistCover?          @relation("AnilistCover")
-  updatedAt         Int?
-  description       String?
-  startDate         StartDate?             @relation("AnilistStartDate")
-  endDate           EndDate?               @relation("AnilistEndDate")
-  season            String?
-  seasonYear        Int?
-  episodes          Int?
-  duration          Int?
-  countryOfOrigin   String?
-  isLicensed        Boolean?
-  source            String?
-  hashtag           String?
-  moreInfo          String?
-  isLocked          Boolean?
-  isAdult           Boolean?
-  averageScore      Int?
-  meanScore         Int?
-  score             Int?
-  popularity        Int?
-  trending          Int?
-  favourites        Int?
-  genres            String[]
-  synonyms          String[]
+  id              Int           @id
+  idMal           Int?
+  title           AnilistTitle? @relation("AnilistTitle")
+  bannerImage     String?
+  status          String?
+  type            String?
+  format          String?
+  coverImage      AnilistCover? @relation("AnilistCover")
+  updatedAt       Int?
+  description     String?
+  startDate       StartDate?    @relation("AnilistStartDate")
+  endDate         EndDate?      @relation("AnilistEndDate")
+  season          String?
+  seasonYear      Int?
+  episodes        Int?
+  duration        Int?
+  countryOfOrigin String?
+  isLicensed      Boolean?
+  source          String?
+  hashtag         String?
+  moreInfo        String?
+  isLocked        Boolean?
+  isAdult         Boolean?
+  averageScore    Int?
+  meanScore       Int?
+  score           Int?
+  popularity      Int?
+  trending        Int?
+  favourites      Int?
+  genres          String[]
+  synonyms        String[]
 
-  trailer           AnilistTrailer?        @relation("AnilistTrailer")
+  trailer           AnilistTrailer?           @relation("AnilistTrailer")
   nextAiringEpisode AnilistNextAiringEpisode? @relation("AnilistNextAiringEpisode")
 
   // Normalized collections
-  recommendations   BasicIdAni[]           @relation("AnilistRecs")
-  characters        AnilistCharacter[]     @relation("AnilistCharacters")
-  studios           AnilistStudio[]        @relation("AnilistStudios")
-  airingSchedule    AnilistAiringSchedule[]@relation("AnilistAiringSchedules")
-  tags              AnilistTag[]           @relation("AnilistTags")
-  rankings          AnilistRanking[]       @relation("AnilistRanking")
-  externalLinks     AnilistExternalLink[]  @relation("AnilistExternalLinks")
-  streamingEpisodes AnilistStreamingEpisode[] @relation("AnilistStreamingEpisodes")
-  scoreDistribution AnilistScoreDistribution[] @relation("AnilistScoreDistribution")
+  recommendations    BasicIdAni[]                @relation("AnilistRecs")
+  characters         AnilistCharacterEdge[]      @relation("AnilistCharacters")
+  studios            AnilistStudioEdge[]         @relation("AnilistStudios")
+  airingSchedule     AnilistAiringSchedule[]     @relation("AnilistAiringSchedules")
+  tags               AnilistTag[]                @relation("AnilistTags")
+  rankings           AnilistRanking[]            @relation("AnilistRanking")
+  externalLinks      AnilistExternalLink[]       @relation("AnilistExternalLinks")
+  streamingEpisodes  AnilistStreamingEpisode[]   @relation("AnilistStreamingEpisodes")
+  scoreDistribution  AnilistScoreDistribution[]  @relation("AnilistScoreDistribution")
   statusDistribution AnilistStatusDistribution[] @relation("AnilistStatusDistribution")
 }
 
 model AnilistTitle {
-  id               Int      @id @default(autoincrement())
-  anilistId       Int      @unique
+  id        Int     @id @default(autoincrement())
+  anilistId Int     @unique
   romaji    String?
   english   String?
   native    String?
-  anilist   Anilist  @relation("AnilistTitle", fields: [anilistId], references: [id])
+  anilist   Anilist @relation("AnilistTitle", fields: [anilistId], references: [id])
 }
 
 model StartDate {
-  id               Int      @id @default(autoincrement())
-  anilistId       Int      @unique
+  id        Int     @id @default(autoincrement())
+  anilistId Int     @unique
   day       Int?
   month     Int?
   year      Int?
-  anilist   Anilist  @relation("AnilistStartDate", fields: [anilistId], references: [id])
+  anilist   Anilist @relation("AnilistStartDate", fields: [anilistId], references: [id])
 }
 
 model EndDate {
-  id               Int      @id @default(autoincrement())
-  anilistId       Int      @unique
+  id        Int     @id @default(autoincrement())
+  anilistId Int     @unique
   day       Int?
   month     Int?
   year      Int?
-  anilist   Anilist  @relation("AnilistEndDate", fields: [anilistId], references: [id])
+  anilist   Anilist @relation("AnilistEndDate", fields: [anilistId], references: [id])
 }
 
 model AnilistCover {
-  id               Int      @id @default(autoincrement())
-  anilistId       Int      @unique
-  color     String?
-  large     String?
-  medium    String?
+  id         Int     @id @default(autoincrement())
+  anilistId  Int     @unique
+  color      String?
+  large      String?
+  medium     String?
   extraLarge String?
-  anilist   Anilist  @relation("AnilistCover", fields: [anilistId], references: [id])
+  anilist    Anilist @relation("AnilistCover", fields: [anilistId], references: [id])
 }
 
 model AnilistIndex {
@@ -100,82 +100,89 @@ model AnilistIndex {
   createdAt DateTime @default(now())
 }
 
-model AnilistCharacter {
-  id          Int      @id @default(autoincrement())
+model AnilistCharacterEdge {
+  id          Int     @id
   anilistId   Int
+  characterId Int
   role        String?
 
-  name        AnilistCharacterName?    @relation("CharacterName")
-  image       AnilistCharacterImage?   @relation("CharacterImage")
+  anilist   Anilist          @relation("AnilistCharacters", fields: [anilistId], references: [id])
+  character AnilistCharacter @relation(fields: [characterId], references: [id])
+  voiceActors VoiceActor[]   @relation("CharacterVoiceActors")
+}
 
-  anilist     Anilist  @relation("AnilistCharacters", fields: [anilistId], references: [id])
-  voiceActors VoiceActor[] @relation("CharacterVoiceActors")
+model AnilistCharacter {
+  id Int @id
+
+  name  AnilistCharacterName?  @relation("CharacterName")
+  image AnilistCharacterImage? @relation("CharacterImage")
+
+  animeLinks  AnilistCharacterEdge[]
 }
 
 model VoiceActor {
-  id          Int      @id @default(autoincrement())
-  language    String?
+  id       Int     @id
+  language String?
 
-  name        AnilistVoiceName?    @relation("VoiceActorName")
-  image       AnilistVoiceImage?   @relation("VoiceActorImage")
+  name  AnilistVoiceName?  @relation("VoiceActorName")
+  image AnilistVoiceImage? @relation("VoiceActorImage")
 
-  characters  AnilistCharacter[] @relation("CharacterVoiceActors")
+  characters AnilistCharacterEdge[] @relation("CharacterVoiceActors")
 }
 
 model AnilistCharacterName {
-  id                Int                @id @default(autoincrement())
-  full              String?
-  native            String?
-  alternative       String[]
+  id          Int      @id @default(autoincrement())
+  full        String?
+  native      String?
+  alternative String[]
 
-  character         AnilistCharacter?  @relation("CharacterName", fields: [characterId], references: [id])
-  characterId       Int? @unique
+  character   AnilistCharacter? @relation("CharacterName", fields: [characterId], references: [id])
+  characterId Int?              @unique
 }
 
 model AnilistCharacterImage {
-  id                Int                @id @default(autoincrement())
-  large             String?
-  medium            String?
+  id     Int     @id @default(autoincrement())
+  large  String?
+  medium String?
 
-  character         AnilistCharacter?  @relation("CharacterImage", fields: [characterId], references: [id])
-  characterId       Int? @unique
+  character   AnilistCharacter? @relation("CharacterImage", fields: [characterId], references: [id])
+  characterId Int?              @unique
 }
 
 model AnilistVoiceName {
-  id                Int                @id @default(autoincrement())
-  full              String?
-  native            String?
-  alternative       String[]
+  id          Int      @id @default(autoincrement())
+  full        String?
+  native      String?
+  alternative String[]
 
-  voiceActor        VoiceActor?         @relation("VoiceActorName", fields: [voiceActorId], references: [id])
-  voiceActorId      Int? @unique
+  voiceActor   VoiceActor? @relation("VoiceActorName", fields: [voiceActorId], references: [id])
+  voiceActorId Int?        @unique
 }
 
 model AnilistVoiceImage {
-  id                Int                @id @default(autoincrement())
-  large             String?
-  medium            String?
+  id     Int     @id @default(autoincrement())
+  large  String?
+  medium String?
 
-  voiceActor        VoiceActor?         @relation("VoiceActorImage", fields: [voiceActorId], references: [id])
-  voiceActorId      Int? @unique
+  voiceActor   VoiceActor? @relation("VoiceActorImage", fields: [voiceActorId], references: [id])
+  voiceActorId Int?        @unique
 }
 
 model AnilistTag {
-  id               Int      @id @default(autoincrement())
-  anilistId        Int        
+  id               Int      @id
+  anilistId        Int
   name             String?  @unique
   description      String?
   category         String?
   rank             Int?
-  isGeneralSpoiler Boolean?
-  isMediaSpoiler   Boolean?
+  isSpoiler        Boolean?
   isAdult          Boolean?
 
-  anilist          Anilist  @relation("AnilistTags", fields: [anilistId], references: [id])
+  anilist Anilist @relation("AnilistTags", fields: [anilistId], references: [id])
 }
 
 model AnilistExternalLink {
-  id         Int      @id @default(autoincrement())
+  id         Int      @id
   anilistId  Int
   url        String?
   site       String?
@@ -187,7 +194,7 @@ model AnilistExternalLink {
   notes      String?
   isDisabled Boolean?
 
-  anilist          Anilist  @relation("AnilistExternalLinks", fields: [anilistId], references: [id])
+  anilist Anilist @relation("AnilistExternalLinks", fields: [anilistId], references: [id])
 }
 
 model AnilistStreamingEpisode {
@@ -198,79 +205,88 @@ model AnilistStreamingEpisode {
   url       String?
   site      String?
 
-  anilist          Anilist  @relation("AnilistStreamingEpisodes", fields: [anilistId], references: [id])
+  anilist Anilist @relation("AnilistStreamingEpisodes", fields: [anilistId], references: [id])
+}
+
+model AnilistStudioEdge {
+  id        Int      @id
+  anilistId Int
+  studioId  Int
+  isMain    Boolean?
+
+  anilist Anilist       @relation("AnilistStudios", fields: [anilistId], references: [id])
+  studio  AnilistStudio @relation(fields: [studioId], references: [id])
 }
 
 model AnilistStudio {
-  id         Int      @id @default(autoincrement())
-  anilistId  Int
-  name       String?
-  isMain     Boolean?
+  id   Int     @id
+  name String?
 
-  anilist    Anilist  @relation("AnilistStudios", fields: [anilistId], references: [id])
+  animeLinks AnilistStudioEdge[]
 }
 
 model AnilistAiringSchedule {
-  id              Int      @id @default(autoincrement())
+  id              Int  @id
   anilistId       Int
   episode         Int?
   airingAt        Int?
   timeUntilAiring Int?
 
-  anilist         Anilist  @relation("AnilistAiringSchedules", fields: [anilistId], references: [id])
+  anilist Anilist @relation("AnilistAiringSchedules", fields: [anilistId], references: [id])
 }
 
 model AnilistNextAiringEpisode {
-  id              Int      @id @default(autoincrement())
-  anilistId       Int      @unique
+  id              Int  @id
+  anilistId       Int  @unique
   episode         Int?
   airingAt        Int?
   timeUntilAiring Int?
 
-  anilist         Anilist  @relation("AnilistNextAiringEpisode", fields: [anilistId], references: [id])
+  anilist Anilist @relation("AnilistNextAiringEpisode", fields: [anilistId], references: [id])
 }
 
 model AnilistRanking {
-  id              Int      @id @default(autoincrement())
-  anilistId       Int
-  rank            Int?
-  type            String?
-  format          String?
-  year            Int?
-  season          String?
-  allTime         Boolean?
-  context         String
+  id        Int      @id
+  anilistId Int
+  rank      Int?
+  type      String?
+  format    String?
+  year      Int?
+  season    String?
+  allTime   Boolean?
+  context   String
 
-  anilist         Anilist  @relation("AnilistRanking", fields: [anilistId], references: [id])
+  anilist Anilist @relation("AnilistRanking", fields: [anilistId], references: [id])
 }
 
 model AnilistTrailer {
-  id              String   @id @default(uuid())
-  anilistId       Int      @unique
-  site            String?
-  thumbnail       String?
+  id        String  @id @default(uuid())
+  anilistId Int     @unique
+  site      String?
+  thumbnail String?
 
-  anilist   Anilist  @relation("AnilistTrailer", fields: [anilistId], references: [id])
+  anilist Anilist @relation("AnilistTrailer", fields: [anilistId], references: [id])
 }
+
 model AnilistScoreDistribution {
-  id          Int      @id @default(autoincrement())
-  score       Int
-  amount      Int
-  anilistId   Int
-  anilist     Anilist  @relation("AnilistScoreDistribution", fields: [anilistId], references: [id])
+  id        Int     @id @default(autoincrement())
+  score     Int
+  amount    Int
+  anilistId Int
+  anilist   Anilist @relation("AnilistScoreDistribution", fields: [anilistId], references: [id])
 }
 
 model AnilistStatusDistribution {
-  id          Int      @id @default(autoincrement())
-  status      String
-  amount      Int
-  anilistId   Int
-  anilist     Anilist  @relation("AnilistStatusDistribution", fields: [anilistId], references: [id])
+  id        Int     @id @default(autoincrement())
+  status    String
+  amount    Int
+  anilistId Int
+  anilist   Anilist @relation("AnilistStatusDistribution", fields: [anilistId], references: [id])
 }
 
 model BasicIdAni {
-  id        Int      @id
-  idMal     Int?
+  id    Int  @id
+  idMal Int?
 
   Anilist Anilist[] @relation("AnilistRecs")
 }

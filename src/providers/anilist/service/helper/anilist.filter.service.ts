@@ -61,7 +61,9 @@ export class AnilistFilterService {
       conditions.push({
         studios: {
           some: {
-            name: { in: filter.studioIn },
+            studio: {
+              name: { in: filter.studioIn },
+            },
           },
         },
       })
@@ -71,8 +73,10 @@ export class AnilistFilterService {
       conditions.push({
         characters: {
           some: {
-            name: {
-              full: { in: filter.characterIn },
+            character: {
+              name: {
+                full: { in: filter.voiceActorIn },
+              },
             },
           },
         },

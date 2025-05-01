@@ -225,6 +225,7 @@ export default class AnilistQL {
       }
       characters {
         edges {
+          id
           node {
             id
             name {

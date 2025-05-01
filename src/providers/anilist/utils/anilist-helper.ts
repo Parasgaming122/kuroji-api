@@ -99,42 +99,48 @@ export class AnilistHelper {
       },
       characters: {
         connectOrCreate: anime.characters?.edges?.map((edge: any) => ({
-          where: { id: edge?.node?.id },
+          where: { id: edge?.id },
           create: {
-            id: edge?.node?.id ?? null,
+            id: edge?.id,
             role: edge?.role ?? null,
-            name: {
-              create: {
-                full: edge?.node?.name?.full ?? null,
-                native: edge?.node?.name?.native ?? null,
-                alternative: edge?.node?.name?.alternative ?? null,
+            character: {
+              connectOrCreate: {
+                where: { id: edge?.node?.id },
+                create: {
+                  id: edge?.node?.id,
+                  name: {
+                    create: {
+                      full: edge?.node?.name?.full ?? null,
+                      native: edge?.node?.name?.native ?? null,
+                      alternative: edge?.node?.name?.alternative ?? []
+                    }
+                  },
+                  image: {
+                    create: {
+                      large: edge?.node?.image?.large ?? null,
+                      medium: edge?.node?.image?.medium ?? null
+                    }
+                  },
+                }
               }
             },
-            image: {
-              create: {
-                large: edge?.node?.image?.large ?? null,
-                medium: edge?.node?.image?.medium ?? null,
-              }
-            },
-
             voiceActors: {
               connectOrCreate: edge?.voiceActors?.map((va: any) => ({
                 where: { id: va.id },
                 create: {
                   id: va.id,
                   language: va?.languageV2 ?? null,
-
                   name: {
                     create: {
                       full: va.name?.full ?? null,
                       native: va.name?.native ?? null,
-                      alternative: va.name?.alternative ?? null,
+                      alternative: va.name?.alternative ?? []
                     }
                   },
                   image: {
                     create: {
                       large: va.image?.large ?? null,
-                      medium: va.image?.medium ?? null,
+                      medium: va.image?.medium ?? null
                     }
                   }
                 }
@@ -145,11 +151,19 @@ export class AnilistHelper {
       },
       studios: {
         connectOrCreate: anime.studios?.edges?.map((edge: any) => ({
-          where: { id: edge?.node?.id },
+          where: { id: edge?.id },
           create: {
-            id: edge?.node?.id ?? null,
-            name: edge?.node?.name ?? null,
-            isMain: edge?.isMain ?? false
+            id: edge?.id,
+            isMain: edge?.isMain ?? false,
+            studio: {
+              connectOrCreate: {
+                where: { id: edge?.node?.id },
+                create: {
+                  id: edge?.node?.id,
+                  name: edge?.node?.name ?? null
+                }
+              }
+            }
           }
         })) ?? []
       },
@@ -184,8 +198,7 @@ export class AnilistHelper {
             description: tag.description ?? null,
             category: tag.category ?? null,
             rank: tag.rank ?? null,
-            isGeneralSpoiler: tag.isGeneralSpoiler ?? false,
-            isMediaSpoiler: tag.isMediaSpoiler ?? false,
+            isSpoiler: tag.isGeneralSpoiler ?? false,
             isAdult: tag.isAdult ?? false,
           }
         }))
@@ -368,44 +381,13 @@ export class AnilistHelper {
           anilistId: true,
         }
       },
-      // characters: {
-      //   omit: {
-      //     anilistId: true,
-      //   },
-      //   include: {
-      //     image: {
-      //       omit: {
-      //         id: true,
-      //         characterId: true
-      //       }
-      //     },
-      //     name: {
-      //       omit: {
-      //         id: true,
-      //         characterId: true
-      //       }
-      //     },
-      //     voiceActors: {
-      //       include: {
-      //         image: {
-      //           omit: {
-      //             id: true,
-      //             voiceActorId: true
-      //           }
-      //         },
-      //         name: {
-      //           omit: {
-      //             id: true,
-      //             voiceActorId: true
-      //           }
-      //         },
-      //       }
-      //     }
-      //   }
-      // },
       studios: {
         omit: {
           anilistId: true,
+          studioId: true,
+        },
+        include: {
+          studio: true
         }
       },
       airingSchedule: {

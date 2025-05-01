@@ -86,22 +86,27 @@ export class AnilistAddService {
     const charactersIds = existingAnilist.characters?.map(c => c.id) as number[];
 
     const [data, total] = await Promise.all([
-      this.prisma.anilistCharacter.findMany({
+      this.prisma.anilistCharacterEdge.findMany({
         where: { id: { in: charactersIds } },
         omit: {
           anilistId: true,
+          characterId: true,
         },
         include: {
-          image: {
-            omit: {
-              id: true,
-              characterId: true
-            }
-          },
-          name: {
-            omit: {
-              id: true,
-              characterId: true
+          character: {
+            include: {
+              image: {
+                omit: {
+                  id: true,
+                  characterId: true
+                }
+              },
+              name: {
+                omit: {
+                  id: true,
+                  characterId: true
+                }
+              },
             }
           },
           voiceActors: {
