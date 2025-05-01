@@ -1,3 +1,20 @@
+# [0.5.0](https://github.com/veaquer/veanime__nestend/compare/v0.4.0...v0.5.0) (2025-05-01)
+
+
+### Features
+
+* characters adjusted ([d7b6231](https://github.com/veaquer/veanime__nestend/commit/d7b6231e69bc1bcc565ee91c4cd21e0d8a7628c5))
+* characters and studios updated ([f202767](https://github.com/veaquer/veanime__nestend/commit/f20276766f454aa4d8859a37096950e9070500ba))
+* characters model improved ([bcb772b](https://github.com/veaquer/veanime__nestend/commit/bcb772b41e7525e236313a64b386de6d1037aaec))
+* exceptions improved ([450d410](https://github.com/veaquer/veanime__nestend/commit/450d4107b06f1a9c6af7e52ee35cc377ad766803))
+* filter improved ([0a1bda3](https://github.com/veaquer/veanime__nestend/commit/0a1bda33b782c604f1a21ddadc4d16423d3fdade))
+* filter improved ([d0a6a71](https://github.com/veaquer/veanime__nestend/commit/d0a6a71e18ab79913e7f9f7a4c2a9862c3bafe1e))
+* filter in exceptions service ([8de7084](https://github.com/veaquer/veanime__nestend/commit/8de7084c584ba964e55dfce1b3790b2d5e15f1a0))
+* improved characters in anilist ([8e3c281](https://github.com/veaquer/veanime__nestend/commit/8e3c28144047b20219bcc7cc724b4b43b4e9d5c3))
+* stream servkce adjusted ([f945f4c](https://github.com/veaquer/veanime__nestend/commit/f945f4c3d113cf2bc3d5aef092e7f7c0eb624825))
+
+
+
 # [0.4.0](https://github.com/veaquer/veanime__nestend/compare/v0.3.1...v0.4.0) (2025-04-23)
 
 
@@ -38,15 +55,6 @@
 ### Features
 
 * anilist schedule ([0c1148b](https://github.com/veaquer/veanime__nestend/commit/0c1148b5f460589b2c2704d18102c562bae0d40e))
-
-
-
-## [0.1.3](https://github.com/veaquer/veanime__nestend/compare/v0.1.2...v0.1.3) (2025-04-17)
-
-
-### Bug Fixes
-
-* no more mangas in anilist ([b69120d](https://github.com/veaquer/veanime__nestend/commit/b69120db146c4219cf72d1be5b44e7efee1fc1c5))
 
 
 
