@@ -3,11 +3,12 @@ import { subDays, startOfWeek, addDays } from 'date-fns'
 import { PrismaService } from '../../../../prisma.service'
 import { AnilistHelper } from '../../utils/anilist-helper'
 import { BasicAnilistSmall } from '../../model/BasicAnilist'
-import { Schedule, Weekday } from '../../model/AnilistModels'
+import { AnilistWithRelations, Schedule, Weekday } from '../../model/AnilistModels'
+import { AnilistAddService } from './anilist.add.service'
 
 @Injectable()
 export class AnilistScheduleService {
-  constructor(private readonly prisma: PrismaService, private readonly helper: AnilistHelper) {}
+  constructor(private readonly prisma: PrismaService, private readonly helper: AnilistHelper, private readonly add: AnilistAddService) {}
 
   async getWithCurrentWeek(): Promise<BasicAnilistSmall[]> {
     const now = new Date()
@@ -81,9 +82,11 @@ export class AnilistScheduleService {
       include: this.helper.getInclude(),
     })
 
+    const data = await this.add.addShikimori(releases);
+
     const releasesByDay: Partial<Record<Weekday, BasicAnilistSmall[]>> = {}
 
-    for (const release of releases) {
+    for (const release of data) {
       const small = this.helper.convertBasicToBasicSmall(release)
       const airingAt = small.nextAiringEpisode?.airingAt
 

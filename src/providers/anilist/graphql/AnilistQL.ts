@@ -153,7 +153,6 @@ export default class AnilistQL {
       type
       format
       updatedAt
-      siteUrl
       coverImage {
         extraLarge
         large
@@ -228,7 +227,6 @@ export default class AnilistQL {
         edges {
           node {
             id
-            siteUrl
             name {
               full
               native
@@ -242,7 +240,6 @@ export default class AnilistQL {
           role
           voiceActors {
             id
-            siteUrl
             image {
               large
               medium

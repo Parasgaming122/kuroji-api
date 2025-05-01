@@ -12,7 +12,6 @@ export class AnilistHelper {
     return {
       id: anime.id,
       idMal: anime.idMal,
-      siteUrl: anime.siteUrl,
       title: {
         connectOrCreate: {
           where: { anilistId: anime.id },
@@ -104,7 +103,6 @@ export class AnilistHelper {
           create: {
             id: edge?.node?.id ?? null,
             role: edge?.role ?? null,
-            siteUrl: edge?.node?.siteUrl ?? null,
             name: {
               create: {
                 full: edge?.node?.name?.full ?? null,
@@ -125,7 +123,6 @@ export class AnilistHelper {
                 create: {
                   id: va.id,
                   language: va?.languageV2 ?? null,
-                  siteUrl: va?.siteUrl ?? null,
 
                   name: {
                     create: {
@@ -180,7 +177,7 @@ export class AnilistHelper {
       } : undefined,
       tags: {
         connectOrCreate: anime.tags?.map((tag: any) => ({
-          where: { name: tag.name },
+          where: { id: tag.id },
           create: {
             id: tag.id,
             name: tag.name,
@@ -190,7 +187,6 @@ export class AnilistHelper {
             isGeneralSpoiler: tag.isGeneralSpoiler ?? false,
             isMediaSpoiler: tag.isMediaSpoiler ?? false,
             isAdult: tag.isAdult ?? false,
-            userId: tag.userId ?? null,
           }
         }))
       },

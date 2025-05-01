@@ -62,22 +62,7 @@ export class AnilistService {
   ): Promise<SearcnResponse<BasicAnilist[]>> {
     const response = await this.filter.getAnilistByFilter(filter);
 
-    const malIds = response.data
-      .map((anilist) => anilist.idMal?.toString() || '')
-      .join(',');
-    const shikimoriData =
-      await this.shikimoriService.saveMultipleShikimori(malIds);
-
-    const data = response.data.map((anilist) => {
-      const malId = anilist.idMal?.toString() || '';
-      const shikimori = shikimoriData.find(
-        (data) => data.malId?.toString() === malId,
-      );
-      return {
-        ...anilist,
-        shikimori: (shikimori as any) || null,
-      } as AnilistWithRelations;
-    });
+    const data = await this.add.addShikimori(response.data);
 
     const basicAnilist = data.map((anilist) =>
       this.helper.convertAnilistToBasic(anilist),
@@ -89,22 +74,7 @@ export class AnilistService {
   async searchAnilist(q: string): Promise<SearcnResponse<BasicAnilist[]>> {
     const response = await this.filter.getAnilistByFilter(new FilterDto({ query: q }))
 
-    const malIds = response.data
-      .map((anilist) => anilist.idMal?.toString() || '')
-      .join(',')
-    const shikimoriData =
-      await this.shikimoriService.saveMultipleShikimori(malIds)
-
-    const data = response.data.map((anilist) => {
-      const malId = anilist.idMal?.toString() || ''
-      const shikimori = shikimoriData.find(
-        (data) => data.malId?.toString() === malId,
-      )
-      return {
-        ...anilist,
-        shikimori: (shikimori as any) || null,
-      } as AnilistWithRelations
-    })
+    const data = await this.add.addShikimori(response.data);
 
     const basicAnilist = data.map((anilist) =>
       this.helper.convertAnilistToBasic(anilist),

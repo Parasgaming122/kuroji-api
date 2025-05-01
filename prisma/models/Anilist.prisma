@@ -1,7 +1,6 @@
 model Anilist {
   id                Int      @id
   idMal             Int?
-  siteUrl           String?
   title             AnilistTitle?          @relation("AnilistTitle")
   bannerImage       String?
   status            String?
@@ -95,7 +94,6 @@ model AnilistCharacter {
   id          Int      @id @default(autoincrement())
   anilistId   Int
   role        String?
-  siteUrl     String?
 
   name        AnilistCharacterName?    @relation("CharacterName")
   image       AnilistCharacterImage?   @relation("CharacterImage")
@@ -107,7 +105,6 @@ model AnilistCharacter {
 model VoiceActor {
   id          Int      @id @default(autoincrement())
   language    String?
-  siteUrl     String?
 
   name        AnilistVoiceName?    @relation("VoiceActorName")
   image       AnilistVoiceImage?   @relation("VoiceActorImage")
@@ -163,7 +160,6 @@ model AnilistTag {
   isGeneralSpoiler Boolean?
   isMediaSpoiler   Boolean?
   isAdult          Boolean?
-  userId           Int?
 
   anilist          Anilist  @relation("AnilistTags", fields: [anilistId], references: [id])
 }

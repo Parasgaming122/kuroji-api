@@ -174,4 +174,23 @@ export class AnilistAddService {
       data: franchises.data
     } as unknown as FranchiseResponse<BasicAnilist[]>;
   }
+
+  async addShikimori(data: AnilistWithRelations[]): Promise<AnilistWithRelations[]> {
+    const malIds = data
+      .map((anilist) => anilist.idMal?.toString() || '')
+      .join(',')
+    const shikimoriData =
+      await this.shikimoriService.saveMultipleShikimori(malIds);
+
+    return data.map((anilist) => {
+      const malId = anilist.idMal?.toString() || ''
+      const shikimori = shikimoriData.find(
+        (data) => data.malId?.toString() === malId,
+      )
+      return {
+        ...anilist,
+        shikimori: (shikimori as any) || null,
+      } as AnilistWithRelations
+    });
+  }
 }

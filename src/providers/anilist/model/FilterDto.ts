@@ -120,6 +120,24 @@ export class FilterDto {
   @IsArray()
   @TransformToArray()
   @Type(() => String)
+  studioIn?: string[]
+
+  @IsOptional()
+  @IsArray()
+  @TransformToArray()
+  @Type(() => String)
+  characterIn?: string[]
+
+  @IsOptional()
+  @IsArray()
+  @TransformToArray()
+  @Type(() => String)
+  voiceActorIn?: string[]
+
+  @IsOptional()
+  @IsArray()
+  @TransformToArray()
+  @Type(() => String)
   genreNotIn?: string[]
 
   @IsOptional()

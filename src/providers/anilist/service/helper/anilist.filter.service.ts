@@ -57,6 +57,44 @@ export class AnilistFilterService {
     if (filter.idMalNotIn) conditions.push({ idMal: { notIn: filter.idMalNotIn } })
     if (filter.idMalNot != null) conditions.push({ idMal: { not: filter.idMalNot } })
 
+    if (filter.studioIn) {
+      conditions.push({
+        studios: {
+          some: {
+            name: { in: filter.studioIn },
+          },
+        },
+      })
+    }
+
+    if (filter.characterIn) {
+      conditions.push({
+        characters: {
+          some: {
+            name: {
+              full: { in: filter.characterIn },
+            },
+          },
+        },
+      })
+    }
+
+    if (filter.voiceActorIn) {
+      conditions.push({
+        characters: {
+          some: {
+            voiceActors: {
+              some: {
+                name: {
+                  full: { in: filter.voiceActorIn },
+                },
+              },
+            },
+          },
+        },
+      })
+    }
+
     // ========== Numeric Filters ==========
     const numericFields = [
       ['duration', 'gt', filter.durationGreater],
