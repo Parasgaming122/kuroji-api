@@ -6,7 +6,7 @@ import { AnimekaiService } from '../../animekai/service/animekai.service'
 import { AnimepaheService } from '../../animepahe/service/animepahe.service'
 import { AnilistService } from '../../anilist/service/anilist.service'
 import { TmdbService } from '../../tmdb/service/tmdb.service'
-import { AnilistStreamingEpisode, AnimekaiEpisode, AnimepaheEpisode, EpisodeZoro, TmdbSeasonEpisode, Zoro } from '@prisma/client'
+import { AnimekaiEpisode, AnimepaheEpisode, EpisodeZoro } from '@prisma/client'
 import { Source } from '../model/Source'
 
 export interface Episode {

@@ -5,7 +5,7 @@ import { CustomHttpService } from '../../../http/http.service';
 import { PrismaService } from '../../../prisma.service';
 import { ZoroHelper } from '../utils/zoro-helper';
 import { UpdateType } from '../../../shared/UpdateType';
-import { AnilistService } from '../../../providers/anilist/service/anilist.service'
+import { AnilistService } from '../../anilist/service/anilist.service'
 import { ScrapeHelper } from '../../../scrapper/scrape-helper'
 import { Source } from '../../stream/model/Source'
 import { TmdbService } from '../../tmdb/service/tmdb.service'
