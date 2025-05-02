@@ -1,3 +1,12 @@
+# [0.6.0](https://github.com/veaquer/veanime__nestend/compare/v0.5.0...v0.6.0) (2025-05-02)
+
+
+### Features
+
+* all providers models had been changed + stream service for animepahe ve been fixed ([7847606](https://github.com/veaquer/veanime__nestend/commit/7847606a4d83251785c2d5338c4008e68bc97974))
+
+
+
 # [0.5.0](https://github.com/veaquer/veanime__nestend/compare/v0.4.0...v0.5.0) (2025-05-01)
 
 
@@ -46,15 +55,6 @@
 
 * anilist model and filter improved ([01c1188](https://github.com/veaquer/veanime__nestend/commit/01c1188945049792fded84738cd2e978a5ed0335))
 * update service with anilist improved ([c1aad50](https://github.com/veaquer/veanime__nestend/commit/c1aad5088b4982f63228cda22d99d61469079961))
-
-
-
-# [0.2.0](https://github.com/veaquer/veanime__nestend/compare/v0.1.3...v0.2.0) (2025-04-18)
-
-
-### Features
-
-* anilist schedule ([0c1148b](https://github.com/veaquer/veanime__nestend/commit/0c1148b5f460589b2c2704d18102c562bae0d40e))
 
 
 
