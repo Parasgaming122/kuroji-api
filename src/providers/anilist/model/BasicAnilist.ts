@@ -1,4 +1,4 @@
-import { AnilistNextAiringEpisode, Poster } from '@prisma/client'
+import { AnilistNextAiringEpisode, ShikimoriPoster } from '@prisma/client'
 import { JsonValue } from '@prisma/client/runtime/library'
 
 export interface BasicShikimori {
@@ -8,7 +8,7 @@ export interface BasicShikimori {
   licenseNameRu?: string;
   url?: string;
   franchise?: string;
-  poster?: Poster;
+  poster?: ShikimoriPoster;
 }
 
 export interface BasicAnilist {

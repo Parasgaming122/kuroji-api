@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { AnimeKai } from '@prisma/client';
+import { AnimeKai, AnimekaiEpisode } from '@prisma/client';
 import { UrlConfig } from '../../../configs/url.config';
 import { CustomHttpService } from '../../../http/http.service';
 import { PrismaService } from '../../../prisma.service';
@@ -25,6 +25,10 @@ export interface AnimekaiResponse {
   results: BasicAnimekai[];
 }
 
+export interface AnimekaiWithRelations extends AnimeKai {
+  episodes: AnimekaiEpisode[]
+}
+
 @Injectable()
 export class AnimekaiService {
   constructor(
@@ -36,9 +40,10 @@ export class AnimekaiService {
     @InjectRedis() private readonly redis: Redis,
   ) {}
 
-  async getAnimekaiByAnilist(id: number): Promise<AnimeKai> {
+  async getAnimekaiByAnilist(id: number): Promise<AnimekaiWithRelations> {
     const existingAnimekai = await this.prisma.animeKai.findFirst({
       where: { anilistId: id },
+      include: { episodes: true }
     });
 
     if (existingAnimekai) {
@@ -46,7 +51,7 @@ export class AnimekaiService {
     }
 
     const animekai = await this.findAnimekai(id);
-    return this.saveAnimekai(animekai);
+    return this.saveAnimekai(animekai as AnimekaiWithRelations);
   }
 
   async getSources(episodeId: string, dub: boolean): Promise<Source> {
@@ -70,7 +75,7 @@ export class AnimekaiService {
     return animekai as Source
   }
 
-  async saveAnimekai(animekai: AnimeKai): Promise<AnimeKai> {
+  async saveAnimekai(animekai: AnimekaiWithRelations): Promise<AnimekaiWithRelations> {
     await this.prisma.lastUpdated.create({
       data: {
         entityId: animekai.id,
@@ -79,19 +84,25 @@ export class AnimekaiService {
       },
     });
 
-    return await this.prisma.animeKai.upsert({
+    await this.prisma.animeKai.upsert({
       where: { id: animekai.id },
       update: this.helper.getAnimekaiData(animekai),
       create: this.helper.getAnimekaiData(animekai),
     });
+
+    return await this.prisma.animeKai.findUnique({
+      where: { id: animekai.id },
+      include: { episodes: true }
+    }) as unknown as AnimekaiWithRelations;
   }
 
   async update(id: string): Promise<AnimeKai> {
     const existingAnimekai = await this.prisma.animeKai.findFirst({
       where: { id },
+      include: { episodes: true }
     });
 
-    const animekai = await this.fetchAnimekai(id);
+    const animekai = await this.fetchAnimekai(id) as AnimekaiWithRelations;
 
     if (!animekai) {
       return Promise.reject(new Error('Animekai not found'));

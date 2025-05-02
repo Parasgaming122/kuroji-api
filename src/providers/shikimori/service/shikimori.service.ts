@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
-import { BasicIdShik, Shikimori } from '@prisma/client';
+import { AiredOn, BasicIdShik, ReleasedOn, Shikimori, ShikimoriPoster, ShikimoriScreenshot, ShikimoriVideo } from '@prisma/client';
 import { PrismaService } from '../../../prisma.service';
 
 import { UpdateType } from '../../../shared/UpdateType';
 
-import { Screenshot } from '@prisma/client';
+import { ShikimoriScreenshot as Screenshot } from '@prisma/client';
 import { UrlConfig } from '../../../configs/url.config';
 import { CustomHttpService } from '../../../http/http.service';
 import { GraphQL } from '../graphql/shikimori.graphql';
@@ -13,6 +13,14 @@ import { ShikimoriHelper } from '../utils/shikimori-helper';
 
 export interface ShikimoriResponse {
   animes: Shikimori[];
+}
+
+export interface ShikimoriWithRelations extends Shikimori {
+  poster: ShikimoriPoster;
+  airedOn: AiredOn;
+  releasedOn: ReleasedOn;
+  videos: ShikimoriVideo[];
+  screenshots: ShikimoriScreenshot[];
 }
 
 @Injectable()
@@ -23,11 +31,11 @@ export class ShikimoriService {
     private readonly helper: ShikimoriHelper,
   ) {}
 
-  async getShikimori(id: string): Promise<Shikimori> {
+  async getShikimori(id: string): Promise<ShikimoriWithRelations> {
     const existingShikimori = await this.prisma.shikimori.findUnique({
       where: { id },
-      omit: { chronology: true }
-    }) as Shikimori;
+      include: this.helper.getInclude()
+    }) as unknown as ShikimoriWithRelations;
     if (existingShikimori) {
       return this.adjustShikimori(existingShikimori);
     }
@@ -45,12 +53,12 @@ export class ShikimoriService {
       throw new NotFoundException(`Shikimori not found for ID: ${id}`);
     }
 
-    await this.saveShikimori(anime);
+    await this.saveShikimori(anime as ShikimoriWithRelations);
 
     const newShikimori = await this.prisma.shikimori.findUnique({
       where: { id },
-      omit: { chronology: true }
-    }) as Shikimori;
+      include: this.helper.getInclude()
+    }) as unknown as ShikimoriWithRelations;
 
     return this.adjustShikimori(newShikimori);
   }
@@ -58,6 +66,9 @@ export class ShikimoriService {
   async getChronology(id: string): Promise<BasicIdShik[]> {
     const shikimori = await this.prisma.shikimori.findUnique({
       where: { id },
+      include: {
+        chronology: true
+      }
     });
 
     if (!shikimori) {
@@ -67,7 +78,7 @@ export class ShikimoriService {
     return (shikimori.chronology as BasicIdShik[]) || [];
   }
 
-  async saveMultipleShikimori(ids: string): Promise<Shikimori[]> {
+  async saveMultipleShikimori(ids: string): Promise<ShikimoriWithRelations[]> {
     const idList = ids
       .split(',')
       .map((id) => id.trim())
@@ -75,13 +86,13 @@ export class ShikimoriService {
 
     const existingShikimoriList = await this.prisma.shikimori.findMany({
       where: { id: { in: idList } },
-      omit: { chronology: true }
-    }) as Shikimori[];
+      include: this.helper.getInclude()
+    }) as unknown as ShikimoriWithRelations[];
 
     const existingIds = existingShikimoriList.map((shikimori) => shikimori.id);
     const idsToFetch = idList.filter((id) => !existingIds.includes(id));
 
-    const shikimoriList: Shikimori[] = [...existingShikimoriList];
+    const shikimoriList: ShikimoriWithRelations[] = [...existingShikimoriList];
 
     if (idsToFetch.length) {
       const fetchedShikimoriList = (await this.fetchShikimoriFromGraphQL(
@@ -99,7 +110,7 @@ export class ShikimoriService {
       );
 
       if (newShikimoriList.length) {
-        await this.saveShikimoris(newShikimoriList);
+        await this.saveShikimoris(newShikimoriList as ShikimoriWithRelations[]);
       }
 
       shikimoriList.push(
@@ -110,7 +121,7 @@ export class ShikimoriService {
     return shikimoriList;
   }
 
-  async saveShikimori(anime: Shikimori): Promise<Shikimori> {
+  async saveShikimori(anime: ShikimoriWithRelations): Promise<ShikimoriWithRelations> {
     await this.prisma.lastUpdated.create({
       data: {
         entityId: anime.id,
@@ -124,10 +135,15 @@ export class ShikimoriService {
       create: this.helper.getDataForPrisma(anime),
     });
 
-    return savedShikimori;
+    const newShikimori = await this.prisma.shikimori.findUnique({
+      where: { id: anime.id },
+      include: this.helper.getInclude()
+    }) as unknown as ShikimoriWithRelations;
+
+    return newShikimori; 
   }
 
-  async saveShikimoris(shikimoris: Shikimori[]): Promise<void> {
+  async saveShikimoris(shikimoris: ShikimoriWithRelations[]): Promise<void> {
     const lastUpdatedData = shikimoris.map((shikimori) => ({
       entityId: shikimori.id,
       externalId: Number(shikimori.malId),
@@ -141,7 +157,7 @@ export class ShikimoriService {
     }
   }
 
-  async update(id: string): Promise<Shikimori> {
+  async update(id: string): Promise<ShikimoriWithRelations> {
     const shikimoriList = (await this.fetchShikimoriFromGraphQL(
       id,
       1,
@@ -181,7 +197,7 @@ export class ShikimoriService {
     return shikimoriBasicId;
   }
 
-  adjustShikimori(shikimori: Shikimori): Shikimori {
+  adjustShikimori(shikimori: ShikimoriWithRelations): ShikimoriWithRelations {
     const screenshots = shikimori.screenshots as Screenshot[];
 
     if (screenshots && screenshots.length > 10) {

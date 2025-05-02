@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Animepahe, AnimepaheExternalLink } from '@prisma/client';
+import { Animepahe, AnimepaheEpisode, AnimepaheExternalLink } from '@prisma/client';
 import { UrlConfig } from '../../../configs/url.config';
 import { CustomHttpService } from '../../../http/http.service';
 import { PrismaService } from '../../../prisma.service';
@@ -23,6 +23,10 @@ export interface BasicAnimepahe {
 export interface AnimepaheResponse {
   results: BasicAnimepahe[];
 }
+export interface AnimepaheWithRelations extends Animepahe {
+  externalLinks: AnimepaheExternalLink[],
+  episodes: AnimepaheEpisode[],
+}
 
 @Injectable()
 export class AnimepaheService {
@@ -35,9 +39,13 @@ export class AnimepaheService {
     @InjectRedis() private readonly redis: Redis,
   ) {}
 
-  async getAnimepaheByAnilist(id: number): Promise<Animepahe | null> {
+  async getAnimepaheByAnilist(id: number): Promise<AnimepaheWithRelations | null> {
     const existingAnimepahe = await this.prisma.animepahe.findFirst({
       where: { alId: id },
+      include: {
+        externalLinks: true,
+        episodes: true,
+      }
     });
 
     if (existingAnimepahe) {
@@ -45,7 +53,7 @@ export class AnimepaheService {
     }
 
     const animepahe = await this.findAnimepahe(id);
-    return this.saveAnimepahe(animepahe);
+    return this.saveAnimepahe(animepahe as AnimepaheWithRelations);
   }
 
   async getSources(episodeId: string): Promise<Source> {
@@ -70,7 +78,7 @@ export class AnimepaheService {
     return animepahe as Source;
   }
 
-  async saveAnimepahe(animepahe: Animepahe): Promise<Animepahe> {
+  async saveAnimepahe(animepahe: Animepahe): Promise<AnimepaheWithRelations> {
     await this.prisma.lastUpdated.create({
       data: {
         entityId: animepahe.id,
@@ -79,19 +87,28 @@ export class AnimepaheService {
       },
     });
 
-    return this.prisma.animepahe.upsert({
+    await this.prisma.animepahe.upsert({
       where: { id: animepahe.id },
       update: this.helper.getAnimePaheData(animepahe),
       create: this.helper.getAnimePaheData(animepahe),
     });
+
+    return await this.prisma.animepahe.findFirst({
+      where: { id: animepahe.id },
+      include: {
+        externalLinks: true,
+        episodes: true,
+      }
+    }) as unknown as AnimepaheWithRelations;
   }
 
-  async update(id: string): Promise<Animepahe> {
+  async update(id: string): Promise<AnimepaheWithRelations> {
     const existingAnimepahe = await this.prisma.animepahe.findFirst({
       where: { id },
+      include: { episodes: true }
     });
 
-    const animepahe = await this.fetchAnimepahe(id);
+    const animepahe = await this.fetchAnimepahe(id) as AnimepaheWithRelations;
 
     if (!animepahe) {
       return Promise.reject(new Error('Animepahe not found'));
@@ -136,8 +153,8 @@ export class AnimepaheService {
           result.title,
         )
       ) {
-        const data = await this.fetchAnimepahe(result.id);
-        const externalLinks = data.externalLinks as AnimepaheExternalLink[];
+        const data = await this.fetchAnimepahe(result.id) as AnimepaheWithRelations;
+        const externalLinks = data.externalLinks;
 
         if (externalLinks.find(l => l.sourceName === 'AniList' && l.id === String(id))) {
           data.alId = id;

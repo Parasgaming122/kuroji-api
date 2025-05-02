@@ -3,7 +3,7 @@ import { Prisma, Tvdb, TvdbLogin, TvdbLanguageTranslation, TvdbLanguage } from '
 
 @Injectable()
 export class TvdbHelper {
-  getTvdbData(tvdb: Tvdb): Prisma.TvdbCreateInput {
+  getTvdbData(tvdb: any): Prisma.TvdbCreateInput {
     return {
       id: tvdb.id,
       tmdbId: tvdb.tmdbId ?? undefined,
@@ -17,12 +17,76 @@ export class TvdbHelper {
       year: tvdb.year ?? undefined,
       nameTranslations: tvdb.nameTranslations ?? [],
       overviewTranslations: tvdb.overviewTranslations ?? [],
-      status: tvdb.status ?? {},
-      aliases: tvdb.aliases ?? undefined,
-      artworks: tvdb.artworks ?? undefined,
-      remoteIds: tvdb.remoteIds ?? undefined,
-      trailers: tvdb.trailers ?? undefined,
-      airsDays: tvdb.airsDays ?? undefined,
+      status: tvdb.status ? {
+        connectOrCreate: {
+          where: { id: tvdb.status.id },
+          create: {
+            id: tvdb.status.id ?? undefined,
+            name: tvdb.status.name ?? undefined,
+            recordType: tvdb.status.recordType ?? undefined,
+            keepUpdated: tvdb.status.keepUpdated ?? false,
+          }
+        }
+      } : undefined,
+      aliases: {
+        create: tvdb.aliases?.map((alias) => ({
+          name: alias.name ?? undefined,
+          language: alias.language ?? undefined,
+        })) ?? [],
+      },
+      artworks: {
+        connectOrCreate: tvdb.artworks?.map((art) => ({
+          where: { id: art.id },
+          create: {
+            id: art.id ?? undefined,
+            height: art.height ?? undefined,
+            image: art.image ?? undefined,
+            includesText: art.includesText ?? undefined,
+            language: art.language ?? undefined,
+            score: art.score ?? undefined,
+            thumbnail: art.thumbnail ?? undefined,
+            type: art.type ?? undefined,
+            width: art.width ?? undefined,
+          },
+        })) ?? [],
+      },
+      remoteIds: {
+        connectOrCreate: tvdb.remoteIds?.map((remote) => ({
+          where: { id: remote.id },
+          create: {
+            id: remote.id ?? undefined,
+            type: remote.type ?? undefined,
+            sourceName: remote.sourceName ?? undefined,
+          },
+        })) ?? [],
+      },
+      trailers: {
+        connectOrCreate: tvdb.trailers?.map((trailer) => ({
+          where: { id: trailer.id },
+          create: {
+            id: trailer.id ?? undefined,
+            url: trailer.url ?? undefined,
+            name: trailer.name ?? undefined,
+            runtime: trailer.runtime ?? undefined,
+            language: trailer.language ?? undefined,
+          },
+        })) ?? [],
+      },
+
+      airsDays: tvdb.airsDays
+        ? {
+          create: {
+            monday: tvdb.airsDays.monday,
+            tuesday: tvdb.airsDays.tuesday,
+            wednesday: tvdb.airsDays.wednesday,
+            thursday: tvdb.airsDays.thursday,
+            friday: tvdb.airsDays.friday,
+            saturday: tvdb.airsDays.saturday,
+            sunday: tvdb.airsDays.sunday,
+          },
+        }
+        : undefined,
+
       airsTime: tvdb.airsTime ?? undefined,
     };
   }
@@ -55,5 +119,32 @@ export class TvdbHelper {
       nativeName: language.nativeName ?? undefined,
       shortCode: language.shortCode ?? undefined,
     };
+  }
+
+  getInclude(): any {
+    const include = {
+      status: {
+        omit: {
+          id: true,
+          tvdbId: true,
+        }
+      },
+      aliases: {
+        omit: {
+          id: true
+        }
+      },
+      artworks: true,
+      remoteIds: true,
+      trailers: true,
+      airsDays: {
+        omit: {
+          id: true,
+          tvdbId: true,
+        }
+      }
+    }
+    
+    return include;
   }
 }

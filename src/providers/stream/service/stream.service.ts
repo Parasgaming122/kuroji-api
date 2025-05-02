@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Provider } from '../model/Provider'
 import { SourceType } from '../model/SourceType'
-import { ZoroService } from '../../zoro/service/zoro.service'
+import { ZoroService, ZoroWithRelations } from '../../zoro/service/zoro.service'
 import { AnimekaiService } from '../../animekai/service/animekai.service'
 import { AnimepaheService } from '../../animepahe/service/animepahe.service'
 import { AnilistService } from '../../anilist/service/anilist.service'
@@ -10,15 +10,15 @@ import { AnilistStreamingEpisode, AnimekaiEpisode, AnimepaheEpisode, EpisodeZoro
 import { Source } from '../model/Source'
 
 export interface Episode {
-  image: string,
-  title: string,
-  number: number,
-  overview: string,
-  date: string,
-  duration: number,
-  filler: boolean,
-  sub: boolean,
-  dub: boolean
+  title: string | null
+  image: string
+  number: number | null
+  overview: string
+  date: string
+  duration: number
+  filler: boolean | null
+  sub: boolean | null
+  dub: boolean | null
 }
 
 export interface ProviderInfo {
@@ -46,9 +46,9 @@ export class StreamService {
         this.anilist.getAnilist(id).catch(() => null),
       ])
 
-      const episodesZoro = aniwatch?.episodes as EpisodeZoro[] || []
-      const tmdbEpisodes = season?.episodes as TmdbSeasonEpisode[] || []
-      const anilistEpisodes = anilist?.streamingEpisodes as AnilistStreamingEpisode[] || []
+      const episodesZoro = aniwatch?.episodes || []
+      const tmdbEpisodes = season?.episodes || []
+      const anilistEpisodes = anilist?.streamingEpisodes || []
 
       const episodes: Episode[] = episodesZoro.map((episode) => {
         const {
@@ -97,8 +97,8 @@ export class StreamService {
     return (await this.getEpisodes(id)).find(e => e.number === ep) as Episode;
   }
 
-  private isEpisodeAvailable(aniwatch: Zoro, episodeNumber: number, isSub: boolean): boolean {
-    const episodes = aniwatch?.episodes as EpisodeZoro[];
+  private isEpisodeAvailable(aniwatch: ZoroWithRelations, episodeNumber: number, isSub: boolean): boolean {
+    const episodes = aniwatch?.episodes;
     if (!episodes) {
       return false;
     }
@@ -109,9 +109,9 @@ export class StreamService {
     }
 
     if (isSub) {
-      return episode.isSubbed;
+      return episode.isSubbed || false;
     } else {
-      return episode.isDubbed;
+      return episode.isDubbed || false;
     }
   }
 
@@ -133,23 +133,29 @@ export class StreamService {
       providers.push({ id, filler, provider, type })
     }
 
-    const zoroEp = (zoro?.episodes as EpisodeZoro[])?.find((e: EpisodeZoro) => e.number === ep)
+    const zoroEp = zoro?.episodes?.find((e: EpisodeZoro, idx: number) =>
+      e.number === ep || idx + 1 === ep
+    )
     if (zoroEp) {
       const { id, isFiller, isSubbed, isDubbed } = zoroEp
-      if (isSubbed) pushProvider(id, isFiller, Provider.ANIWATCH, SourceType.SOFT_SUB)
-      if (isDubbed) pushProvider(id, isFiller, Provider.ANIWATCH, SourceType.DUB)
+      if (isSubbed) pushProvider(id, isFiller || false, Provider.ANIWATCH, SourceType.SOFT_SUB)
+      if (isDubbed) pushProvider(id, isFiller || false, Provider.ANIWATCH, SourceType.DUB)
     }
 
-    const paheEp = (pahe?.episodes as AnimepaheEpisode[])?.find((e: AnimepaheEpisode) => e.number === ep)
+    const paheEp = pahe?.episodes?.find((e: AnimepaheEpisode, idx: number) =>
+      e.number === ep || idx + 1 === ep
+    )
     if (paheEp) {
-      pushProvider(paheEp.id, false, Provider.ANIMEPAHE, SourceType.BOTH)
+      pushProvider(paheEp.id, zoroEp?.isFiller || false, Provider.ANIMEPAHE, SourceType.BOTH)
     }
 
-    const kaiEp = (kai?.episodes as AnimekaiEpisode[])?.find((e: AnimekaiEpisode) => e.number === ep)
+    const kaiEp = kai?.episodes?.find((e: AnimekaiEpisode, idx: number) =>
+      e.number === ep || idx + 1 === ep
+    )
     if (kaiEp) {
-      const { id, isFiller = false, isSubbed, isDubbed } = kaiEp
-      if (isSubbed) pushProvider(id, false, Provider.ANIMEKAI, SourceType.HARD_SUB)
-      if (isDubbed) pushProvider(id, false, Provider.ANIMEKAI, SourceType.DUB)
+      const { id, isFiller, isSubbed, isDubbed } = kaiEp
+      if (isSubbed) pushProvider(id, isFiller || false, Provider.ANIMEKAI, SourceType.HARD_SUB)
+      if (isDubbed) pushProvider(id, isFiller || false, Provider.ANIMEKAI, SourceType.DUB)
     }
 
     return providers
@@ -160,7 +166,7 @@ export class StreamService {
 
     const enrichedEpisodes = await Promise.all(
       episodes.map(async (ep) => {
-        const providers = await this.getProvidersSingle(id, ep.number)
+        const providers = await this.getProvidersSingle(id, ep?.number || 0)
         return {
           ...ep,
           providers,

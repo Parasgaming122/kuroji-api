@@ -4,7 +4,7 @@ import { Animepahe, Prisma } from '@prisma/client';
 @Injectable()
 export class AnimePaheHelper {
   getAnimePaheData(
-    animePahe: Animepahe,
+    animePahe: any,
   ): Prisma.AnimepaheCreateInput {
     return {
       id: animePahe.id,
@@ -13,13 +13,34 @@ export class AnimePaheHelper {
       image: animePahe.image,
       cover: animePahe.cover,
       hasSub: animePahe.hasSub,
-      externalLinks: animePahe.externalLinks || [],
+      externalLinks: {
+        connectOrCreate: animePahe.externalLinks.map((e: any) => ({
+          where: { id: e.id },
+          create: {
+            id: e.id,
+            url: e.url,
+            sourceName: e.sourceName
+          }
+        })) ?? []
+      },
       status: animePahe.status,
       type: animePahe.type,
       releaseDate: animePahe.releaseDate,
       totalEpisodes: animePahe.totalEpisodes,
       episodePages: animePahe.episodePages,
-      episodes: animePahe.episodes || [],
+      episodes: {
+        connectOrCreate: animePahe.episodes.map((e: any) => ({
+          where: { id: e.id },
+          create: {
+            id: e.id,
+            number: e.number,
+            title: e.title,
+            image: e.image,
+            duration: e.duration,
+            url: e.url
+          }
+        })) ?? []
+      },
     };
   }
 }

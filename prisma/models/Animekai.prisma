@@ -14,7 +14,7 @@ model AnimeKai {
   season         String?
   totalEpisodes  Int?
 
-  episodes       Json?
+  episodes       AnimekaiEpisode[] @relation("AnimekaiEpisode")
 }
 
 model AnimekaiEpisode {
@@ -25,4 +25,6 @@ model AnimekaiEpisode {
   isSubbed   Boolean?
   isDubbed   Boolean?
   url        String?
+
+  animekai AnimeKai[] @relation("AnimekaiEpisode")
 }

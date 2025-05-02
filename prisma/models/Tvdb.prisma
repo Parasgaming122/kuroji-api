@@ -1,7 +1,7 @@
 model Tvdb {
   id                   Int                @id
   tmdbId               Int?
-  type                 String?            // even though it's ignored in JSON, you can keep it if needed
+  type                 String?
   name                 String?
   slug                 String?
   image                String?
@@ -9,24 +9,36 @@ model Tvdb {
   runtime              Int?
   lastUpdated          String?
   year                 String?
-  nameTranslations     String[]           // list of translations
-  overviewTranslations String[]           // list of translations
-  status               Json?
+  nameTranslations     String[]
+  overviewTranslations String[]
+  status               TvdbStatus? @relation("TvdbStatus")
 
-  aliases              Json?
-  artworks             Json?
-  remoteIds            Json?
-  trailers             Json?
+  aliases              TvdbAlias[] @relation("TvdbAliases")
+  artworks             TvdbArtwork[] @relation("TvdbArtworks")
+  remoteIds            TvdbRemoteId[] @relation("TvdbRemote")
+  trailers             TvdbTrailer[] @relation("TvdbTrailers")
 
-  airsDays             Json?
+  airsDays             TvdbAirDays? @relation("TvdbAirDays")
   airsTime             String?
+}
+
+model TvdbStatus {
+  id    Int @id
+  tvdbId Int @unique
+
+  name  String?
+  recordType String?
+  keepUpdated Boolean?
+
+  tvdb Tvdb @relation("TvdbStatus", fields: [tvdbId], references: [id])
 }
 
 model TvdbAlias {
   id            Int         @id @default(autoincrement())
   name          String?
   language      String?
-
+  
+  tvdb Tvdb[] @relation("TvdbAliases")
   @@map("tvdb_aliases")
 }
 
@@ -40,6 +52,8 @@ model TvdbArtwork {
   thumbnail     String?
   type          Int?
   width         Int?
+
+  tvdb Tvdb[] @relation("TvdbArtworks")
   @@map("tvdb_artworks")
 }
 
@@ -47,8 +61,34 @@ model TvdbRemoteId {
   id            String      @id
   type          Int?
   sourceName    String?
-
+ 
+  tvdb Tvdb[] @relation("TvdbRemote")
   @@map("tvdb_remote")
+}
+
+model TvdbTrailer {
+  id  Int @id
+  url String?
+  name String?
+  runtime Int?
+  language String?
+
+  tvdb Tvdb[] @relation("TvdbTrailers")
+}
+
+model TvdbAirDays {
+  id        Int     @id @default(autoincrement())
+  tvdbId    Int @unique
+
+  monday    Boolean @default(false)
+  tuesday   Boolean @default(false)
+  wednesday Boolean @default(false)
+  thursday  Boolean @default(false)
+  friday    Boolean @default(false)
+  saturday  Boolean @default(false)
+  sunday    Boolean @default(false)
+
+  tvdb Tvdb @relation("TvdbAirDays", fields: [tvdbId], references: [id])
 }
 
 model TvdbLogin {

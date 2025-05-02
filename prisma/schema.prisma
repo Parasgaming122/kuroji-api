@@ -308,7 +308,7 @@ model AnimeKai {
   season         String?
   totalEpisodes  Int?
 
-  episodes       Json?
+  episodes       AnimekaiEpisode[] @relation("AnimekaiEpisode")
 }
 
 model AnimekaiEpisode {
@@ -319,6 +319,8 @@ model AnimekaiEpisode {
   isSubbed   Boolean?
   isDubbed   Boolean?
   url        String?
+
+  animekai AnimeKai[] @relation("AnimekaiEpisode")
 }
 
 // Animepahe.prisma
@@ -329,14 +331,14 @@ model Animepahe {
   image          String?
   cover          String?
   hasSub         Boolean?
-  externalLinks  Json?
+  externalLinks  AnimepaheExternalLink[] @relation("AnimepaheExLink")
   status         String?
   type           String?
   releaseDate    String?
   totalEpisodes  Int?
   episodePages   Int?
 
-  episodes       Json?
+  episodes       AnimepaheEpisode[] @relation("AnimepaheEpisode")
 }
 
 model AnimepaheEpisode {
@@ -346,12 +348,16 @@ model AnimepaheEpisode {
   image       String?
   duration    String?
   url         String?
+
+  animepahe Animepahe[] @relation("AnimepaheEpisode")
 }
 
 model AnimepaheExternalLink {
   id          String   @id
   url         String
   sourceName  String
+
+  animepahe Animepahe[] @relation("AnimepaheExLink")
 }
 
 // Exception.prisma
@@ -387,7 +393,7 @@ model Shikimori {
   licenseNameRu String?
   english       String?
   japanese      String?
-  poster        Json?
+  poster        ShikimoriPoster? @relation("ShikimoriPoster")
   synonyms      String[]
   kind          String?
   rating        String?
@@ -396,55 +402,68 @@ model Shikimori {
   episodes      Int?
   episodesAired Int?
   duration      Int?
-  airedOn       Json?
-  releasedOn    Json?
+  airedOn       AiredOn? @relation("ShikimoriAiredOn")
+  releasedOn    ReleasedOn? @relation("ShikimoriReleasedOn")
   franchise     String?
   url           String?
   season        String?
   createdAt     DateTime?
   updatedAt     DateTime?
   nextEpisodeAt DateTime?
-  chronology    Json?
-  videos        Json?
-  screenshots   Json?
+  chronology    BasicIdShik[] @relation("ShikimoriChronology")
+  videos        ShikimoriVideo[] @relation("ShikimoriVideo")
+  screenshots   ShikimoriScreenshot[] @relation("ShikimoriScreenshot")
 }
 
 model AiredOn {
   id        Int         @id @default(autoincrement())
+  shikimoriId String @unique
+
   year      Int?
   month     Int?
   day       Int?
   date      String?
+
+  shikimori Shikimori @relation("ShikimoriAiredOn", fields: [shikimoriId], references: [id])
 }
 
 model ReleasedOn {
   id        Int         @id @default(autoincrement())
+  shikimoriId String @unique
+
   year      Int?
   month     Int?
   day       Int?
   date      String?
+
+  shikimori Shikimori @relation("ShikimoriReleasedOn", fields: [shikimoriId], references: [id])
 }
 
 model BasicIdShik {
-  id          Int        @id @default(autoincrement())
-  malId       Int?
+  id          String        @id
+  malId       String?
+
+  shikimori Shikimori[] @relation("ShikimoriChronology")
 }
 
-model Video {
-  id            Int        @id @default(autoincrement())
-  videoId       String?
-  videoImageUrl String?
+model ShikimoriVideo {
+  id            String        @id
+  url           String?
+  name          String?
   kind          String?
-  videoName     String?
   playerUrl     String?
-  videoUrl      String?
+  imageUrl      String?
+
+  shikimori Shikimori[] @relation("ShikimoriVideo")
 }
 
-model Screenshot {
-  id          Int        @id @default(autoincrement())
+model ShikimoriScreenshot {
+  id          String        @id
   originalUrl String?
   x166Url     String?
   x332Url     String?
+
+  shikimori Shikimori[] @relation("ShikimoriScreenshot")
 }
 
 model Title {
@@ -454,14 +473,6 @@ model Title {
   native       String?
 }
 
-model CoverImage {
-  id           Int                     @id @default(autoincrement())
-  extraLarge   String?
-  large        String?
-  medium       String?
-  color        String?
-}
-
 model DateDetails {
   id           Int                     @id @default(autoincrement())
   year         Int?
@@ -469,25 +480,14 @@ model DateDetails {
   day          Int?
 }
 
-model AiringEpisode {
-  id              Int                     @id @default(autoincrement())
-  airingAt        Int?
-  timeUntilAiring Int?
-  episode         Int?
-}
+model ShikimoriPoster {
+  id             String              @id
+  shikimoriId    String @unique
 
-model BasicShikimori {
-  id           Int                     @id @default(autoincrement())
-  name         String?
-  url          String?
-  poster       Json? 
-  posterId     Int?
-}
-
-model Poster {
-  id             Int              @id @default(autoincrement())
   originalUrl    String?
   mainUrl        String?
+
+  shikimori Shikimori @relation("ShikimoriPoster", fields: [shikimoriId], references: [id])
 }
 
 model ReleaseIndex {
@@ -523,7 +523,7 @@ model Tmdb {
   vote_average       Float?
   vote_count         Int?
 
-  seasons            Json?    // relation to embedded seasons
+  seasons            TmdbReleaseSeason[] @relation("TmdbReleaseSeason")
 }
 
 model TmdbReleaseSeason {
@@ -535,6 +535,8 @@ model TmdbReleaseSeason {
   poster_path   String? // handle URL concatenation in your app logic
   season_number Int?
   vote_average  Float?
+
+  tmdb Tmdb[] @relation("TmdbReleaseSeason")
 }
 
 model TmdbSeason {
@@ -547,7 +549,7 @@ model TmdbSeason {
   season_number Int?
   vote_average  Float?
 
-  episodes      Json?    // relation to episodes
+  episodes      TmdbSeasonEpisode[] @relation("TmdbSeasonEpisode")
 }
 
 model TmdbSeasonEpisode {
@@ -564,13 +566,15 @@ model TmdbSeasonEpisode {
   still_path     String? // handle URL concatenation in your app logic
   vote_average   Float?
   vote_count     Int?
+
+  tmdbSeason TmdbSeason[] @relation("TmdbSeasonEpisode")
 }
 
 // Tvdb.prisma
 model Tvdb {
   id                   Int                @id
   tmdbId               Int?
-  type                 String?            // even though it's ignored in JSON, you can keep it if needed
+  type                 String?
   name                 String?
   slug                 String?
   image                String?
@@ -578,24 +582,36 @@ model Tvdb {
   runtime              Int?
   lastUpdated          String?
   year                 String?
-  nameTranslations     String[]           // list of translations
-  overviewTranslations String[]           // list of translations
-  status               Json?
+  nameTranslations     String[]
+  overviewTranslations String[]
+  status               TvdbStatus? @relation("TvdbStatus")
 
-  aliases              Json?
-  artworks             Json?
-  remoteIds            Json?
-  trailers             Json?
+  aliases              TvdbAlias[] @relation("TvdbAliases")
+  artworks             TvdbArtwork[] @relation("TvdbArtworks")
+  remoteIds            TvdbRemoteId[] @relation("TvdbRemote")
+  trailers             TvdbTrailer[] @relation("TvdbTrailers")
 
-  airsDays             Json?
+  airsDays             TvdbAirDays? @relation("TvdbAirDays")
   airsTime             String?
+}
+
+model TvdbStatus {
+  id    Int @id
+  tvdbId Int @unique
+
+  name  String?
+  recordType String?
+  keepUpdated Boolean?
+
+  tvdb Tvdb @relation("TvdbStatus", fields: [tvdbId], references: [id])
 }
 
 model TvdbAlias {
   id            Int         @id @default(autoincrement())
   name          String?
   language      String?
-
+  
+  tvdb Tvdb[] @relation("TvdbAliases")
   @@map("tvdb_aliases")
 }
 
@@ -609,6 +625,8 @@ model TvdbArtwork {
   thumbnail     String?
   type          Int?
   width         Int?
+
+  tvdb Tvdb[] @relation("TvdbArtworks")
   @@map("tvdb_artworks")
 }
 
@@ -616,8 +634,34 @@ model TvdbRemoteId {
   id            String      @id
   type          Int?
   sourceName    String?
-
+ 
+  tvdb Tvdb[] @relation("TvdbRemote")
   @@map("tvdb_remote")
+}
+
+model TvdbTrailer {
+  id  Int @id
+  url String?
+  name String?
+  runtime Int?
+  language String?
+
+  tvdb Tvdb[] @relation("TvdbTrailers")
+}
+
+model TvdbAirDays {
+  id        Int     @id @default(autoincrement())
+  tvdbId    Int @unique
+
+  monday    Boolean @default(false)
+  tuesday   Boolean @default(false)
+  wednesday Boolean @default(false)
+  thursday  Boolean @default(false)
+  friday    Boolean @default(false)
+  saturday  Boolean @default(false)
+  sunday    Boolean @default(false)
+
+  tvdb Tvdb @relation("TvdbAirDays", fields: [tvdbId], references: [id])
 }
 
 model TvdbLogin {
@@ -766,15 +810,17 @@ model Zoro {
   status        String?
   season        String?
   totalEpisodes Int?
-  episodes      Json?
+  episodes      EpisodeZoro[] @relation("EpisodeZoro")
 }
 
 model EpisodeZoro {
   id       String  @id
-  number   Int
-  title    String
-  isFiller Boolean
-  isSubbed Boolean
-  isDubbed Boolean
-  url      String
+  number   Int?
+  title    String?
+  isFiller Boolean?
+  isSubbed Boolean?
+  isDubbed Boolean?
+  url      String?
+
+  zoro Zoro[] @relation("EpisodeZoro")
 }

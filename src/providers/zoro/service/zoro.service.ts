@@ -24,6 +24,10 @@ export interface ZoroResponse {
   results: BasicZoro[];
 }
 
+export interface ZoroWithRelations extends Zoro {
+  episodes: EpisodeZoro[]
+}
+
 @Injectable()
 export class ZoroService {
   constructor(
@@ -35,31 +39,37 @@ export class ZoroService {
     @InjectRedis() private readonly redis: Redis,
   ) {}
 
-  async getZoro(id: string): Promise<Zoro> {
+  async getZoro(id: string): Promise<ZoroWithRelations> {
     const existingZoro = await this.prisma.zoro.findUnique({
       where: { id: id },
+      include: {
+        episodes: true
+      }
     });
 
     if (!existingZoro) {
       const zoro = await this.fetchZoro(id);
-      return this.saveZoro(zoro);
+      return this.saveZoro(zoro as ZoroWithRelations);
     }
     return existingZoro;
   }
 
-  async getZoroByAnilist(id: number): Promise<Zoro> {
+  async getZoroByAnilist(id: number): Promise<ZoroWithRelations> {
     const existingZoro = await this.prisma.zoro.findFirst({
       where: { alID: id },
+      include: {
+        episodes: true
+      }
     });
 
     if (!existingZoro) {
       const zoro = await this.findZoroByAnilist(id);
-      return this.saveZoro(zoro);
+      return this.saveZoro(zoro as ZoroWithRelations);
     }
     return existingZoro;
   }
 
-  async saveZoro(zoro: Zoro): Promise<Zoro> {
+  async saveZoro(zoro: ZoroWithRelations): Promise<ZoroWithRelations> {
     await this.prisma.lastUpdated.create({
       data: {
         entityId: zoro.id,
@@ -68,21 +78,31 @@ export class ZoroService {
       },
     });
 
-    return this.prisma.zoro.create({
+    await this.prisma.zoro.create({
       data: this.helper.getZoroData(zoro),
     });
+
+    return await this.prisma.zoro.findUnique({
+      where: { id: zoro.id },
+      include: {
+        episodes: true
+      }
+    }) as unknown as ZoroWithRelations;
   }
 
-  async update(id: string): Promise<Zoro> {
+  async update(id: string): Promise<ZoroWithRelations> {
     const existingZoro = await this.prisma.zoro.findFirst({
       where: { id },
+      include: {
+        episodes: true,
+      }
     });
 
     if (!existingZoro) {
       throw new Error('Zoro not found');
     }
 
-    const zoro = await this.fetchZoro(id);
+    const zoro = await this.fetchZoro(id) as ZoroWithRelations;
     zoro.alID = existingZoro.alID || 0;
 
     if (existingZoro?.episodes !== zoro.episodes) {

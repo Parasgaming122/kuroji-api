@@ -3,7 +3,7 @@ import { AnimeKai, Prisma } from '@prisma/client';
 
 @Injectable()
 export class AnimeKaiHelper {
-  getAnimekaiData(anime: AnimeKai): Prisma.AnimeKaiCreateInput {
+  getAnimekaiData(anime: any): Prisma.AnimeKaiCreateInput {
     return {
       id: anime.id,
       anilistId: anime.anilistId,
@@ -19,7 +19,20 @@ export class AnimeKaiHelper {
       status: anime.status,
       season: anime.season,
       totalEpisodes: anime.totalEpisodes,
-      episodes: anime.episodes || [],
+      episodes: {
+        connectOrCreate: anime.episodes.map((e: any) => ({
+          where: { id: e.id },
+          create: {
+            id: e.id,
+            number: e.number,
+            title: e.title,
+            isFiller: e.isFiller,
+            isSubbed: e.isSubbed,
+            isDubbed: e.isDubbed,
+            url: e.url
+          }
+        })) ?? []
+      },
     };
   }
 }

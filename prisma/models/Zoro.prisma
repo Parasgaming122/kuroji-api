@@ -14,15 +14,17 @@ model Zoro {
   status        String?
   season        String?
   totalEpisodes Int?
-  episodes      Json?
+  episodes      EpisodeZoro[] @relation("EpisodeZoro")
 }
 
 model EpisodeZoro {
   id       String  @id
-  number   Int
-  title    String
-  isFiller Boolean
-  isSubbed Boolean
-  isDubbed Boolean
-  url      String
+  number   Int?
+  title    String?
+  isFiller Boolean?
+  isSubbed Boolean?
+  isDubbed Boolean?
+  url      String?
+
+  zoro Zoro[] @relation("EpisodeZoro")
 }

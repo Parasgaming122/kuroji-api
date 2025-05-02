@@ -6,7 +6,7 @@ import { AnilistService } from '../../anilist/service/anilist.service'
 import { TmdbService } from '../../tmdb/service/tmdb.service'
 import { TvdbTokenService } from './token/tvdb.token.service'
 import { TVDB } from '../../../configs/tvdb.config'
-import { Tvdb, TvdbLanguage, TvdbLanguageTranslation } from '@prisma/client'
+import { Tvdb, TvdbAirDays, TvdbAlias, TvdbArtwork, TvdbLanguage, TvdbLanguageTranslation, TvdbRemoteId, TvdbTrailer } from '@prisma/client'
 import { UpdateType } from '../../../shared/UpdateType'
 
 export interface BasicTvdb {
@@ -31,6 +31,15 @@ export interface RemoteId {
   sourceName: string,
 }
 
+export interface TvdbWithRelations extends Tvdb {
+  status: TvdbStatus,
+  aliases: TvdbAlias[],
+  artworks: TvdbArtwork[],
+  remoteIds: TvdbRemoteId[],
+  trailers: TvdbTrailer[],
+  airDays: TvdbAirDays,
+}
+
 export enum TvdbStatus {
   Continuing = "Continuing",
   Ended = "Ended",
@@ -49,26 +58,28 @@ export class TvdbService {
       private readonly helper: TvdbHelper,
   ) {}
 
-  async getTvdb(id: number): Promise<Tvdb> {
+  async getTvdb(id: number): Promise<TvdbWithRelations> {
     const existingTvdb = await this.prisma.tvdb.findUnique({
-      where: { id }
-    })
+      where: { id },
+      include: this.helper.getInclude()
+    }) as unknown as TvdbWithRelations;
 
     if (existingTvdb) return existingTvdb;
 
     const tvdb = await this.fetchTvdb(id, await this.detectType(id));
 
-    return await this.saveTvdb(tvdb);
+    return await this.saveTvdb(tvdb as TvdbWithRelations);
   }
 
-  async getTvdbByAnilist(id: number): Promise<Tvdb> {
+  async getTvdbByAnilist(id: number): Promise<TvdbWithRelations> {
     const tmdb = await this.tmdbService.getTmdbByAnilist(id);
 
     const existingTvdb = await this.prisma.tvdb.findFirst({
       where: {
         tmdbId: tmdb.id
       },
-    });
+      include: this.helper.getInclude()
+    }) as unknown as TvdbWithRelations;
 
     if (!existingTvdb) {
       const basicTvdb = await this.fetchByRemoteId(String(tmdb.id), tmdb.media_type || 'series');
@@ -80,7 +91,7 @@ export class TvdbService {
       const tvdb = await this.fetchTvdb(basicTvdb.id, tmdb.type || 'series');
       tvdb.type = tmdb.type;
       tvdb.tmdbId = tmdb.id;
-      return await this.saveTvdb(tvdb);
+      return await this.saveTvdb(tvdb as TvdbWithRelations);
     }
 
     return existingTvdb;
@@ -115,7 +126,7 @@ export class TvdbService {
     return await this.saveLanguages(languages);
   }
 
-  async saveTvdb(tvdb: Tvdb): Promise<Tvdb> {
+  async saveTvdb(tvdb: TvdbWithRelations): Promise<TvdbWithRelations> {
     await this.prisma.lastUpdated.create({
       data: {
         entityId: String(tvdb.id),
@@ -124,11 +135,16 @@ export class TvdbService {
       },
     });
 
-    return await this.prisma.tvdb.upsert({
+    await this.prisma.tvdb.upsert({
       where: { id: tvdb.id },
       update: this.helper.getTvdbData(tvdb),
       create: this.helper.getTvdbData(tvdb)
-    })
+    });
+
+    return await this.prisma.tvdb.findUnique({
+      where: { id: tvdb.id },
+      include: this.helper.getInclude()
+    }) as unknown as TvdbWithRelations;
   }
 
   async saveTranslation(translation: TvdbLanguageTranslation): Promise<TvdbLanguageTranslation> {
@@ -139,12 +155,13 @@ export class TvdbService {
 
   async update(id: number) {
     const existingTvdb = this.prisma.tvdb.findFirst({
-      where: { id }
-    }) as unknown as Tvdb;
+      where: { id },
+      include: this.helper.getInclude()
+    }) as unknown as TvdbWithRelations;
 
-    const tvdb = await this.fetchTvdb(id, existingTvdb.type || 'series')
+    const tvdb = await this.fetchTvdb(id, existingTvdb.type || 'series') as TvdbWithRelations;
 
-    if (tvdb !== existingTvdb) {
+    if (tvdb.artworks != existingTvdb.artworks) {
       await this.saveTvdb(tvdb);
     }
   }
@@ -191,7 +208,7 @@ export class TvdbService {
     return type === 'movie' ? match.movie : match.series;
   }
 
-  async fetchTvdb(id: number, type: string): Promise<Tvdb> {
+  async fetchTvdb(id: number, type: string): Promise<TvdbWithRelations> {
     const url = type === 'movie' ? TVDB.getMovie(id) : TVDB.getSeries(id);
 
     return await this.customHttpService.getResponse(

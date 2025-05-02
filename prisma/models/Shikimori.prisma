@@ -6,7 +6,7 @@ model Shikimori {
   licenseNameRu String?
   english       String?
   japanese      String?
-  poster        Json?
+  poster        ShikimoriPoster? @relation("ShikimoriPoster")
   synonyms      String[]
   kind          String?
   rating        String?
@@ -15,55 +15,68 @@ model Shikimori {
   episodes      Int?
   episodesAired Int?
   duration      Int?
-  airedOn       Json?
-  releasedOn    Json?
+  airedOn       AiredOn? @relation("ShikimoriAiredOn")
+  releasedOn    ReleasedOn? @relation("ShikimoriReleasedOn")
   franchise     String?
   url           String?
   season        String?
   createdAt     DateTime?
   updatedAt     DateTime?
   nextEpisodeAt DateTime?
-  chronology    Json?
-  videos        Json?
-  screenshots   Json?
+  chronology    BasicIdShik[] @relation("ShikimoriChronology")
+  videos        ShikimoriVideo[] @relation("ShikimoriVideo")
+  screenshots   ShikimoriScreenshot[] @relation("ShikimoriScreenshot")
 }
 
 model AiredOn {
   id        Int         @id @default(autoincrement())
+  shikimoriId String @unique
+
   year      Int?
   month     Int?
   day       Int?
   date      String?
+
+  shikimori Shikimori @relation("ShikimoriAiredOn", fields: [shikimoriId], references: [id])
 }
 
 model ReleasedOn {
   id        Int         @id @default(autoincrement())
+  shikimoriId String @unique
+
   year      Int?
   month     Int?
   day       Int?
   date      String?
+
+  shikimori Shikimori @relation("ShikimoriReleasedOn", fields: [shikimoriId], references: [id])
 }
 
 model BasicIdShik {
-  id          Int        @id @default(autoincrement())
-  malId       Int?
+  id          String        @id
+  malId       String?
+
+  shikimori Shikimori[] @relation("ShikimoriChronology")
 }
 
-model Video {
-  id            Int        @id @default(autoincrement())
-  videoId       String?
-  videoImageUrl String?
+model ShikimoriVideo {
+  id            String        @id
+  url           String?
+  name          String?
   kind          String?
-  videoName     String?
   playerUrl     String?
-  videoUrl      String?
+  imageUrl      String?
+
+  shikimori Shikimori[] @relation("ShikimoriVideo")
 }
 
-model Screenshot {
-  id          Int        @id @default(autoincrement())
+model ShikimoriScreenshot {
+  id          String        @id
   originalUrl String?
   x166Url     String?
   x332Url     String?
+
+  shikimori Shikimori[] @relation("ShikimoriScreenshot")
 }
 
 model Title {
@@ -73,14 +86,6 @@ model Title {
   native       String?
 }
 
-model CoverImage {
-  id           Int                     @id @default(autoincrement())
-  extraLarge   String?
-  large        String?
-  medium       String?
-  color        String?
-}
-
 model DateDetails {
   id           Int                     @id @default(autoincrement())
   year         Int?
@@ -88,25 +93,14 @@ model DateDetails {
   day          Int?
 }
 
-model AiringEpisode {
-  id              Int                     @id @default(autoincrement())
-  airingAt        Int?
-  timeUntilAiring Int?
-  episode         Int?
-}
+model ShikimoriPoster {
+  id             String              @id
+  shikimoriId    String @unique
 
-model BasicShikimori {
-  id           Int                     @id @default(autoincrement())
-  name         String?
-  url          String?
-  poster       Json? 
-  posterId     Int?
-}
-
-model Poster {
-  id             Int              @id @default(autoincrement())
   originalUrl    String?
   mainUrl        String?
+
+  shikimori Shikimori @relation("ShikimoriPoster", fields: [shikimoriId], references: [id])
 }
 
 model ReleaseIndex {

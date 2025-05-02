@@ -26,6 +26,14 @@ export interface TmdbResponse {
   results: BasicTmdb[];
 }
 
+export interface TmdbWithRelations extends Tmdb {
+  seasons: TmdbReleaseSeason[]
+}
+
+export interface TmdbSeasonWithRelations extends TmdbSeason {
+  episodes: TmdbSeasonEpisode[]
+}
+
 export enum TmdbStatus {
   Rumored = "Rumored",
   Planned = "Planned",
@@ -47,27 +55,28 @@ export class TmdbService {
     private readonly helper: TmdbHelper,
   ) {}
 
-  async getTmdb(id: number): Promise<Tmdb> {
+  async getTmdb(id: number): Promise<TmdbWithRelations> {
     const existingTmdb = await this.prisma.tmdb.findUnique({
-      where: { id }
+      where: { id },
+      include: { seasons: true }
     });
 
     if (existingTmdb) return existingTmdb;
 
     const tmdb = await this.fetchTmdb(id, await this.detectType(id));
 
-    return await this.saveTmdb(tmdb);
+    return await this.saveTmdb(tmdb as TmdbWithRelations);
   }
 
-  async getTmdbByAnilist(id: number): Promise<Tmdb> {
+  async getTmdbByAnilist(id: number): Promise<TmdbWithRelations> {
     return await this.findTmdb(id);
   }
 
-  async getTmdbSeasonByAnilist(id: number): Promise<TmdbSeason> {
+  async getTmdbSeasonByAnilist(id: number, formatEpisodes = true): Promise<TmdbSeasonWithRelations> {
     const anilist = await this.anilistService.getAnilist(id)
-    const tmdb = await this.findTmdb(id)
+    const tmdb = await this.findTmdb(id);
 
-    const existTmdbSeason = tmdb.seasons as TmdbReleaseSeason[]
+    const existTmdbSeason = tmdb.seasons
 
     if (!existTmdbSeason || existTmdbSeason.length === 0) {
       return Promise.reject(new Error(`No seasons found for TMDb ID: ${tmdb.id}`));
@@ -105,7 +114,8 @@ export class TmdbService {
     for (let currentSeason = seasonNumber; currentSeason <= SEASONS; currentSeason++) {
       let tmdbSeason = await this.prisma.tmdbSeason.findFirst({
         where: { show_id: tmdb.id, season_number: currentSeason },
-      })
+        include: { episodes: true }
+      });
 
       if (!tmdbSeason) {
         tmdbSeason = await this.fetchTmdbSeason(tmdb.id, currentSeason)
@@ -114,7 +124,7 @@ export class TmdbService {
         await this.saveTmdbSeason(tmdbSeason)
       }
 
-      const episodes = tmdbSeason.episodes as TmdbSeasonEpisode[]
+      const episodes = tmdbSeason.episodes
       if (!episodes || episodes.length === 0) continue
 
       let startIndex = episodes.findIndex(ep => ep.air_date === anilistStartDateString)
@@ -125,7 +135,13 @@ export class TmdbService {
       const today = new Date().toISOString().split('T')[0]
 
       for (let i = startIndex; i < episodes.length; i++) {
-        const ep = { ...episodes[i], episode_number: trimmedEpisodes.length + 1 }
+        let ep;
+
+        if (formatEpisodes) {
+          ep = { ...episodes[i], episode_number: trimmedEpisodes.length + 1 }
+        } else {
+          ep = { ...episodes[i] }
+        }
 
         if (ep.air_date && ep.air_date > today) break
 
@@ -135,7 +151,7 @@ export class TmdbService {
 
       if (trimmedEpisodes.length === 0) continue
 
-      const newSeason: TmdbSeason = {
+      const newSeason: TmdbSeasonWithRelations = {
         ...tmdbSeason,
         episodes: trimmedEpisodes,
         show_id: tmdb.id,
@@ -147,7 +163,7 @@ export class TmdbService {
     return Promise.reject(new Error('Not found'));
   }  
 
-  async saveTmdb(tmdb: Tmdb): Promise<Tmdb> {
+  async saveTmdb(tmdb: TmdbWithRelations): Promise<TmdbWithRelations> {
     await this.prisma.lastUpdated.create({
       data: {
         entityId: String(tmdb.id),
@@ -156,11 +172,16 @@ export class TmdbService {
       },
     });
 
-    return this.prisma.tmdb.upsert({
+    await this.prisma.tmdb.upsert({
       where: { id: tmdb.id },
       update: this.helper.getTmdbData(tmdb),
       create: this.helper.getTmdbData(tmdb),
-    });
+    })
+
+    return await this.prisma.tmdb.findUnique({
+      where: { id: tmdb.id },
+      include: { seasons: true }
+    }) as unknown as TmdbWithRelations;
   }
 
   async saveTmdbSeason(tmdbSeason: TmdbSeason): Promise<TmdbSeason> {
@@ -171,23 +192,24 @@ export class TmdbService {
     });
   }
 
-  async update(id: number): Promise<Tmdb> {
+  async update(id: number): Promise<TmdbWithRelations> {
     const tmdb = await this.fetchTmdb(id, await this.detectType(id));
     await this.saveTmdb(tmdb);
     await this.updateSeason(id);
     return tmdb;
   }
 
-  async updateSeason(id: number): Promise<Tmdb> {
+  async updateSeason(id: number): Promise<TmdbWithRelations> {
     const tmdb = await this.prisma.tmdb.findFirst({
       where: { id },
+      include: { seasons: true }
     });
 
     if (!tmdb) {
       throw new Error(`TMDb ID ${id} not found`);
     }
 
-    for (const season of tmdb.seasons as TmdbReleaseSeason[]) {
+    for (const season of tmdb.seasons) {
       const tmdbSeason = await this.fetchTmdbSeason(id, season.season_number || 1);
       await this.saveTmdbSeason(tmdbSeason);
 
@@ -197,18 +219,18 @@ export class TmdbService {
     return tmdb;
   }
 
-  async fetchTmdb(id: number, type: string): Promise<Tmdb> {
+  async fetchTmdb(id: number, type: string): Promise<TmdbWithRelations> {
     const url =
       type === 'tv' ? TMDB.getTvDetails(id) : TMDB.getMovieDetails(id);
     return this.customHttpService.getResponse(url);
   }
 
-  async fetchTmdbSeason(id: number, seasonNumber: number): Promise<TmdbSeason> {
-    const seasonData: TmdbSeason = await this.customHttpService.getResponse(
+  async fetchTmdbSeason(id: number, seasonNumber: number): Promise<TmdbSeasonWithRelations> {
+    const seasonData: TmdbSeasonWithRelations = await this.customHttpService.getResponse(
       TMDB.getSeasonDetails(id, seasonNumber),
     );
 
-    const filteredEpisodes = (seasonData.episodes as any[]).map((episode) => ({
+    const filteredEpisodes = (seasonData.episodes).map((episode) => ({
       id: episode.id,
       air_date: episode.air_date,
       episode_number: episode.episode_number,
@@ -233,7 +255,7 @@ export class TmdbService {
     return this.customHttpService.getResponse(TMDB.multiSearch(query));
   }
 
-  async findTmdb(id: number): Promise<Tmdb> {
+  async findTmdb(id: number): Promise<TmdbWithRelations> {
     let tmdb;
 
     try {
@@ -246,7 +268,7 @@ export class TmdbService {
     return await this.fetchTmdbByAnilist(id);
   }
 
-  async findMatchInPrisma(id: number): Promise<Tmdb> {
+  async findMatchInPrisma(id: number): Promise<TmdbWithRelations> {
     const anilist = await this.anilistService.getAnilist(id);
 
     let match = await this.prisma.tmdb.findFirst({
@@ -272,10 +294,11 @@ export class TmdbService {
           }
         ]
       },
+      include: { seasons: true }
     });
 
-    if (match && this.isTitleMatch(anilist, match as Tmdb)) {
-      return match as Tmdb;
+    if (match && this.isTitleMatch(anilist, match as TmdbWithRelations)) {
+      return match as TmdbWithRelations;
     }
 
     const candidates = await this.prisma.tmdb.findMany({
@@ -301,9 +324,10 @@ export class TmdbService {
           }
         ]
       },
+      include: { seasons: true }
     });
 
-    const bestMatch = this.findBestMatchFromCandidates(anilist, candidates as Tmdb[]);
+    const bestMatch = this.findBestMatchFromCandidates(anilist, candidates as TmdbWithRelations[]);
     
     if (bestMatch) {
       return bestMatch;
@@ -312,7 +336,7 @@ export class TmdbService {
     return Promise.reject('No match found in database');
   }
 
-  isTitleMatch(anilist: AnilistWithRelations, tmdb: Tmdb): boolean {
+  isTitleMatch(anilist: AnilistWithRelations, tmdb: TmdbWithRelations): boolean {
     if (anilist.format?.toLowerCase() != tmdb.media_type?.toLowerCase()) {
       return false;
     }
@@ -329,12 +353,12 @@ export class TmdbService {
 
   findBestMatchFromCandidates(
     anilist: AnilistWithRelations,
-    candidates: Tmdb[],
-  ): Tmdb | null {
+    candidates: TmdbWithRelations[],
+  ): TmdbWithRelations | null {
     return candidates.find((tmdb) => this.isTitleMatch(anilist, tmdb)) || null;
   }
 
-  async fetchTmdbByAnilist(id: number): Promise<Tmdb> {
+  async fetchTmdbByAnilist(id: number): Promise<TmdbWithRelations> {
     const anilist = await this.anilistService.getAnilist(id);
 
     let searchResults = await this.searchTmdb(

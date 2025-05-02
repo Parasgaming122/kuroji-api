@@ -3,7 +3,7 @@ import { Prisma, Zoro } from '@prisma/client';
 
 @Injectable()
 export class ZoroHelper {
-  getZoroData(zoro: Zoro): Prisma.ZoroCreateInput {
+  getZoroData(zoro: any): Prisma.ZoroCreateInput {
     return {
       id: zoro.id,
       title: zoro.title,
@@ -20,7 +20,20 @@ export class ZoroHelper {
       status: zoro.status,
       season: zoro.season,
       totalEpisodes: zoro.totalEpisodes,
-      episodes: zoro.episodes || [],
+      episodes: {
+        connectOrCreate: zoro.episodes.map((e: any) => ({
+          where: { id: e.id },
+          create: {
+            id: e.id,
+            number: e.number,
+            title: e.title,
+            isFiller: e.isFiller,
+            isSubbed: e.isSubbed,
+            isDubbed: e.isDubbed,
+            url: e.url
+          }
+        })) ?? []
+      },
     };
   }
 }

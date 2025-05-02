@@ -5,14 +5,14 @@ model Animepahe {
   image          String?
   cover          String?
   hasSub         Boolean?
-  externalLinks  Json?
+  externalLinks  AnimepaheExternalLink[] @relation("AnimepaheExLink")
   status         String?
   type           String?
   releaseDate    String?
   totalEpisodes  Int?
   episodePages   Int?
 
-  episodes       Json?
+  episodes       AnimepaheEpisode[] @relation("AnimepaheEpisode")
 }
 
 model AnimepaheEpisode {
@@ -22,10 +22,14 @@ model AnimepaheEpisode {
   image       String?
   duration    String?
   url         String?
+
+  animepahe Animepahe[] @relation("AnimepaheEpisode")
 }
 
 model AnimepaheExternalLink {
   id          String   @id
   url         String
   sourceName  String
+
+  animepahe Animepahe[] @relation("AnimepaheExLink")
 }
