@@ -76,17 +76,17 @@ export class AnilistController {
     return this.streamService.getEpisode(id, number);
   }
 
-  @Get('watch/:id/episodes/:number')
-  async getSources(
-    @Param('id', ParseIntPipe) id: number,
-    @Param('number', ParseIntPipe) number: number,
-    @Query('provider') provider: string = Provider.ANIWATCH,
-    @Query('dub') dub: boolean = false
-  ) {
-    const providerEnum = Provider[provider.toUpperCase() as keyof typeof Provider] || Provider.ANIWATCH;
+  // @Get('watch/:id/episodes/:number')
+  // async getSources(
+  //   @Param('id', ParseIntPipe) id: number,
+  //   @Param('number', ParseIntPipe) number: number,
+  //   @Query('provider') provider: string = Provider.ANIWATCH,
+  //   @Query('dub') dub: boolean = false
+  // ) {
+  //   const providerEnum = Provider[provider.toUpperCase() as keyof typeof Provider] || Provider.ANIWATCH;
 
-    return this.streamService.getSources(providerEnum, number, id, dub);
-  }
+  //   return this.streamService.getSources(providerEnum, number, id, dub);
+  // }
 
   @Get('filter')
   async filterAnilist(@Query() filter: FilterDto) {

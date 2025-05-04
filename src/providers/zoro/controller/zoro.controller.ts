@@ -15,8 +15,8 @@ export class ZoroController {
     return this.service.getZoroByAnilist(id);
   }
 
-  @Get('watch/:id')
-  async getZoroWatch(@Param('id') id: string, @Query('dub') dub: boolean = false) {
-    return this.service.getSources(id, dub);
-  }
+  // @Get('watch/:id')
+  // async getZoroWatch(@Param('id') id: string, @Query('dub') dub: boolean = false) {
+  //   return this.service.getSources(id, dub);
+  // }
 }
