@@ -1,3 +1,7 @@
+## [0.6.3](https://github.com/veaquer/veanime__nestend/compare/v0.6.2...v0.6.3) (2025-05-04)
+
+
+
 ## [0.6.2](https://github.com/veaquer/veanime__nestend/compare/v0.6.1...v0.6.2) (2025-05-02)
 
 
@@ -29,21 +33,6 @@
 * filter in exceptions service ([8de7084](https://github.com/veaquer/veanime__nestend/commit/8de7084c584ba964e55dfce1b3790b2d5e15f1a0))
 * improved characters in anilist ([8e3c281](https://github.com/veaquer/veanime__nestend/commit/8e3c28144047b20219bcc7cc724b4b43b4e9d5c3))
 * stream servkce adjusted ([f945f4c](https://github.com/veaquer/veanime__nestend/commit/f945f4c3d113cf2bc3d5aef092e7f7c0eb624825))
-
-
-
-# [0.4.0](https://github.com/veaquer/veanime__nestend/compare/v0.3.1...v0.4.0) (2025-04-23)
-
-
-### Bug Fixes
-
-* tmdb search ([c547bd8](https://github.com/veaquer/veanime__nestend/commit/c547bd88ca410f1c726e6290ce094d09cfe14909))
-
-
-### Features
-
-* improved stream service ([3119c09](https://github.com/veaquer/veanime__nestend/commit/3119c09065b1bec640e5dcfca6344d9019496a81))
-* search in russian with shikimori ([e75d982](https://github.com/veaquer/veanime__nestend/commit/e75d982940db3071bfd73b630b7c387290ead620))
 
 
 
