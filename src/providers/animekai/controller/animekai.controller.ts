@@ -10,8 +10,8 @@ export class AnimekaiController {
     return this.service.getAnimekaiByAnilist(id);
   }
 
-  @Get('watch/:id')
-  async getSources(@Param('id') id: string, @Query('dub') dub: boolean = false) {
-    return this.service.getSources(id, dub);
-  }
+  // @Get('watch/:id')
+  // async getSources(@Param('id') id: string, @Query('dub') dub: boolean = false) {
+  //   return this.service.getSources(id, dub);
+  // }
 }

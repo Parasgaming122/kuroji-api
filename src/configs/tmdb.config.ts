@@ -1,10 +1,13 @@
-import Config from './Config'
+import Config from './Config';
 
 export class TMDB {
-  public static readonly API_KEY: string = "''";
-  public static readonly URL: string = Config.TMDB || "https://api.themoviedb.org/3/";
-  public static readonly IMAGE_BASE_URL: string = "https://image.tmdb.org/t/p/";
-  public static readonly IMAGE_BASE_ORIGINAL_URL: string = TMDB.getImageUrl("original");
+  public static readonly API_KEY: string =
+    Config.TMDB_API || '''';
+  public static readonly URL: string =
+    Config.TMDB || 'https://api.themoviedb.org/3/';
+  public static readonly IMAGE_BASE_URL: string = 'https://image.tmdb.org/t/p/';
+  public static readonly IMAGE_BASE_ORIGINAL_URL: string =
+    TMDB.getImageUrl('original');
 
   // Image URL Generator
   public static getImageUrl(width: string): string {
@@ -22,7 +25,11 @@ export class TMDB {
   }
 
   // Episode Details
-  public static getEpisodeDetails(tvId: number, seasonNumber: number, episodeNumber: number): string {
+  public static getEpisodeDetails(
+    tvId: number,
+    seasonNumber: number,
+    episodeNumber: number,
+  ): string {
     return `${TMDB.URL}tv/${tvId}/season/${seasonNumber}/episode/${episodeNumber}?api_key=${TMDB.API_KEY}`;
   }
 
