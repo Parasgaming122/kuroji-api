@@ -5,6 +5,7 @@ import { PrismaService } from '../../../../prisma.service';
 import { AtomicInteger } from '../../../../shared/AtomicInteger';
 import { AnilistService } from '../anilist.service';
 import { get } from 'http'
+import { last } from 'rxjs'
 
 export interface Ids {
   sfw: number[];
@@ -145,8 +146,7 @@ export class AnilistIndexerService {
           console.warn(`⚠️ 429 hit - Attempt ${attempt}/${retries}. Sleeping ${retryAfter}s`)
           await this.sleep(retryAfter)
         } else {
-          console.warn(`❌ Error on attempt ${attempt}/${retries}: ${e.message}`)
-          await this.sleep(this.getRandomInt(5, 10))
+          throw lastError ?? new Error(`Unknown error fetching Anilist for ID: ${id}`)
         }
       }
     }
