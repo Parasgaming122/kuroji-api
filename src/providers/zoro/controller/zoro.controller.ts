@@ -1,7 +1,7 @@
 import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { ZoroService } from '../service/zoro.service'
 
-@Controller('zoro')
+@Controller('anime')
 export class ZoroController {
   constructor(private readonly service: ZoroService) {}
 
@@ -10,7 +10,7 @@ export class ZoroController {
   //   return this.service.getZoro(id);
   // }
 
-  @Get('info/:id')
+  @Get('info/:id/zoro')
   async getZoroByAnilist(@Param('id', ParseIntPipe) id: number) {
     return this.service.getZoroByAnilist(id);
   }

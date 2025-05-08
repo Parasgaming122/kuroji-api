@@ -1,11 +1,11 @@
 import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { AnimekaiService } from '../service/animekai.service'
 
-@Controller('animekai')
+@Controller('anime')
 export class AnimekaiController {
   constructor(private readonly service: AnimekaiService) {}
 
-  @Get('info/:id')
+  @Get('info/:id/animekai')
   async getAnimekaiByAnilist(@Param('id', ParseIntPipe) id: number) {
     return this.service.getAnimekaiByAnilist(id);
   }
