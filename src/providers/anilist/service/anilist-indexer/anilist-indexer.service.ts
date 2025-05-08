@@ -1,39 +1,41 @@
-import { Injectable } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
-import { CustomHttpService } from '../../../../http/http.service';
-import { PrismaService } from '../../../../prisma.service';
-import { AtomicInteger } from '../../../../shared/AtomicInteger';
-import { AnilistService } from '../anilist.service';
-import { get } from 'http'
-import { last } from 'rxjs'
+import { Injectable } from '@nestjs/common'
+import { Cron, CronExpression } from '@nestjs/schedule'
+import { CustomHttpService } from '../../../../http/http.service'
+import { PrismaService } from '../../../../prisma.service'
+import { AnilistService } from '../anilist.service'
+import { ZoroService } from '../../../zoro/service/zoro.service'
+import { AnimekaiService } from '../../../animekai/service/animekai.service'
+import { AnimepaheService } from '../../../animepahe/service/animepahe.service'
+import Config from '../../../../configs/Config'
 
 export interface Ids {
-  sfw: number[];
-  nsfw: number[];
+  sfw: number[]
+  nsfw: number[]
 }
 
 @Injectable()
 export class AnilistIndexerService {
-  private isRunning: boolean = false;
-  private scheduledUpdatesEnabled: boolean = false;
-  private allIds: number[] = [];
+  private isRunning = false;
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly service: AnilistService,
+    private readonly zoro: ZoroService,
+    private readonly animekai: AnimekaiService,
+    private readonly animepahe: AnimepaheService,
     private readonly httpService: CustomHttpService,
-  ) {}
+  ) { }
 
-  public async index(delay: number) {
+  public async index(delay: number = 10): Promise<void> {
     if (this.isRunning) {
       console.log('Already running, skip this round.')
       return
     }
 
     this.isRunning = true
+    const ids = await this.getIds()
 
-    this.allIds = (await this.getIds()).sort(() => Math.random() - 0.5)
-
-    for (let id of this.allIds) {
+    for (const id of ids) {
       if (!this.isRunning) {
         console.log('Indexing manually stopped 🚫')
         this.isRunning = false
@@ -47,14 +49,12 @@ export class AnilistIndexerService {
       if (existing) continue
 
       try {
-        console.log('Indexing new release: ' + id)
-        await this.safeGetAnilist(id);
+        console.log(`Indexing new release: ${id}`)
+        await this.safeGetAnilist(id)
 
         await this.prisma.releaseIndex.create({
-          data: {
-            id: id.toString(),
-          },
-        });
+          data: { id: id.toString() },
+        })
 
         await this.sleep(this.getRandomInt(delay, delay + 25))
       } catch (e: any) {
@@ -70,62 +70,26 @@ export class AnilistIndexerService {
     this.isRunning = false
   }
 
-  public async sleep(delay: number): Promise<void> {
-    console.log(`Sleeping for ${delay} seconds...`);
-    return new Promise((resolve) => setTimeout(resolve, delay * 1000));
+  private async sleep(delay: number): Promise<void> {
+    console.log(`Sleeping for ${delay} seconds...`)
+    return new Promise((resolve) => setTimeout(resolve, delay * 1000))
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_NOON)
   public async updateIndex(): Promise<void> {
-    if (!this.scheduledUpdatesEnabled || this.isRunning) {
-      console.log('Scheduled updates are disabled. Skipping update.');
-      return;
+    if (!Config.ANILIST_INDEXER_UPDATE_ENABLED || this.isRunning) {
+      console.log('Scheduled updates are disabled. Skipping update.')
+      return
     }
 
-    console.log('Scheduled index update started...');
+    console.log('Scheduled index update started...')
 
-    let ids: number[] = await this.getIds();
-    ids = ids.sort((a, b) => b - a);
-
-    for (let id in ids) {
-      if (
-        !(await this.prisma.releaseIndex.findUnique({
-          where: { id: id.toString() },
-        }))
-      ) {
-        try {
-          console.log('Indexing new release: ' + id);
-          await this.safeGetAnilist(+id);
-
-          await this.prisma.releaseIndex.create({
-            data: {
-              id: id,
-            },
-          });
-          await this.sleep(this.getRandomInt(10, 10 + 25));
-        } catch (e: any) {
-          console.error('Failed scheduled index update:', e);
-        }
-      }
-    }
+    await this.index()
   }
 
-  public disableScheduledUpdates() {
-    this.scheduledUpdatesEnabled = false;
-    console.log('Scheduled updates have disabled.');
-  }
-
-  public enableScheduledUpdates() {
-    this.scheduledUpdatesEnabled = true;
-    console.log('Scheduled updates have enabled.');
-  }
-
-  public async getIds(): Promise<number[]> {
-    const ids = await this.httpService.getResponse(
-      'https://raw.githubusercontent.com/purarue/mal-id-cache/master/cache/anime_cache.json',
-    ) as Ids;
-
-    return [...ids.sfw, ...ids.nsfw];
+  private async getIds(): Promise<number[]> {
+    const ids = await this.httpService.getResponse('https://raw.githubusercontent.com/purarue/mal-id-cache/master/cache/anime_cache.json') as Ids
+    return [...ids.sfw, ...ids.nsfw]
   }
 
   private async safeGetAnilist(id: number, retries = 3): Promise<void> {
@@ -133,7 +97,26 @@ export class AnilistIndexerService {
 
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
-        await this.service.getAnilist(id, true)
+        const data = await this.service.getAnilist(id, true)
+        if (!data) {
+          console.warn(`⚠️ Anilist returned no data for ID ${id}`)
+          return
+        }
+
+        const providers = [
+          { name: 'Zoro', fn: () => this.zoro.getZoroByAnilist(id) },
+          { name: 'Animekai', fn: () => this.animekai.getAnimekaiByAnilist(id) },
+          { name: 'Animepahe', fn: () => this.animepahe.getAnimepaheByAnilist(id) },
+        ]
+
+        for (const provider of providers) {
+          try {
+            await provider.fn()
+          } catch (e) {
+            console.warn(`⚠️ ${provider.name} failed for ID ${id}:`, e.message ?? e)
+          }
+        }
+
         return
       } catch (e: any) {
         lastError = e
@@ -146,7 +129,8 @@ export class AnilistIndexerService {
           console.warn(`⚠️ 429 hit - Attempt ${attempt}/${retries}. Sleeping ${retryAfter}s`)
           await this.sleep(retryAfter)
         } else {
-          throw lastError ?? new Error(`Unknown error fetching Anilist for ID: ${id}`)
+          console.warn(`❌ Attempt ${attempt} failed:`, e.message ?? e)
+          break
         }
       }
     }

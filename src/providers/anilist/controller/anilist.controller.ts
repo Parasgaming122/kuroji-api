@@ -129,24 +129,4 @@ export class AnilistController {
       status: 'Indexing stopped',
     };
   }
-
-  @Put('index/sleep/:sleep')
-  sleep(@Param('sleep', ParseIntPipe) sleep: number) {
-    this.indexer.sleep(sleep)
-      .catch((err) => console.error('Sleeping failed:', err))
-
-    return {
-      status: `Sleeping for ${sleep}s`,
-    }
-  }
-
-  @Put('index/schedule')
-  async scheduleIndex() {
-    return this.indexer.enableScheduledUpdates();
-  }
-
-  @Put('index/unschedule')
-  async unscheduleIndex() {
-    return this.indexer.disableScheduledUpdates();
-  }
 }

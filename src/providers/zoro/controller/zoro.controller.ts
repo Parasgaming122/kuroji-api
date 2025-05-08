@@ -5,12 +5,12 @@ import { ZoroService } from '../service/zoro.service'
 export class ZoroController {
   constructor(private readonly service: ZoroService) {}
 
-  @Get('info/:id')
-  async getZoro(@Param('id') id: string) {
-    return this.service.getZoro(id);
-  }
+  // @Get('info/:id')
+  // async getZoro(@Param('id') id: string) {
+  //   return this.service.getZoro(id);
+  // }
 
-  @Get('anilist/:id')
+  @Get('info/:id')
   async getZoroByAnilist(@Param('id', ParseIntPipe) id: number) {
     return this.service.getZoroByAnilist(id);
   }
