@@ -256,14 +256,7 @@ export class TmdbService {
   }
 
   async findTmdb(id: number): Promise<TmdbWithRelations> {
-    let tmdb;
-
-    try {
-      tmdb = await this.findMatchInPrisma(id)
-    } catch (error) {
-      console.log('Tmdb error: ' + error)
-    }
-
+    const tmdb = await this.findMatchInPrisma(id)
     if (tmdb) return tmdb;
     return await this.fetchTmdbByAnilist(id);
   }
@@ -333,7 +326,7 @@ export class TmdbService {
       return bestMatch;
     }
 
-    return Promise.reject('No match found in database');
+    return Promise.resolve(undefined as unknown as TmdbWithRelations);
   }
 
   isTitleMatch(anilist: AnilistWithRelations, tmdb: TmdbWithRelations): boolean {

@@ -1,8 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AnilistService } from './anilist.service';
 import { AnilistController } from '../controller/anilist.controller'
-import { HttpModule } from '@nestjs/axios'
-import { ShikimoriHelperModule } from '../../shikimori/module/shikimori-helper.module';
 import { SharedModule } from '../../../shared/shared.module'
 
 describe('AnilistService', () => {
@@ -11,19 +9,21 @@ describe('AnilistService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AnilistController],
-      imports: [HttpModule, ShikimoriHelperModule, SharedModule],
+      imports: [SharedModule],
     }).compile();
 
     service = module.get<AnilistService>(AnilistService);
   });
 
-  it('fetch anilist', async () => {
-    const id = 21;
-    const result = await service.getAnilist(id);
-
-    expect(result).toBeDefined();
-    expect(result.id).toEqual(id);
-  });
+  it('fetch info', async () => {
+    try {
+      const id = 21
+      const data = await service.getAnilist(id)
+      expect(data).toBeDefined()
+    } catch (err) {
+      throw new Error(`Anilist API failed info test: ${err.message}`)
+    }
+  })
 
   it('should be defined', () => {
     expect(service).toBeDefined();

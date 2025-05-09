@@ -14,6 +14,16 @@ describe('TmdbService', () => {
     service = module.get<TmdbService>(TmdbService);
   });
 
+  it('fetch info', async () => {
+    try {
+      const id = 21
+      const data = await service.getTmdbByAnilist(id)
+      expect(data).toBeDefined()
+    } catch (err) {
+      throw new Error(`TMDB API failed info test: ${err.message}`)
+    }
+  })
+
   it('should be defined', () => {
     expect(service).toBeDefined();
   });

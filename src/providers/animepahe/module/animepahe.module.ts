@@ -4,7 +4,7 @@ import { AnimepaheController } from '../controller/animepahe.controller'
 import { SharedModule } from '../../../shared/shared.module'
 
 @Module({
-  imports: [HttpModule, SharedModule],
+  imports: [SharedModule],
   controllers: [AnimepaheController],
 })
 export class AnimepaheModule {}

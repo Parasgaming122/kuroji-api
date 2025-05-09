@@ -1,31 +1,27 @@
-import { HttpModule } from '@nestjs/axios';
 import { Test, TestingModule } from '@nestjs/testing';
-import { CustomHttpService } from '../../../http/http.service';
-import { PrismaService } from '../../../prisma.service';
-import { ShikimoriHelper } from '../utils/shikimori-helper';
 import { ShikimoriService } from './shikimori.service';
+import { SharedModule } from '../../../shared/shared.module'
 
 describe('ShikimoriService', () => {
   let service: ShikimoriService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [HttpModule],
-      providers: [
-        ShikimoriService,
-        PrismaService,
-        CustomHttpService,
-        ShikimoriHelper,
-      ],
+      imports: [SharedModule],
     }).compile();
 
     service = module.get<ShikimoriService>(ShikimoriService);
   });
 
-  it('fetch shikimori from graphql', async () => {
-    const data = await service.getShikimori('21');
-    expect(data).toBeDefined();
-  });
+  it('fetch info', async () => {
+    try {
+      const id = '21'
+      const data = await service.getShikimori(id)
+      expect(data).toBeDefined()
+    } catch (err) {
+      throw new Error(`Shikimori API failed info test: ${err.message}`)
+    }
+  })
 
   it('should be defined', () => {
     expect(service).toBeDefined();
