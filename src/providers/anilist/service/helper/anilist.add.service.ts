@@ -1,29 +1,26 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { BasicIdShik, BasicIdAni, AnilistTitle, AnilistCharacter } from '@prisma/client'
-import { ApiResponse } from '../../../../api/ApiResponse'
+import { Injectable } from '@nestjs/common';
+import { BasicIdAni, AnilistCharacter } from '@prisma/client'
+import { ApiResponse, PageInfo } from '../../../../api/ApiResponse'
 import { TMDB } from '../../../../configs/tmdb.config'
 import { MediaSort } from '../../graphql/types/MediaEnums'
 import { BasicAnilistSmall, BasicAnilist } from '../../model/BasicAnilist'
 import { FilterDto } from '../../model/FilterDto'
-import { AnilistService } from '../anilist.service'
-import { CustomHttpService } from '../../../../http/http.service'
 import { PrismaService } from '../../../../prisma.service'
 import { ShikimoriService } from '../../../shikimori/service/shikimori.service'
 import { TmdbService } from '../../../tmdb/service/tmdb.service'
 import { AnilistHelper } from '../../utils/anilist-helper'
-import { AnilistWithRelations, FranchiseResponse } from '../../model/AnilistModels'
+import { AnilistWithRelations, Franchise, FranchiseResponse } from '../../model/AnilistModels'
+import { AnilistSearchService } from './anilist.search.service'
+import { getPageInfo } from '../../../../shared/utils'
 
 @Injectable()
 export class AnilistAddService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly helper: AnilistHelper,
-    @Inject(forwardRef(() => TmdbService))
     private readonly tmdbService: TmdbService,
-    @Inject(forwardRef(() => AnilistService))
-    private readonly anilist: AnilistService,
-    private readonly shikimoriService: ShikimoriService,
-    private readonly customHttpService: CustomHttpService,
+    private readonly search: AnilistSearchService,
+    private readonly shikimori: ShikimoriService,
   ) {}
 
   async getChronology(id: number, perPage: number, page: number): Promise<ApiResponse<BasicAnilistSmall[]>> {
@@ -31,15 +28,14 @@ export class AnilistAddService {
       where: { id },
     }) as AnilistWithRelations
 
-    const chronologyRaw = await this.shikimoriService.getChronology(String(existingAnilist.idMal)) as BasicIdShik[] || []
-    const chronologyIds = chronologyRaw.map(c => Number(c.malId)) as number[] || []
-    const chronology = await this.anilist.getAnilists(
+    const chronologyRaw = await this.shikimori.getChronology(String(existingAnilist.idMal));
+    const chronologyIds = chronologyRaw.map(c => Number(c.malId));
+
+    const chronology = await this.search.getAnilists(
       new FilterDto({ idMalIn: chronologyIds, perPage, page })
     );
 
-    const basicChronology = chronology.data.map((anilist) =>
-      this.helper.convertBasicToBasicSmall(anilist),
-    );
+    const basicChronology = this.helper.mapToSmall(chronology.data);
 
     return {
       ...chronology,
@@ -56,18 +52,13 @@ export class AnilistAddService {
       recommendations: BasicIdAni[]
     }
 
-    const shikimori = await this.shikimoriService.getShikimori(
-      existingAnilist.idMal?.toString() || '',
-    )
+    const recommendationIds = existingAnilist.recommendations.map(r => Number(r.idMal));
 
-    const recommendationIds = existingAnilist.recommendations.map(r => Number(r.idMal)) as number[] || []
-    const recommendations = await this.anilist.getAnilists(
+    const recommendations = await this.search.getAnilists(
       new FilterDto({ idMalIn: recommendationIds, perPage, page, sort: [MediaSort.SCORE_DESC] })
     );
 
-    const basicRecommendations = recommendations.data.map((anilist) =>
-      this.helper.convertBasicToBasicSmall(anilist),
-    );
+    const basicRecommendations = this.helper.mapToSmall(recommendations.data);
 
     return {
       ...recommendations,
@@ -81,9 +72,9 @@ export class AnilistAddService {
       include: {
         characters: true,
       }
-    }) as unknown as AnilistWithRelations;
+    }) as AnilistWithRelations;
 
-    const charactersIds = existingAnilist.characters?.map(c => c.id) as number[];
+    const charactersIds = existingAnilist.characters?.map(c => c.id);
 
     const [data, total] = await Promise.all([
       this.prisma.anilistCharacterEdge.findMany({
@@ -129,27 +120,22 @@ export class AnilistAddService {
         skip: perPage * (page - 1),
         take: perPage
       }),
-      this.prisma.anilistCharacter.count(),
+      this.prisma.anilistCharacterEdge.count({
+        where: { id: { in: charactersIds } }
+      })
     ]);
 
-    const lastPage = Math.ceil(total / perPage)
-    const pageInfo = {
-      total,
-      perPage,
-      page,
-      lastPage,
-      hasNextPage: page < lastPage,
-    }
-
-    return { pageInfo, data } as unknown as ApiResponse<AnilistCharacter[]>;
+    const pageInfo: PageInfo = getPageInfo(total, perPage, page);
+    const response: ApiResponse<AnilistCharacter[]> = { pageInfo, data };
+    return response
   }
 
   async getFranchise(franchiseName: string, perPage: number, page: number): Promise<FranchiseResponse<BasicAnilist[]>> {
-    const franchiseBasic = await this.shikimoriService.getFranchiseIds(franchiseName);
+    const franchiseBasic = await this.shikimori.getFranchiseIds(franchiseName);
   
-    const franchiseIds = franchiseBasic.map(r => Number(r.malId)) as number[] || []
+    const franchiseIds = franchiseBasic.map(r => Number(r.malId));
 
-    const franchises = await this.anilist.getAnilists(
+    const franchises = await this.search.getAnilists(
       new FilterDto({ idMalIn: franchiseIds, perPage, page, sort: [MediaSort.START_DATE] })
     );
 
@@ -160,24 +146,27 @@ export class AnilistAddService {
         pageInfo: franchises.pageInfo,
         franchise: {},
         data: []
-      } as unknown as FranchiseResponse<BasicAnilist[]>;
+      } as FranchiseResponse<BasicAnilist[]>;
     }
     
     const tmdbFirst = await this.tmdbService.getTmdbByAnilist(firstFranchise.id).catch(() => null);
 
-    const franchise = {
-      cover: firstFranchise.shikimori?.poster?.originalUrl,
-      banner: TMDB.IMAGE_BASE_ORIGINAL_URL + tmdbFirst?.backdrop_path || firstFranchise.bannerImage,
-      title: tmdbFirst?.name || (firstFranchise.title as AnilistTitle)?.romaji,
+    const franchise: Franchise = {
+      cover: firstFranchise.shikimori?.poster?.originalUrl ?? '',
+      banner: tmdbFirst?.backdrop_path
+        ? TMDB.IMAGE_BASE_ORIGINAL_URL + tmdbFirst.backdrop_path
+        : firstFranchise.bannerImage,
+      title: (tmdbFirst?.name || (firstFranchise.title)?.romaji) ?? '',
       franchise: franchiseName,
       description: tmdbFirst?.overview || firstFranchise.description,
     }
-  
-    return {
+
+    const response: FranchiseResponse<BasicAnilist[]> = {
       pageInfo: franchises.pageInfo,
-      franchise: franchise,
+      franchise,
       data: franchises.data
-    } as unknown as FranchiseResponse<BasicAnilist[]>;
+    }
+    return response;
   }
 
   async addShikimori(data: AnilistWithRelations[]): Promise<AnilistWithRelations[]> {
@@ -185,7 +174,7 @@ export class AnilistAddService {
       .map((anilist) => anilist.idMal?.toString() || '')
       .join(',')
     const shikimoriData =
-      await this.shikimoriService.saveMultipleShikimori(malIds);
+      await this.shikimori.saveMultipleShikimori(malIds);
 
     return data.map((anilist) => {
       const malId = anilist.idMal?.toString() || ''

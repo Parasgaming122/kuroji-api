@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { subDays, startOfWeek, addDays } from 'date-fns'
+import { startOfWeek, addDays } from 'date-fns'
 import { PrismaService } from '../../../../prisma.service'
 import { AnilistHelper } from '../../utils/anilist-helper'
 import { BasicAnilistSmall } from '../../model/BasicAnilist'
-import { AnilistWithRelations, Schedule, Weekday } from '../../model/AnilistModels'
+import { Schedule, Weekday } from '../../model/AnilistModels'
 import { AnilistAddService } from './anilist.add.service'
 
 @Injectable()
@@ -11,76 +11,17 @@ export class AnilistScheduleService {
   constructor(private readonly prisma: PrismaService, private readonly helper: AnilistHelper, private readonly add: AnilistAddService) {}
 
   async getWithCurrentWeek(): Promise<BasicAnilistSmall[]> {
-    const now = new Date()
-    const weekStart = startOfWeek(now, { weekStartsOn: 1 })
-    const weekEnd = addDays(weekStart, 7)
-
-    const startTimestamp = Math.floor(weekStart.getTime() / 1000)
-    const endTimestamp = Math.floor(weekEnd.getTime() / 1000)
-
-    const releases = await this.prisma.anilist.findMany({
-      where: {
-        OR: [
-          {
-            nextAiringEpisode: {
-              airingAt: {
-                gte: startTimestamp,
-                lt: endTimestamp,
-              },
-            },
-          },
-          {
-            airingSchedule: {
-              some: {
-                airingAt: {
-                  gte: startTimestamp,
-                  lt: endTimestamp,
-                },
-              },
-            },
-          },
-        ],
-      },
-      include: this.helper.getInclude(),
-    });
-
+    const { start, end } = this.getWeekRangeTimestamps()
+    const releases = await this.getThisWeeksAnilist(start, end);
     return releases.map(r => this.helper.convertBasicToBasicSmall(r));
   }
 
   async getSchedule(): Promise<Schedule> {
     const now = new Date()
     const currentDay = now.getDay()
-    const weekStart = startOfWeek(now, { weekStartsOn: 1 })
-    const weekEnd = addDays(weekStart, 7)
+    const { start, end } = this.getWeekRangeTimestamps()
 
-    const startTimestamp = Math.floor(weekStart.getTime() / 1000)
-    const endTimestamp = Math.floor(weekEnd.getTime() / 1000)
-
-    const releases = await this.prisma.anilist.findMany({
-      where: {
-        OR: [
-          {
-            nextAiringEpisode: {
-              airingAt: {
-                gte: startTimestamp,
-                lt: endTimestamp,
-              },
-            },
-          },
-          {
-            airingSchedule: {
-              some: {
-                airingAt: {
-                  gte: startTimestamp,
-                  lt: endTimestamp,
-                },
-              },
-            },
-          },
-        ],
-      },
-      include: this.helper.getInclude(),
-    })
+    const releases = await this.getThisWeeksAnilist(start, end);
 
     const data = await this.add.addShikimori(releases);
 
@@ -118,5 +59,28 @@ export class AnilistScheduleService {
   private getWeekdayName(index: number): Weekday {
     const days: Weekday[] = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
     return days[index]
+  }
+
+  private getWeekRangeTimestamps(): { start: number, end: number, currentDay: number } {
+    const now = new Date()
+    const weekStart = startOfWeek(now, { weekStartsOn: 1 })
+    const weekEnd = addDays(weekStart, 7)
+    return {
+      start: Math.floor(weekStart.getTime() / 1000),
+      end: Math.floor(weekEnd.getTime() / 1000),
+      currentDay: now.getDay()
+    }
+  }
+
+  private async getThisWeeksAnilist(start: number, end: number) {
+    return this.prisma.anilist.findMany({
+      where: {
+        OR: [
+          { nextAiringEpisode: { airingAt: { gte: start, lt: end } } },
+          { airingSchedule: { some: { airingAt: { gte: start, lt: end } } } },
+        ]
+      },
+      include: this.helper.getInclude(),
+    })
   }
 }

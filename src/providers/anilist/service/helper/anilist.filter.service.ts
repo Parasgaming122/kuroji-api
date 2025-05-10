@@ -5,6 +5,7 @@ import { UpdateType } from '../../../../shared/UpdateType'
 import { FilterDto } from '../../model/FilterDto'
 import { PrismaService } from '../../../../prisma.service'
 import { AnilistHelper } from '../../utils/anilist-helper'
+import { getPageInfo } from '../../../../shared/utils'
 
 @Injectable()
 export class AnilistFilterService {
@@ -242,14 +243,7 @@ export class AnilistFilterService {
     ])
 
     // ========== Pagination Info ==========
-    const lastPage = Math.ceil(total / perPage)
-    const pageInfo = {
-      total,
-      perPage,
-      currentPage,
-      lastPage,
-      hasNextPage: currentPage < lastPage,
-    }
+    const pageInfo = getPageInfo(total, perPage, currentPage);
 
     return { pageInfo, data }
   }

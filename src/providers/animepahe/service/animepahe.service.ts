@@ -39,7 +39,7 @@ export class AnimepaheService {
     @InjectRedis() private readonly redis: Redis,
   ) {}
 
-  async getAnimepaheByAnilist(id: number): Promise<AnimepaheWithRelations | null> {
+  async getAnimepaheByAnilist(id: number): Promise<AnimepaheWithRelations> {
     const existingAnimepahe = await this.prisma.animepahe.findFirst({
       where: { alId: id },
       include: {
@@ -99,7 +99,7 @@ export class AnimepaheService {
         externalLinks: true,
         episodes: true,
       }
-    }) as unknown as AnimepaheWithRelations;
+    }) as AnimepaheWithRelations;
   }
 
   async update(id: string): Promise<AnimepaheWithRelations> {
@@ -111,7 +111,7 @@ export class AnimepaheService {
     const animepahe = await this.fetchAnimepahe(id) as AnimepaheWithRelations;
 
     if (!animepahe) {
-      return Promise.reject(new Error('Animepahe not found'));
+      throw new Error('Animepahe not found');
     }
     
     animepahe.alId = existingAnimepahe?.alId || 0;
@@ -163,6 +163,6 @@ export class AnimepaheService {
       }
     }
 
-    return Promise.reject(new Error('Animepahe not found'));
+    throw new Error('Animepahe not found');
   }
 }

@@ -7,14 +7,16 @@ import { FilterDto } from '../model/FilterDto'
 import { AnilistAddService } from '../service/helper/anilist.add.service'
 import { AnilistScheduleService } from '../service/helper/anilist.schedule.service'
 import Dimens from '../../../configs/Dimens'
+import { AnilistSearchService } from '../service/helper/anilist.search.service'
 
 @Controller('anime')
 export class AnilistController {
   constructor(
     private readonly service: AnilistService, 
     private readonly add: AnilistAddService,
+    private readonly search: AnilistSearchService,
     private readonly schedule: AnilistScheduleService,
-    private readonly streamService: StreamService, 
+    private readonly stream: StreamService, 
     private readonly indexer: AnilistIndexerService
   ) {}
 
@@ -52,7 +54,7 @@ export class AnilistController {
 
   @Get('info/:id/episodes')
   async getEpisodes(@Param('id', ParseIntPipe) id: number) {
-    return this.streamService.getEpisodes(id);
+    return this.stream.getEpisodes(id);
   }
 
   @Get('info/:id/providers/:number')
@@ -60,12 +62,12 @@ export class AnilistController {
     @Param('id', ParseIntPipe) id: number, 
     @Param('number', ParseIntPipe) number: number
   ) {
-    return this.streamService.getProvidersSingle(id, number);
+    return this.stream.getProvidersSingle(id, number);
   }
 
   @Get('info/:id/providers')
   async getProvidersMultiple(@Param('id', ParseIntPipe) id: number) {
-    return this.streamService.getProvidersMultiple(id);
+    return this.stream.getProvidersMultiple(id);
   }
 
   @Get('info/:id/episodes/:number')
@@ -73,29 +75,29 @@ export class AnilistController {
     @Param('id', ParseIntPipe) id: number, 
     @Param('number', ParseIntPipe) number: number
   ) {
-    return this.streamService.getEpisode(id, number);
+    return this.stream.getEpisode(id, number);
   }
 
-  // @Get('watch/:id/episodes/:number')
-  // async getSources(
-  //   @Param('id', ParseIntPipe) id: number,
-  //   @Param('number', ParseIntPipe) number: number,
-  //   @Query('provider') provider: string = Provider.ANIWATCH,
-  //   @Query('dub') dub: boolean = false
-  // ) {
-  //   const providerEnum = Provider[provider.toUpperCase() as keyof typeof Provider] || Provider.ANIWATCH;
+  @Get('watch/:id/episodes/:number')
+  async getSources(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('number', ParseIntPipe) number: number,
+    @Query('provider') provider: string = Provider.ANIWATCH,
+    @Query('dub') dub: boolean = false
+  ) {
+    const providerEnum = Provider[provider.toUpperCase() as keyof typeof Provider] || Provider.ANIWATCH;
 
-  //   return this.streamService.getSources(providerEnum, number, id, dub);
-  // }
+    return this.stream.getSources(providerEnum, number, id, dub);
+  }
 
   @Get('filter')
   async filterAnilist(@Query() filter: FilterDto) {
-    return this.service.getAnilists(filter);
+    return this.search.getAnilists(filter);
   }
 
   @Get('search/:q')
   async searchAnilist(@Param('q') q: string) {
-    return this.service.searchAnilist(q);
+    return this.search.searchAnilist(q);
   }
 
   @Get('schedule')

@@ -7,6 +7,9 @@ import { config } from 'dotenv';
 import { ExceptionsHandler } from './exception/handler/ExceptionsHandler'
 import { PrismaService } from './prisma.service'
 import { RootPathBlockerMiddleware } from './shared/RootPathBlockerMiddleware'
+import * as express from 'express'
+import { join } from 'path'
+
 config();
 
 Object.defineProperty(BigInt.prototype, 'toJSON', {
@@ -35,6 +38,7 @@ async function bootstrap() {
       forbidNonWhitelisted: true, // Throws an error if unknown properties are provided
     }),
   );
+  app.use(express.static(join(__dirname, '..', 'public')));
   app.setGlobalPrefix('api');
   const prismaService = app.get(PrismaService)
   app.useGlobalFilters(new ExceptionsHandler(prismaService));

@@ -25,20 +25,16 @@ import { AnilistFilterService } from '../providers/anilist/service/helper/anilis
 import { AnilistFetchService } from '../providers/anilist/service/helper/anilist.fetch.service'
 import { ExceptionsService } from '../exception/service/exceptions.service'
 import { AnilistScheduleService } from '../providers/anilist/service/helper/anilist.schedule.service'
-import { RedisModule } from '@nestjs-modules/ioredis'
 import { ShikimoriHelperModule } from '../providers/shikimori/module/shikimori-helper.module'
+import { Redis } from './redis.module'
+import { AnilistSearchService } from '../providers/anilist/service/helper/anilist.search.service'
+import { AnilistUtilService } from '../providers/anilist/service/helper/anilist.util.service'
 
 @Module({
   imports: [
     HttpModule,
     ShikimoriHelperModule,
-    RedisModule.forRoot({
-      options: {
-        host: process.env.REDIS_HOST ?? 'localhost',
-        port: process.env.REDIS_PORT ? parseInt(process.env.REDIS_PORT) : 6379
-      },
-      type: 'single'
-    }),
+    Redis
   ],
   providers: [
     PrismaService,
@@ -49,6 +45,8 @@ import { ShikimoriHelperModule } from '../providers/shikimori/module/shikimori-h
     AnilistFetchService,
     AnilistScheduleService,
     AnilistIndexerService,
+    AnilistSearchService,
+    AnilistUtilService,
     ShikimoriService,
     AnilistHelper,
     ShikimoriHelper,
@@ -76,6 +74,8 @@ import { ShikimoriHelperModule } from '../providers/shikimori/module/shikimori-h
     AnilistFetchService,
     AnilistScheduleService,
     AnilistIndexerService,
+    AnilistSearchService,
+    AnilistUtilService,
     ShikimoriService,
     AnilistHelper,
     ShikimoriHelper,

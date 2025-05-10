@@ -93,7 +93,7 @@ export class AnimekaiService {
     return await this.prisma.animeKai.findUnique({
       where: { id: animekai.id },
       include: { episodes: true }
-    }) as unknown as AnimekaiWithRelations;
+    }) as AnimekaiWithRelations;
   }
 
   async update(id: string): Promise<AnimeKai> {
@@ -105,7 +105,7 @@ export class AnimekaiService {
     const animekai = await this.fetchAnimekai(id) as AnimekaiWithRelations;
 
     if (!animekai) {
-      return Promise.reject(new Error('Animekai not found'));
+      throw new Error('Animekai not found');
     }
 
     animekai.anilistId = existingAnimekai?.anilistId ?? 0;
@@ -153,6 +153,6 @@ export class AnimekaiService {
       }
     }
 
-    return Promise.reject(new Error('Animekai not found'));
+    throw new Error('Animekai not found');
   }
 }

@@ -1,223 +1,149 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-
-import { AiredOn, BasicIdShik, ReleasedOn, Shikimori, ShikimoriPoster, ShikimoriScreenshot, ShikimoriVideo } from '@prisma/client';
-import { PrismaService } from '../../../prisma.service';
-
-import { UpdateType } from '../../../shared/UpdateType';
-
-import { ShikimoriScreenshot as Screenshot } from '@prisma/client';
-import { UrlConfig } from '../../../configs/url.config';
-import { CustomHttpService } from '../../../http/http.service';
-import { GraphQL } from '../graphql/shikimori.graphql';
-import { ShikimoriHelper } from '../utils/shikimori-helper';
-
-export interface ShikimoriResponse {
-  animes: Shikimori[];
-}
+import { Injectable, NotFoundException } from '@nestjs/common'
+import {
+  AiredOn,
+  BasicIdShik,
+  ReleasedOn,
+  Shikimori,
+  ShikimoriPoster,
+  ShikimoriScreenshot,
+  ShikimoriVideo,
+} from '@prisma/client'
+import { PrismaService } from '../../../prisma.service'
+import { UpdateType } from '../../../shared/UpdateType'
+import { UrlConfig } from '../../../configs/url.config'
+import { CustomHttpService } from '../../../http/http.service'
+import { GraphQL } from '../graphql/shikimori.graphql'
+import { ShikimoriHelper } from '../utils/shikimori-helper'
+import Dimens from '../../../configs/Dimens'
 
 export interface ShikimoriWithRelations extends Shikimori {
-  poster: ShikimoriPoster;
-  airedOn: AiredOn;
-  releasedOn: ReleasedOn;
-  videos: ShikimoriVideo[];
-  screenshots: ShikimoriScreenshot[];
+  poster: ShikimoriPoster
+  airedOn: AiredOn
+  releasedOn: ReleasedOn
+  videos: ShikimoriVideo[]
+  screenshots: ShikimoriScreenshot[]
 }
 
 @Injectable()
 export class ShikimoriService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly customHttpService: CustomHttpService,
+    private readonly http: CustomHttpService,
     private readonly helper: ShikimoriHelper,
-  ) {}
+  ) { }
 
   async getShikimori(id: string): Promise<ShikimoriWithRelations> {
-    const existingShikimori = await this.prisma.shikimori.findUnique({
-      where: { id },
-      include: this.helper.getInclude()
-    }) as unknown as ShikimoriWithRelations;
-    if (existingShikimori) {
-      return this.adjustShikimori(existingShikimori);
-    }
+    const existing = await this.findById(id)
+    if (existing) return this.adjustScreenshots(existing)
 
-    const shikimoriList = (await this.fetchShikimoriFromGraphQL(id, 1, 1)) as {
-      animes: Shikimori[];
-    };
-    if (!shikimoriList.animes.length) {
-      throw new NotFoundException(`No Shikimori data found for ID: ${id}`);
-    }
+    const { animes } = await this.fetchFromGraphQL(id)
+    const anime = animes[0]
+    if (!anime) throw new NotFoundException(`No Shikimori data found for ID: ${id}`)
 
-    const anime = shikimoriList.animes[0];
-
-    if (!anime) {
-      throw new NotFoundException(`Shikimori not found for ID: ${id}`);
-    }
-
-    await this.saveShikimori(anime as ShikimoriWithRelations);
-
-    const newShikimori = await this.prisma.shikimori.findUnique({
-      where: { id },
-      include: this.helper.getInclude()
-    }) as unknown as ShikimoriWithRelations;
-
-    return this.adjustShikimori(newShikimori);
+    await this.saveShikimori(anime as ShikimoriWithRelations)
+    const saved = await this.findById(id)
+    return this.adjustScreenshots(saved!)
   }
 
   async getChronology(id: string): Promise<BasicIdShik[]> {
     const shikimori = await this.prisma.shikimori.findUnique({
       where: { id },
-      include: {
-        chronology: true
-      }
-    });
+      include: { chronology: true },
+    })
 
-    if (!shikimori) {
-      throw new NotFoundException(`Shikimori not found for ID: ${id}`);
-    }
-
-    return (shikimori.chronology as BasicIdShik[]) || [];
+    if (!shikimori) throw new NotFoundException(`Shikimori not found for ID: ${id}`)
+    return shikimori.chronology as BasicIdShik[]
   }
 
   async saveMultipleShikimori(ids: string): Promise<ShikimoriWithRelations[]> {
-    const idList = ids
-      .split(',')
-      .map((id) => id.trim())
-      .filter((id) => id !== '');
+    const idList = ids.split(',').map((id) => id.trim()).filter(Boolean)
 
-    const existingShikimoriList = await this.prisma.shikimori.findMany({
+    const existing = await this.prisma.shikimori.findMany({
       where: { id: { in: idList } },
-      include: this.helper.getInclude()
-    }) as unknown as ShikimoriWithRelations[];
+      include: this.helper.getInclude(),
+    }) as unknown as ShikimoriWithRelations[]
 
-    const existingIds = existingShikimoriList.map((shikimori) => shikimori.id);
-    const idsToFetch = idList.filter((id) => !existingIds.includes(id));
+    const existingIds = existing.map((a) => a.id)
+    const toFetch = idList.filter((id) => !existingIds.includes(id))
 
-    const shikimoriList: ShikimoriWithRelations[] = [...existingShikimoriList];
+    if (!toFetch.length) return existing
 
-    if (idsToFetch.length) {
-      const fetchedShikimoriList = (await this.fetchShikimoriFromGraphQL(
-        idsToFetch.join(','),
-        1,
-        idsToFetch.length,
-      )) as ShikimoriResponse;
+    const { animes } = await this.fetchFromGraphQL(toFetch.join(','), 1, toFetch.length)
+    const newAnimes = animes.filter((a) => !existingIds.includes(a.id)) as ShikimoriWithRelations[]
 
-      if (!fetchedShikimoriList.animes.length) {
-        return [];
-      }
+    if (newAnimes.length) await this.saveShikimoris(newAnimes)
 
-      const newShikimoriList: Shikimori[] = fetchedShikimoriList.animes.filter(
-        (shikimori) => !existingIds.includes(shikimori.id),
-      );
-
-      if (newShikimoriList.length) {
-        await this.saveShikimoris(newShikimoriList as ShikimoriWithRelations[]);
-      }
-
-      shikimoriList.push(
-        ...fetchedShikimoriList.animes.map(this.adjustShikimori),
-      );
-    }
-
-    return shikimoriList;
+    return [
+      ...existing,
+      ...newAnimes.map(this.adjustScreenshots),
+    ]
   }
 
   async saveShikimori(anime: ShikimoriWithRelations): Promise<ShikimoriWithRelations> {
     await this.prisma.lastUpdated.create({
-      data: {
-        entityId: anime.id,
-        type: UpdateType.SHIKIMORI,
-      },
-    });
+      data: { entityId: anime.id, type: UpdateType.SHIKIMORI },
+    })
 
-    const savedShikimori = await this.prisma.shikimori.upsert({
+    await this.prisma.shikimori.upsert({
       where: { id: anime.id },
       update: this.helper.getDataForPrisma(anime),
       create: this.helper.getDataForPrisma(anime),
-    });
+    })
 
-    const newShikimori = await this.prisma.shikimori.findUnique({
-      where: { id: anime.id },
-      include: this.helper.getInclude()
-    }) as unknown as ShikimoriWithRelations;
-
-    return newShikimori; 
+    return (await this.findById(anime.id))!
   }
 
-  async saveShikimoris(shikimoris: ShikimoriWithRelations[]): Promise<void> {
-    const lastUpdatedData = shikimoris.map((shikimori) => ({
-      entityId: shikimori.id,
-      externalId: Number(shikimori.malId),
+  async saveShikimoris(animes: ShikimoriWithRelations[]): Promise<void> {
+    const updates = animes.map((a) => ({
+      entityId: a.id,
+      externalId: Number(a.malId),
       type: UpdateType.SHIKIMORI,
-    }));
+    }))
 
-    await this.prisma.lastUpdated.createMany({ data: lastUpdatedData });
+    await this.prisma.lastUpdated.createMany({ data: updates })
 
-    for (const anime of shikimoris) {
-      await this.saveShikimori(anime);
+    for (const anime of animes) {
+      await this.saveShikimori(anime)
     }
   }
 
   async update(id: string): Promise<ShikimoriWithRelations> {
-    const shikimoriList = (await this.fetchShikimoriFromGraphQL(
-      id,
-      1,
-      1,
-    )) as ShikimoriResponse;
+    const { animes } = await this.fetchFromGraphQL(id)
+    const anime = animes[0]
+    if (!anime) throw new NotFoundException(`Shikimori not found for ID: ${id}`)
 
-    if (!shikimoriList.animes.length) {
-      throw new NotFoundException(`Shikimori not found for ID: ${id}`);
+    const existing = await this.prisma.shikimori.findUnique({ where: { id } })
+    if (JSON.stringify(anime) === JSON.stringify(existing)) {
+      return anime as ShikimoriWithRelations
     }
 
-    const shikimori = shikimoriList[0];
-    const existingShikimori = await this.prisma.shikimori.findUnique({
-      where: { id },
-    });
-
-    if (JSON.stringify(shikimori) === JSON.stringify(existingShikimori)) {
-      return shikimori;
-    }
-
-    return this.saveShikimori(shikimori);
+    return this.saveShikimori(anime as ShikimoriWithRelations)
   }
 
   async getFranchise(franchise: string): Promise<Shikimori[]> {
-    const shikimoris = await this.prisma.shikimori.findMany({
-      where: { franchise },
-    });
-    return shikimoris;
+    return this.prisma.shikimori.findMany({ where: { franchise } })
   }
 
   async getFranchiseIds(franchise: string): Promise<BasicIdShik[]> {
-    const shikimoris = await this.getFranchise(franchise);
-
-    const shikimoriBasicId = shikimoris.map((shikimori) => 
-      this.helper.shikimoriToBasicId(shikimori)
-    );
-
-    return shikimoriBasicId;
+    const items = await this.getFranchise(franchise)
+    return items.map((item) => this.helper.shikimoriToBasicId(item))
   }
 
-  adjustShikimori(shikimori: ShikimoriWithRelations): ShikimoriWithRelations {
-    const screenshots = shikimori.screenshots as Screenshot[];
+  private async fetchFromGraphQL(id: string, page = 1, perPage = 1) {
+    return this.http.getGraphQL(UrlConfig.SHIKIMORI_GRAPHQL, GraphQL.getShikimoriAnime(id, page, perPage)) as Promise<{ animes: Shikimori[] }>
+  }
 
-    if (screenshots && screenshots.length > 10) {
-      shikimori.screenshots = screenshots.slice(0, 10);
+  private async findById(id: string): Promise<ShikimoriWithRelations | null> {
+    return this.prisma.shikimori.findUnique({
+      where: { id },
+      include: this.helper.getInclude(),
+    }) as Promise<ShikimoriWithRelations | null>
+  }
+
+  private adjustScreenshots(anime: ShikimoriWithRelations): ShikimoriWithRelations {
+    if (anime.screenshots?.length > Dimens.SCREENSHOTS) {
+      anime.screenshots = anime.screenshots.slice(0, Dimens.SCREENSHOTS)
     }
-
-    return shikimori;
-  }
-
-  private async fetchShikimoriFromGraphQL(
-    id: string,
-    page: number,
-    perPage: number,
-  ): Promise<ShikimoriResponse> {
-    const data: { animes: Shikimori[] } =
-      await this.customHttpService.getGraphQL(
-        UrlConfig.SHIKIMORI_GRAPHQL,
-        GraphQL.getShikimoriAnime(id, page, perPage),
-      );
-
-    return data as unknown as Promise<ShikimoriResponse>;
+    return anime
   }
 }

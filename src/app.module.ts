@@ -17,6 +17,7 @@ import { UserModule } from './user/user.module';
 import { ExceptionsModule } from './exception/module/exceptions.module'
 import { RedisModule } from '@nestjs-modules/ioredis'
 import { ConsoleModule } from './console/module/console.module'
+import { Redis } from './shared/redis.module'
 
 @Module({
   imports: [
@@ -38,13 +39,7 @@ import { ConsoleModule } from './console/module/console.module'
       envFilePath: '.env',
       isGlobal: true,
     }),
-    RedisModule.forRoot({
-      options: {
-        host: process.env.REDIS_HOST ?? 'localhost',
-        port: process.env.REDIS_PORT ? parseInt(process.env.REDIS_PORT) : 6379
-      },
-      type: 'single'
-    }),
+    Redis
   ],
   controllers: [AppController],
   providers: [AppService],

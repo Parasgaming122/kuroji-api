@@ -500,4 +500,10 @@ export class AnilistHelper {
       shikimori: raw.shikimori,
     };
   }
+
+  public mapToSmall(data: any): BasicAnilistSmall[] {
+    return data.map((anilist) =>
+      this.convertBasicToBasicSmall(anilist),
+    );
+  }
 }

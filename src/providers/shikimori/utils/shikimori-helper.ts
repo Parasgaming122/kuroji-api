@@ -19,6 +19,7 @@ export class ShikimoriHelper {
       rating: anime.rating,
       score: anime.score,
       status: anime.status,
+      franchise: anime.franchise,
       episodes: anime.episodes,
       episodesAired: anime.episodesAired,
       duration: anime.duration,

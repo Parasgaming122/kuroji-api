@@ -44,110 +44,419 @@ $ yarn start:dev
 ## API Documentation
 
 ### Table of Contents
-- [Authentication](#authentication)
-- [User](#user)
 - [Anime](#anime)
 - [Shikimori](#shikimori)
 - [Streaming Sources](#streaming-sources)
 - [Exceptions](#exceptions)
 - [Console](#console)
-- [Cloudinary](#cloudinary)
+- [TMDB](#tmdb)
+- [TVDB](#tvdb)
 - [Filters and DTOs](#filters-and-dtos)
 
-### Authentication
-| Endpoint | Method | Description | Query/Body Parameters |
-|----------|--------|-------------|---------------------|
-| `/auth/register` | POST | Register new user | `CreateUserDto` |
-| `/auth/oauth2/register` | POST | Register with OAuth2 | `OAuth2Dto` |
-
-### User
-| Endpoint | Method | Description | Query/Body Parameters |
-|----------|--------|-------------|---------------------|
-| `/user/profile` | GET | Get user profile | `id?` (optional) |
-| `/user/update` | POST | Update user profile | `UpdateUserDto` |
-| `/user/avatar/upload` | POST | Upload user avatar | `file` (multipart) |
-
 ### Anime
-| Endpoint | Method | Description | Query/Body Parameters |
-|----------|--------|-------------|---------------------|
-| `/anime/info/:id` | GET | Get anime details | - |
-| `/anime/info/:id/characters` | GET | Get anime characters | `perPage`, `page` |
-| `/anime/info/:id/episodes` | GET | Get episode list | - |
-| `/anime/info/:id/episodes/:number` | GET | Get specific episode | - |
-| `/anime/info/:id/providers/:number` | GET | Get specific episode provider | - |
-| `/anime/filter` | GET | Filter anime list | `FilterDto` |
-| `/anime/search/:q` | GET | Search anime | - |
-| `/anime/schedule` | GET | Get anime airing schedule | - |
-| `/anime/info/:id/tmdb` | GET | Get TMDB info by Anilist ID | - |
-| `/anime/info/:id/tmdb/season` | GET | Get TMDB season info | - |
-| `/anime/info/:id/tvdb` | GET | Get TVDB info by Anilist ID | - |
-| `/anime/info/:id/tvdb/translations/:language` | GET | Get TVDB translations | - |
-| `/anime/tvdb/languages` | GET | Get TVDB available languages | - |
-| `/anime/tvdb/languages` | PUT | Update TVDB languages | - |
-
-#### Indexing Endpoints
-| Endpoint | Method | Description | Query Parameters |
-|----------|--------|-------------|-----------------|
-| `/anime/index` | PUT | Start indexing | `delay` |
-| `/anime/index/stop` | PUT | Stop indexing | - |
-| `/anime/index/sleep/:sleep` | PUT | Set indexer sleep time | - |
-| `/anime/index/schedule` | PUT | Schedule indexing | - |
-| `/anime/index/unschedule` | PUT | Unschedule indexing | - |
-
-### Shikimori
-| Endpoint | Method | Description | Query/Body Parameters |
-|----------|--------|-------------|---------------------|
-| `/shikimori/info/:id` | GET | Get anime info | - |
-| `/shikimori/info/:id` | PUT | Update anime info | - |
-| `/shikimori/franchise/:franchise` | GET | Get franchise info | - |
-| `/shikimori/franchiseId/:franchise` | GET | Get franchise IDs | - |
-
-### Streaming Sources
-
-#### AnimePahe
-| Endpoint | Method | Description | Query/Body Parameters |
-|----------|--------|-------------|---------------------|
-| `/animepahe/info/:id` | GET | Get anime info by Anilist ID | - |
-| `/animepahe/watch/:id` | GET | Get streaming sources | - |
-
-#### AnimeKai
-| Endpoint | Method | Description | Query/Body Parameters |
-|----------|--------|-------------|---------------------|
-| `/animekai/info/:id` | GET | Get anime info by Anilist ID | - |
-| `/animekai/watch/:id` | GET | Get streaming sources | `dub` (boolean) |
-
-#### Zoro
-| Endpoint | Method | Description | Query/Body Parameters |
-|----------|--------|-------------|---------------------|
-| `/zoro/info/:id` | GET | Get anime info | - |
-| `/zoro/anilist/:id` | GET | Get Zoro info by Anilist ID | - |
-| `/zoro/watch/:id` | GET | Get streaming sources | `dub` (boolean) |
-
-### Exceptions
-| Endpoint | Method | Description | Query/Body Parameters |
-|----------|--------|-------------|---------------------|
-| `/exceptions` | GET | Get all exceptions | `ExceptionFilterDto` |
-| `/exceptions/delete/:id` | DELETE | Delete exception | - |
-
-### Console
-| Endpoint | Method | Description | Query/Body Parameters |
-|----------|--------|-------------|---------------------|
-| `/console/logs` | GET | Get logs from console | - |
-| `/console/warns` | GET | Get warnings from console | - |
-| `/console/errors` | GET | Get errors from console | - |
-
-### Cloudinary
-| Endpoint | Method | Description | Query/Body Parameters |
-|----------|--------|-------------|---------------------|
-| `/cloudinary` | - | Cloudinary integration endpoints | - |
-
-### Filters and DTOs
 
 <details>
-<summary><strong>Anime Filter Parameters</strong> (click to expand)</summary>
+<summary>Get Anime Details</summary>
 
+**URL**: `/anime/info/:id`  
+**Method**: `GET`  
+**Description**: Get detailed information about an anime by ID
+
+**Path Parameters**:
+```
+id: number
+```
+
+**Response Type**: `AnimeWithRelations`
+
+**Response**:
+```json
+{
+  "id": "number",
+  "title": {
+    "romaji": "string",
+    "english": "string",
+    "native": "string"
+  },
+  "coverImage": {
+    "extraLarge": "string",
+    "large": "string",
+    "medium": "string",
+    "color": "string"
+  },
+  "bannerImage": "string",
+  "description": "string",
+  "genres": ["string"],
+  "episodes": "number",
+  "status": "string",
+  "season": "string",
+  "seasonYear": "number",
+  "format": "string",
+  "duration": "number",
+  "averageScore": "number",
+  "popularity": "number",
+  "source": "string",
+  "studios": ["string"],
+  "startDate": {
+    "year": "number",
+    "month": "number",
+    "day": "number"
+  },
+  "endDate": {
+    "year": "number",
+    "month": "number",
+    "day": "number"
+  },
+  "relations": [
+    {
+      "id": "number",
+      "relationType": "string",
+      "anime": {
+        "id": "number",
+        "title": {
+          "romaji": "string",
+          "english": "string",
+          "native": "string"
+        },
+        "coverImage": {
+          "medium": "string"
+        }
+      }
+    }
+  ],
+  "trailer": {
+    "id": "string",
+    "site": "string",
+    "thumbnail": "string"
+  }
+}
+```
+</details>
+
+<details>
+<summary>Get Anime Recommendations</summary>
+
+**URL**: `/anime/info/:id/recommendations`  
+**Method**: `GET`  
+**Description**: Get anime recommendations based on an anime ID
+
+**Path Parameters**:
+```
+id: number
+```
+
+**Query Parameters**:
+```
+perPage?: number (default: 20)
+page?: number (default: 1)
+```
+
+**Response Type**: `PaginatedAnimeRecommendations`
+
+**Response**:
+```json
+{
+  "data": [
+    {
+      "id": "number",
+      "title": {
+        "romaji": "string",
+        "english": "string",
+        "native": "string"
+      },
+      "coverImage": {
+        "extraLarge": "string",
+        "large": "string",
+        "medium": "string",
+        "color": "string"
+      }
+    }
+  ],
+  "pageInfo": {
+    "total": "number",
+    "perPage": "number",
+    "currentPage": "number",
+    "lastPage": "number",
+    "hasNextPage": "boolean"
+  }
+}
+```
+</details>
+
+<details>
+<summary>Get Anime Characters</summary>
+
+**URL**: `/anime/info/:id/characters`  
+**Method**: `GET`  
+**Description**: Get characters from an anime
+
+**Path Parameters**:
+```
+id: number
+```
+
+**Query Parameters**:
+```
+perPage?: number (default: 20)
+page?: number (default: 1)
+```
+
+**Response Type**: `PaginatedCharacters`
+
+**Response**:
+```json
+{
+  "data": [
+    {
+      "id": "number",
+      "name": {
+        "full": "string",
+        "native": "string"
+      },
+      "image": {
+        "large": "string",
+        "medium": "string"
+      },
+      "role": "string",
+      "voiceActors": [
+        {
+          "id": "number",
+          "name": {
+            "full": "string",
+            "native": "string"
+          },
+          "image": {
+            "large": "string",
+            "medium": "string"
+          },
+          "language": "string"
+        }
+      ]
+    }
+  ],
+  "pageInfo": {
+    "total": "number",
+    "perPage": "number",
+    "currentPage": "number",
+    "lastPage": "number",
+    "hasNextPage": "boolean"
+  }
+}
+```
+</details>
+
+<details>
+<summary>Get Anime Chronology</summary>
+
+**URL**: `/anime/info/:id/chronology`  
+**Method**: `GET`  
+**Description**: Get chronological order of related anime
+
+**Path Parameters**:
+```
+id: number
+```
+
+**Query Parameters**:
+```
+perPage?: number (default: 20)
+page?: number (default: 1)
+```
+
+**Response Type**: `PaginatedAnimeChronology`
+
+**Response**:
+```json
+{
+  "data": [
+    {
+      "id": "number",
+      "title": {
+        "romaji": "string",
+        "english": "string",
+        "native": "string"
+      },
+      "format": "string",
+      "type": "string",
+      "startDate": {
+        "year": "number",
+        "month": "number",
+        "day": "number"
+      }
+    }
+  ],
+  "pageInfo": {
+    "total": "number",
+    "perPage": "number",
+    "currentPage": "number",
+    "lastPage": "number",
+    "hasNextPage": "boolean"
+  }
+}
+```
+</details>
+
+<details>
+<summary>Get Anime Episodes</summary>
+
+**URL**: `/anime/info/:id/episodes`  
+**Method**: `GET`  
+**Description**: Get episode list for an anime
+
+**Path Parameters**:
+```
+id: number
+```
+
+**Response Type**: `AnimeEpisodeList`
+
+**Response**:
+```json
+{
+  "episodes": [
+    {
+      "id": "string",
+      "number": "number",
+      "title": "string",
+      "description": "string",
+      "image": "string",
+      "airDate": "string"
+    }
+  ]
+}
+```
+</details>
+
+<details>
+<summary>Get Specific Episode</summary>
+
+**URL**: `/anime/info/:id/episodes/:number`  
+**Method**: `GET`  
+**Description**: Get details of a specific episode
+
+**Path Parameters**:
+```
+id: number
+number: number
+```
+
+**Response Type**: `Episode`
+
+**Response**:
+```json
+{
+  "id": "string",
+  "number": "number",
+  "title": "string",
+  "description": "string",
+  "image": "string",
+  "airDate": "string"
+}
+```
+</details>
+
+<details>
+<summary>Get Episode Providers</summary>
+
+**URL**: `/anime/info/:id/providers/:number`  
+**Method**: `GET`  
+**Description**: Get available streaming providers for a specific episode
+
+**Path Parameters**:
+```
+id: number
+number: number
+```
+
+**Response Type**: `ProvidersList`
+
+**Response**:
+```json
+{
+  "providers": ["string"]
+}
+```
+</details>
+
+<details>
+<summary>Get All Providers for Anime</summary>
+
+**URL**: `/anime/info/:id/providers`  
+**Method**: `GET`  
+**Description**: Get all available streaming providers for all episodes of an anime
+
+**Path Parameters**:
+```
+id: number
+```
+
+**Response Type**: `AllProviders`
+
+**Response**:
+```json
+{
+  "providers": {
+    "1": ["string"],
+    "2": ["string"]
+  }
+}
+```
+</details>
+
+<details>
+<summary>Get Streaming Sources</summary>
+
+**URL**: `/anime/watch/:id/episodes/:number`  
+**Method**: `GET`  
+**Description**: Get streaming sources for a specific episode
+
+**Path Parameters**:
+```
+id: number
+number: number
+```
+
+**Query Parameters**:
+```
+provider?: string (default: "ANIWATCH")
+dub?: boolean (default: false)
+```
+
+**Response Type**: `StreamingSources`
+
+**Response**:
+```json
+{
+  "sources": [
+    {
+      "url": "string",
+      "quality": "string",
+      "isM3U8": "boolean"
+    }
+  ],
+  "subtitles": [
+    {
+      "url": "string",
+      "lang": "string"
+    }
+  ],
+  "headers": {
+    "Referer": "string"
+  }
+}
+```
+</details>
+
+<details>
+<summary>Filter Anime List</summary>
+
+**URL**: `/anime/filter`  
+**Method**: `GET`  
+**Description**: Filter anime list based on various criteria
+
+**Query Parameters**:
 ```typescript
-// Filter parameters for anime queries
+// FilterDto
 {
   // Pagination
   page?: number;            // Page number for results
@@ -227,67 +536,675 @@ $ yarn start:dev
   licensedByIdIn?: string[]; // Include these licensor IDs
   
   // Additional filters
-  sort?: string[];          // Sort options (see MediaSort enum)
+  sort?: string[];          // Sort options
 }
 ```
-</details>
 
-<details>
-<summary><strong>Media Sort Options</strong> (click to expand)</summary>
+**Response Type**: `PaginatedAnimeList`
 
-```typescript
-// Available sort options for media queries
+**Response**:
+```json
 {
-  // ID-based sorting
-  "id"                  // Sort by ID ascending
-  "id_desc"             // Sort by ID descending
-  
-  // Title-based sorting
-  "title_romaji"        // Sort by romaji title ascending
-  "title_romaji_desc"   // Sort by romaji title descending
-  "title_english"       // Sort by English title ascending
-  "title_english_desc"  // Sort by English title descending
-  "title_native"        // Sort by native title ascending
-  "title_native_desc"   // Sort by native title descending
-  
-  // Type and format sorting
-  "type"                // Sort by media type ascending
-  "type_desc"           // Sort by media type descending
-  "format"              // Sort by format ascending
-  "format_desc"         // Sort by format descending
-  
-  // Date-based sorting
-  "start_date"          // Sort by start date ascending
-  "start_date_desc"     // Sort by start date descending
-  "end_date"            // Sort by end date ascending
-  "end_date_desc"       // Sort by end date descending
-  "updated_at"          // Sort by last update ascending
-  "updated_at_desc"     // Sort by last update descending
-  
-  // Popularity/score sorting
-  "score"               // Sort by score ascending
-  "score_desc"          // Sort by score descending
-  "popularity"          // Sort by popularity ascending
-  "popularity_desc"     // Sort by popularity descending
-  "trending"            // Sort by trending score ascending
-  "trending_desc"       // Sort by trending score descending
-  
-  // Content-based sorting
-  "episodes"            // Sort by episode count ascending
-  "episodes_desc"       // Sort by episode count descending
-  "duration"            // Sort by duration ascending
-  "duration_desc"       // Sort by duration descending
-  "status"              // Sort by status ascending
-  "status_desc"         // Sort by status descending
+  "data": [
+    {
+      "id": "number",
+      "title": {
+        "romaji": "string",
+        "english": "string",
+        "native": "string"
+      },
+      "coverImage": {
+        "extraLarge": "string",
+        "large": "string",
+        "medium": "string",
+        "color": "string"
+      },
+      "bannerImage": "string",
+      "format": "string",
+      "status": "string",
+      "episodes": "number",
+      "season": "string",
+      "seasonYear": "number",
+      "averageScore": "number",
+      "genres": ["string"]
+    }
+  ],
+  "pageInfo": {
+    "total": "number",
+    "perPage": "number",
+    "currentPage": "number",
+    "lastPage": "number",
+    "hasNextPage": "boolean"
+  }
 }
 ```
 </details>
 
 <details>
-<summary><strong>Exception Filter Parameters</strong> (click to expand)</summary>
+<summary>Search Anime</summary>
 
+**URL**: `/anime/search/:q`  
+**Method**: `GET`  
+**Description**: Search for anime by query string
+
+**Path Parameters**:
+```
+q: string
+```
+
+**Response Type**: `AnimeSearchResults`
+
+**Response**:
+```json
+{
+  "data": [
+    {
+      "id": "number",
+      "title": {
+        "romaji": "string",
+        "english": "string",
+        "native": "string"
+      },
+      "coverImage": {
+        "extraLarge": "string",
+        "large": "string",
+        "medium": "string",
+        "color": "string"
+      }
+    }
+  ]
+}
+```
+</details>
+
+<details>
+<summary>Get Anime Schedule</summary>
+
+**URL**: `/anime/schedule`  
+**Method**: `GET`  
+**Description**: Get currently airing anime schedule
+
+**Response Type**: `AnimeSchedule`
+
+**Response**:
+```json
+{
+  "sunday": [
+    {
+      "id": "number",
+      "title": {
+        "romaji": "string",
+        "english": "string",
+        "native": "string"
+      },
+      "coverImage": {
+        "extraLarge": "string",
+        "large": "string",
+        "medium": "string",
+        "color": "string"
+      },
+      "airingAt": "string",
+      "episode": "number"
+    }
+  ],
+  "monday": [],
+  "tuesday": [],
+  "wednesday": [],
+  "thursday": [],
+  "friday": [],
+  "saturday": []
+}
+```
+</details>
+
+<details>
+<summary>Get Franchise Info</summary>
+
+**URL**: `/anime/franchise/:franchise`  
+**Method**: `GET`  
+**Description**: Get information about an anime franchise
+
+**Path Parameters**:
+```
+franchise: string
+```
+
+**Query Parameters**:
+```
+perPage?: number (default: 20)
+page?: number (default: 1)
+```
+
+**Response Type**: `PaginatedFranchise`
+
+**Response**:
+```json
+{
+  "data": [
+    {
+      "id": "number",
+      "title": {
+        "romaji": "string",
+        "english": "string",
+        "native": "string"
+      },
+      "format": "string",
+      "startDate": {
+        "year": "number",
+        "month": "number",
+        "day": "number"
+      }
+    }
+  ],
+  "pageInfo": {
+    "total": "number",
+    "perPage": "number",
+    "currentPage": "number",
+    "lastPage": "number",
+    "hasNextPage": "boolean"
+  }
+}
+```
+</details>
+
+<details>
+<summary>Start Indexing</summary>
+
+**URL**: `/anime/index`  
+**Method**: `PUT`  
+**Description**: Start the anime indexing process
+
+**Query Parameters**:
+```
+delay?: number (default: 10)
+```
+
+**Response Type**: `IndexerStatus`
+
+**Response**:
+```json
+{
+  "status": "Indexing started"
+}
+```
+</details>
+
+<details>
+<summary>Stop Indexing</summary>
+
+**URL**: `/anime/index/stop`  
+**Method**: `PUT`  
+**Description**: Stop the anime indexing process
+
+**Response Type**: `IndexerStatus`
+
+**Response**:
+```json
+{
+  "status": "Indexing stopped"
+}
+```
+</details>
+
+<details>
+<summary>Schedule Indexing</summary>
+
+**URL**: `/anime/index/schedule`  
+**Method**: `PUT`  
+**Description**: Schedule periodic indexing
+
+**Response Type**: `IndexerStatus`
+
+**Response**:
+```json
+{
+  "status": "Indexing scheduled"
+}
+```
+</details>
+
+<details>
+<summary>Unschedule Indexing</summary>
+
+**URL**: `/anime/index/unschedule`  
+**Method**: `PUT`  
+**Description**: Cancel scheduled indexing
+
+**Response Type**: `IndexerStatus`
+
+**Response**:
+```json
+{
+  "status": "Indexing unscheduled"
+}
+```
+</details>
+
+### Shikimori
+
+<details>
+<summary>Get Shikimori Anime Info</summary>
+
+**URL**: `/shikimori/info/:id`  
+**Method**: `GET`  
+**Description**: Get anime information from Shikimori
+
+**Path Parameters**:
+```
+id: number
+```
+
+**Response Type**: `ShikimoriAnime`
+
+**Response**:
+```json
+{
+  "id": "number",
+  "name": "string",
+  "russian": "string",
+  "image": {
+    "original": "string",
+    "preview": "string",
+    "x96": "string",
+    "x48": "string"
+  },
+  "url": "string",
+  "kind": "string",
+  "score": "number",
+  "status": "string",
+  "episodes": "number",
+  "episodesAired": "number",
+  "aired_on": "string",
+  "released_on": "string",
+  "rating": "string",
+  "genres": [
+    {
+      "id": "number",
+      "name": "string",
+      "russian": "string"
+    }
+  ],
+  "studios": [
+    {
+      "id": "number",
+      "name": "string",
+      "filtered_name": "string"
+    }
+  ]
+}
+```
+</details>
+
+<details>
+<summary>Update Shikimori Anime Info</summary>
+
+**URL**: `/shikimori/info/:id`  
+**Method**: `PUT`  
+**Description**: Update anime information from Shikimori
+
+**Path Parameters**:
+```
+id: number
+```
+
+**Response Type**: `ShikimoriUpdateResponse`
+
+**Response**:
+```json
+{
+  "id": "number",
+  "name": "string",
+  "russian": "string",
+  "image": {
+    "original": "string",
+    "preview": "string",
+    "x96": "string",
+    "x48": "string"
+  },
+  "updatedAt": "string"
+}
+```
+</details>
+
+<details>
+<summary>Get Shikimori Franchise</summary>
+
+**URL**: `/shikimori/franchise/:franchise`  
+**Method**: `GET`  
+**Description**: Get franchise information from Shikimori
+
+**Path Parameters**:
+```
+franchise: string
+```
+
+**Response Type**: `ShikimoriFranchise`
+
+**Response**:
+```json
+{
+  "links": [
+    {
+      "id": "number",
+      "source_id": "number",
+      "target_id": "number",
+      "source": {
+        "id": "number",
+        "name": "string",
+        "russian": "string",
+        "image": {
+          "original": "string",
+          "preview": "string",
+          "x96": "string",
+          "x48": "string"
+        },
+        "kind": "string",
+        "status": "string"
+      },
+      "target": {
+        "id": "number",
+        "name": "string",
+        "russian": "string",
+        "image": {
+          "original": "string",
+          "preview": "string",
+          "x96": "string",
+          "x48": "string"
+        },
+        "kind": "string",
+        "status": "string"
+      },
+      "relation": "string",
+      "relation_russian": "string"
+    }
+  ]
+}
+```
+</details>
+
+<details>
+<summary>Get Franchise IDs</summary>
+
+**URL**: `/shikimori/franchiseId/:franchise`  
+**Method**: `GET`  
+**Description**: Get list of IDs in a franchise
+
+**Path Parameters**:
+```
+franchise: string
+```
+
+**Response Type**: `FranchiseIDs`
+
+**Response**:
+```json
+{
+  "ids": ["number"]
+}
+```
+</details>
+
+### Streaming Sources
+
+#### AnimePahe
+
+<details>
+<summary>Get AnimePahe Anime Info</summary>
+
+**URL**: `/anime/animepahe/info/:id`  
+**Method**: `GET`  
+**Description**: Get anime information from AnimePahe
+
+**Path Parameters**:
+```
+id: number
+```
+
+**Response Type**: `AnimePaheAnime`
+
+**Response**:
+```json
+{
+  "id": "string",
+  "title": "string",
+  "image": "string",
+  "episodes": [
+    {
+      "id": "string",
+      "number": "number",
+      "title": "string",
+      "created_at": "string"
+    }
+  ]
+}
+```
+</details>
+
+<details>
+<summary>Get AnimePahe Streaming Sources</summary>
+
+**URL**: `/anime/animepahe/watch/:id`  
+**Method**: `GET`  
+**Description**: Get streaming sources from AnimePahe
+
+**Path Parameters**:
+```
+id: string (AnimePahe ID)
+```
+
+**Response Type**: `AnimePaheSources`
+
+**Response**:
+```json
+{
+  "sources": [
+    {
+      "url": "string",
+      "quality": "string",
+      "isM3U8": false
+    }
+  ],
+  "subtitles": [],
+  "headers": {
+    "Referer": "string"
+  }
+}
+```
+</details>
+
+#### AnimeKai
+
+<details>
+<summary>Get AnimeKai Anime Info</summary>
+
+**URL**: `/anime/animekai/info/:id`  
+**Method**: `GET`  
+**Description**: Get anime information from AnimeKai
+
+**Path Parameters**:
+```
+id: number
+```
+
+**Response Type**: `AnimeKaiAnime`
+
+**Response**:
+```json
+{
+  "id": "string",
+  "title": "string",
+  "image": "string",
+  "episodes": [
+    {
+      "id": "string",
+      "number": "number",
+      "title": "string"
+    }
+  ]
+}
+```
+</details>
+
+<details>
+<summary>Get AnimeKai Streaming Sources</summary>
+
+**URL**: `/anime/animekai/watch/:id`  
+**Method**: `GET`  
+**Description**: Get streaming sources from AnimeKai
+
+**Path Parameters**:
+```
+id: string (AnimeKai ID)
+```
+
+**Query Parameters**:
+```
+dub?: boolean (default: false)
+```
+
+**Response Type**: `AnimeKaiSources`
+
+**Response**:
+```json
+{
+  "sources": [
+    {
+      "url": "string",
+      "quality": "string",
+      "isM3U8": "boolean"
+    }
+  ],
+  "subtitles": [
+    {
+      "url": "string",
+      "lang": "string"
+    }
+  ],
+  "headers": {
+    "Referer": "string"
+  }
+}
+```
+</details>
+
+#### Zoro
+
+<details>
+<summary>Get Zoro Anime Info</summary>
+
+**URL**: `/anime/zoro/info/:id`  
+**Method**: `GET`  
+**Description**: Get anime information from Zoro
+
+**Path Parameters**:
+```
+id: string (Zoro ID)
+```
+
+**Response Type**: `ZoroAnime`
+
+**Response**:
+```json
+{
+  "id": "string",
+  "title": "string",
+  "image": "string",
+  "episodes": [
+    {
+      "id": "string",
+      "number": "number",
+      "title": "string"
+    }
+  ]
+}
+```
+</details>
+
+<details>
+<summary>Get Zoro Info by Anilist ID</summary>
+
+**URL**: `/anime/zoro/anilist/:id`  
+**Method**: `GET`  
+**Description**: Get Zoro anime information using Anilist ID
+
+**Path Parameters**:
+```
+id: number
+```
+
+**Response Type**: `ZoroAnime`
+
+**Response**:
+```json
+{
+  "id": "string",
+  "title": "string",
+  "image": "string",
+  "episodes": [
+    {
+      "id": "string",
+      "number": "number",
+      "title": "string"
+    }
+  ]
+}
+```
+</details>
+
+<details>
+<summary>Get Zoro Streaming Sources</summary>
+
+**URL**: `/anime/zoro/watch/:id`  
+**Method**: `GET`  
+**Description**: Get streaming sources from Zoro
+
+**Path Parameters**:
+```
+id: string (Zoro ID)
+```
+
+**Query Parameters**:
+```
+dub?: boolean (default: false)
+```
+
+**Response Type**: `ZoroSources`
+
+**Response**:
+```json
+{
+  "sources": [
+    {
+      "url": "string",
+      "quality": "string",
+      "isM3U8": "boolean"
+    }
+  ],
+  "subtitles": [
+    {
+      "url": "string",
+      "lang": "string"
+    }
+  ],
+  "headers": {
+    "Referer": "string"
+  }
+}
+```
+</details>
+
+### Exceptions
+
+<details>
+<summary>Get All Exceptions</summary>
+
+**URL**: `/exceptions`  
+**Method**: `GET`  
+**Description**: Get all logged exceptions
+
+**Query Parameters**:
 ```typescript
-// Filter parameters for exception queries
+// ExceptionFilterDto
 {
   // Filter by exception details
   statusCode?: number;     // HTTP status code
@@ -302,6 +1219,325 @@ $ yarn start:dev
   // Pagination
   page?: number;           // Page number (min: 1)
   perPage?: number;        // Results per page (min: 1)
+}
+```
+
+**Response Type**: `PaginatedExceptions`
+
+**Response**:
+```json
+{
+  "data": [
+    {
+      "id": "number",
+      "statusCode": "number",
+      "message": "string",
+      "path": "string",
+      "method": "string",
+      "timestamp": "string",
+      "stack": "string"
+    }
+  ],
+  "pageInfo": {
+    "total": "number",
+    "perPage": "number",
+    "currentPage": "number",
+    "lastPage": "number",
+    "hasNextPage": "boolean"
+  }
+}
+```
+</details>
+
+<details>
+<summary>Delete Exception</summary>
+
+**URL**: `/exceptions/delete/:id`  
+**Method**: `DELETE`  
+**Description**: Delete a logged exception
+
+**Path Parameters**:
+```
+id: number
+```
+
+**Response Type**: `DeleteExceptionResponse`
+
+**Response**:
+```json
+{
+  "deleted": true,
+  "id": "number"
+}
+```
+</details>
+
+### Console
+
+<details>
+<summary>Get Console Logs</summary>
+
+**URL**: `/console/logs`  
+**Method**: `GET`  
+**Description**: Get all console logs
+
+**Response Type**: `ConsoleLogEntry[]`
+
+**Response**:
+```json
+[
+  {
+    "message": "string",
+    "timestamp": "string"
+  }
+]
+```
+</details>
+
+<details>
+<summary>Get Console Warnings</summary>
+
+**URL**: `/console/warns`  
+**Method**: `GET`  
+**Description**: Get all console warnings
+
+**Response Type**: `ConsoleWarnEntry[]`
+
+**Response**:
+```json
+[
+  {
+    "message": "string",
+    "timestamp": "string"
+  }
+]
+```
+</details>
+
+<details>
+<summary>Get Console Errors</summary>
+
+**URL**: `/console/errors`  
+**Method**: `GET`  
+**Description**: Get all console errors
+
+**Response Type**: `ConsoleErrorEntry[]`
+
+**Response**:
+```json
+[
+  {
+    "message": "string",
+    "timestamp": "string",
+    "stack": "string"
+  }
+]
+```
+</details>
+
+### TMDB
+
+<details>
+<summary>Get TMDB Info by Anilist ID</summary>
+
+**URL**: `/anime/info/:id/tmdb`  
+**Method**: `GET`  
+**Description**: Get TMDB information using Anilist ID
+
+**Path Parameters**:
+```
+id: number
+```
+
+**Response Type**: `TMDBShow`
+
+**Response**:
+```json
+{
+  "id": "number",
+  "name": "string",
+  "original_name": "string",
+  "overview": "string",
+  "poster_path": "string",
+  "backdrop_path": "string",
+  "first_air_date": "string",
+  "seasons": [
+    {
+      "id": "number",
+      "name": "string",
+      "overview": "string",
+      "season_number": "number",
+      "episode_count": "number",
+      "poster_path": "string",
+      "air_date": "string"
+    }
+  ],
+  "genres": [
+    {
+      "id": "number",
+      "name": "string"
+    }
+  ],
+  "status": "string",
+  "vote_average": "number"
+}
+```
+</details>
+
+<details>
+<summary>Get TMDB Season Info</summary>
+
+**URL**: `/anime/info/:id/tmdb/season`  
+**Method**: `GET`  
+**Description**: Get TMDB season information
+
+**Path Parameters**:
+```
+id: number
+```
+
+**Response Type**: `TMDBSeason`
+
+**Response**:
+```json
+{
+  "id": "number",
+  "name": "string",
+  "overview": "string",
+  "season_number": "number",
+  "air_date": "string",
+  "episodes": [
+    {
+      "id": "number",
+      "name": "string",
+      "overview": "string",
+      "episode_number": "number",
+      "still_path": "string",
+      "air_date": "string",
+      "vote_average": "number",
+      "runtime": "number"
+    }
+  ],
+  "poster_path": "string"
+}
+```
+</details>
+
+### TVDB
+
+<details>
+<summary>Get TVDB Info by Anilist ID</summary>
+
+**URL**: `/anime/info/:id/tvdb`  
+**Method**: `GET`  
+**Description**: Get TVDB information using Anilist ID
+
+**Path Parameters**:
+```
+id: number
+```
+
+**Response Type**: `TVDBShow`
+
+**Response**:
+```json
+{
+  "id": "number",
+  "name": "string",
+  "overview": "string",
+  "firstAired": "string",
+  "image": "string",
+  "network": "string",
+  "status": "string",
+  "seasons": [
+    {
+      "id": "number",
+      "name": "string",
+      "overview": "string",
+      "number": "number",
+      "imageUrl": "string",
+      "episodes": [
+        {
+          "id": "number",
+          "name": "string",
+          "overview": "string",
+          "number": "number",
+          "image": "string",
+          "firstAired": "string",
+          "directors": ["string"],
+          "writers": ["string"],
+          "runtime": "number"
+        }
+      ]
+    }
+  ],
+  "genres": ["string"]
+}
+```
+</details>
+
+<details>
+<summary>Get TVDB Translations</summary>
+
+**URL**: `/anime/info/:id/tvdb/translations/:language`  
+**Method**: `GET`  
+**Description**: Get TVDB translations for a specific language
+
+**Path Parameters**:
+```
+id: number
+language: string
+```
+
+**Response Type**: `TVDBTranslation`
+
+**Response**:
+```json
+{
+  "name": "string",
+  "overview": "string",
+  "language": "string"
+}
+```
+</details>
+
+<details>
+<summary>Get TVDB Available Languages</summary>
+
+**URL**: `/anime/tvdb/languages`  
+**Method**: `GET`  
+**Description**: Get list of available languages in TVDB
+
+**Response Type**: `TVDBLanguage[]`
+
+**Response**:
+```json
+[
+  {
+    "id": "string",
+    "name": "string",
+    "shortCode": "string",
+    "englishName": "string"
+  }
+]
+```
+</details>
+
+<details>
+<summary>Update TVDB Languages</summary>
+
+**URL**: `/anime/tvdb/languages`  
+**Method**: `PUT`  
+**Description**: Update the list of available TVDB languages
+
+**Response Type**: `TVDBLanguageUpdateResponse`
+
+**Response**:
+```json
+{
+  "success": true,
+  "message": "Languages updated",
+  "count": "number"
 }
 ```
 </details>
@@ -327,6 +1563,7 @@ interface ApiResponse<T> {
 {
   statusCode: number;
   message: string;
+  stack?: string; // Only in development mode
 }
 ```
 

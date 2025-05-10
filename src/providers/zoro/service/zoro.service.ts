@@ -173,6 +173,6 @@ export class ZoroService {
         }
       }
     }
-    return Promise.reject(new Error('Zoro not found'));
+    throw new Error('Zoro not found');
   }
 }

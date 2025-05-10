@@ -14,6 +14,7 @@ import { UpdateType } from '../../../shared/UpdateType';
 import { AnilistService } from '../../anilist/service/anilist.service';
 import { TmdbHelper } from '../utils/tmdb-helper';
 import { AnilistWithRelations } from '../../anilist/model/AnilistModels'
+import { sleep } from '../../../shared/utils'
 
 export interface BasicTmdb {
   id: number;
@@ -79,7 +80,7 @@ export class TmdbService {
     const existTmdbSeason = tmdb.seasons
 
     if (!existTmdbSeason || existTmdbSeason.length === 0) {
-      return Promise.reject(new Error(`No seasons found for TMDb ID: ${tmdb.id}`));
+      throw new Error(`No seasons found for TMDb ID: ${tmdb.id}`);
     }
 
     const { year, month, day } = anilist.startDate as DateDetails || {}
@@ -160,7 +161,7 @@ export class TmdbService {
       return newSeason
     }
 
-    return Promise.reject(new Error('Not found'));
+    throw new Error('Not found');
   }  
 
   async saveTmdb(tmdb: TmdbWithRelations): Promise<TmdbWithRelations> {
@@ -181,7 +182,7 @@ export class TmdbService {
     return await this.prisma.tmdb.findUnique({
       where: { id: tmdb.id },
       include: { seasons: true }
-    }) as unknown as TmdbWithRelations;
+    }) as TmdbWithRelations;
   }
 
   async saveTmdbSeason(tmdbSeason: TmdbSeason): Promise<TmdbSeason> {
@@ -213,7 +214,7 @@ export class TmdbService {
       const tmdbSeason = await this.fetchTmdbSeason(id, season.season_number || 1);
       await this.saveTmdbSeason(tmdbSeason);
 
-      this.sleep(5);
+      sleep(5);
     }
 
     return tmdb;
@@ -409,9 +410,5 @@ export class TmdbService {
         throw new Error('ID not found in TMDb as Movie or TV Show.');
       }
     }
-  }
-
-  public async sleep(delay: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, delay * 1000));
   }
 }

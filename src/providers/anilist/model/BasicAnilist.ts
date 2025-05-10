@@ -1,4 +1,4 @@
-import { AnilistNextAiringEpisode, ShikimoriPoster } from '@prisma/client'
+import { AnilistCover, AnilistNextAiringEpisode, AnilistTitle, ShikimoriPoster, StartDate } from '@prisma/client'
 import { JsonValue } from '@prisma/client/runtime/library'
 
 export interface BasicShikimori {
@@ -16,12 +16,12 @@ export interface BasicAnilist {
   idMal?: number;
 
   siteUrl?: string;
-  title?: JsonValue;
+  title?: AnilistTitle;
 
   synonyms?: string[];
 
   bannerImage?: string;
-  coverImage?: JsonValue;
+  coverImage?: AnilistCover;
 
   type?: string;
   format?: string;
@@ -29,7 +29,7 @@ export interface BasicAnilist {
   description?: string;
   moreInfo?: string;
 
-  startDate?: JsonValue;
+  startDate?: StartDate;
 
   season?: string;
   seasonYear?: number;
@@ -59,15 +59,15 @@ export interface BasicAnilistSmall {
   idMal?: number
 
   siteUrl?: string
-  title?: JsonValue
+  title?: AnilistTitle
 
-  coverImage?: JsonValue
+  coverImage?: AnilistCover
 
   type?: string
   format?: string
   status?: string
 
-  startDate?: JsonValue
+  startDate?: StartDate
 
   season?: string
   seasonYear?: number

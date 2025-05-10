@@ -17,9 +17,9 @@ export interface AnilistResponse {
 }
 
 export interface FranchiseResponse<T> {
+  pageInfo: PageInfo
   franchise: Franchise
   data: T
-  pageInfo: PageInfo
 }
 
 export interface SearcnResponse<T> {

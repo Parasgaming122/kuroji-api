@@ -7,6 +7,7 @@ import { ZoroService } from '../../../zoro/service/zoro.service'
 import { AnimekaiService } from '../../../animekai/service/animekai.service'
 import { AnimepaheService } from '../../../animepahe/service/animepahe.service'
 import Config from '../../../../configs/Config'
+import { sleep } from '../../../../shared/utils'
 
 export interface Ids {
   sfw: number[]
@@ -56,7 +57,7 @@ export class AnilistIndexerService {
           data: { id: id.toString() },
         })
 
-        await this.sleep(this.getRandomInt(delay, delay + 25))
+        await sleep(this.getRandomInt(delay, delay + 25))
       } catch (e: any) {
         console.error('Failed index update:', e)
       }
@@ -68,11 +69,6 @@ export class AnilistIndexerService {
 
   public stop(): void {
     this.isRunning = false
-  }
-
-  private async sleep(delay: number): Promise<void> {
-    console.log(`Sleeping for ${delay} seconds...`)
-    return new Promise((resolve) => setTimeout(resolve, delay * 1000))
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_NOON)
@@ -127,7 +123,7 @@ export class AnilistIndexerService {
             : this.getRandomInt(30, 60)
 
           console.warn(`⚠️ 429 hit - Attempt ${attempt}/${retries}. Sleeping ${retryAfter}s`)
-          await this.sleep(retryAfter)
+          await sleep(retryAfter)
         } else {
           console.warn(`❌ Attempt ${attempt} failed:`, e.message ?? e)
           break
