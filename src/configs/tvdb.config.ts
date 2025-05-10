@@ -2,7 +2,7 @@ import Config from './Config';
 
 export class TVDB {
   static readonly API_KEY: string =
-    Config.TVDB_API || '''';
+    Config.TVDB_API || '8327a9a3-c6bd-4a96-9527-e4c723b0041b';
   static readonly URL: string = Config.TVDB || 'https://api4.thetvdb.com/v4/';
 
   static getLoginUrl(): string {

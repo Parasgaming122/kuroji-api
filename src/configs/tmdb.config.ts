@@ -2,7 +2,7 @@ import Config from './Config';
 
 export class TMDB {
   public static readonly API_KEY: string =
-    Config.TMDB_API || '''';
+    Config.TMDB_API || '5201b54eb0968700e693a30576d7d4dc';
   public static readonly URL: string =
     Config.TMDB || 'https://api.themoviedb.org/3/';
   public static readonly IMAGE_BASE_URL: string = 'https://image.tmdb.org/t/p/';

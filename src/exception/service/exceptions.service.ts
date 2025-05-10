@@ -2,8 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service'
 import { Exception } from '@prisma/client'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { ApiResponse } from '../../api/ApiResponse'
+import { ApiResponse, PageInfo } from '../../api/ApiResponse'
 import { ExceptionFilterDto } from '../model/ExceptionFilterDto'
+import { getPageInfo } from '../../shared/utils'
 
 @Injectable()
 export class ExceptionsService {
@@ -52,15 +53,7 @@ export class ExceptionsService {
       },
     })
 
-    const lastPage = Math.ceil(total / perPage)
-    const pageInfo = {
-      total,
-      perPage,
-      currentPage: page,
-      lastPage,
-      hasNextPage: page < lastPage,
-    }
-
+    const pageInfo: PageInfo = getPageInfo(total, perPage, page);
     return { pageInfo, data: exceptions }
   }
 

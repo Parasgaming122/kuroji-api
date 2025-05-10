@@ -102,7 +102,8 @@ export class TvdbService {
     const tvdb = await this.getTvdbByAnilist(id)
     const existing = await this.prisma.tvdbLanguageTranslation.findFirst({
       where: { tvdbId: tvdb.id, language: translation },
-    })
+      omit: { id: true, tvdbId: true }
+    }) as TvdbLanguageTranslation;
     if (existing) return existing
 
     const tmdb = await this.tmdbService.getTmdbByAnilist(id)
@@ -140,9 +141,13 @@ export class TvdbService {
   }
 
   async saveTranslation(translation: TvdbLanguageTranslation): Promise<TvdbLanguageTranslation> {
-    return await this.prisma.tvdbLanguageTranslation.create({
+    await this.prisma.tvdbLanguageTranslation.create({
       data: this.helper.getTvdbLanguageTranslationData(translation),
-    })
+    });
+    return await this.prisma.tvdbLanguageTranslation.findFirst({
+      where: { tvdbId: translation.tvdbId, language: translation.language },
+      omit: { id: true, tvdbId: true }
+    }) as TvdbLanguageTranslation;
   }
 
   async update(id: number): Promise<void> {
