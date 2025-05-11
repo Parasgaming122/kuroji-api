@@ -1,10 +1,10 @@
 <p align="center">
-  <a href="hhttps://github.com/veaquer/veanime__nestend">
-    <img src="https://raw.githubusercontent.com/veaquer/veanime__nestend/main/images/background.jpg" alt="Background" width="100%" style="max-height: 300px; object-fit: cover; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);" />
+  <a href="https://github.com/veaquer/kuroji-api">
+    <img src="https://raw.githubusercontent.com/veaquer/kuroji-api/main/public/img/logo.svg" alt="Logo" width="100%" style="max-height: 300px; object-fit: cover; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);" />
   </a>
 </p>
 
-# <p align="center">VeAnime - Modern Anime API and Content Hub</p>
+# <p align="center">Kuroji API - Modern Anime API and Content Hub</p>
 
 <p align="center">
   <a href="https://nestjs.com" target="_blank"><img src="https://img.shields.io/badge/Built%20with-NestJS-ea2845" alt="Built with NestJS"></a>
@@ -13,7 +13,7 @@
   <a href="#"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License"></a>
 </p>
 
-VeAnime is a powerful and flexible API for accessing anime information, streaming sources, and related content from various providers. Built on NestJS and TypeScript, it provides a robust and scalable solution for anime-related applications.
+Kuroji API is a powerful and flexible API for accessing anime information, streaming sources, and related content from various providers. Built on NestJS and TypeScript, it provides a robust and scalable solution for anime-related applications.
 
 ## Features
 
@@ -27,6 +27,7 @@ VeAnime is a powerful and flexible API for accessing anime information, streamin
 ## Installation
 
 ```bash
+# Install dependencies
 # Install dependencies
 $ yarn install
 
@@ -51,95 +52,33 @@ $ yarn start:dev
 - [Console](#console)
 - [TMDB](#tmdb)
 - [TVDB](#tvdb)
-- [Filters and DTOs](#filters-and-dtos)
 
-### Anime
+## Anime
 
 <details>
-<summary>Get Anime Details</summary>
+<summary><h3>Get Anime Details</h3></summary>
 
 **URL**: `/anime/info/:id`  
 **Method**: `GET`  
 **Description**: Get detailed information about an anime by ID
 
+**Example**: `https://api.example.com/anime/info/1`
+
 **Path Parameters**:
 ```
 id: number
 ```
-
-**Response Type**: `AnimeWithRelations`
-
-**Response**:
-```json
-{
-  "id": "number",
-  "title": {
-    "romaji": "string",
-    "english": "string",
-    "native": "string"
-  },
-  "coverImage": {
-    "extraLarge": "string",
-    "large": "string",
-    "medium": "string",
-    "color": "string"
-  },
-  "bannerImage": "string",
-  "description": "string",
-  "genres": ["string"],
-  "episodes": "number",
-  "status": "string",
-  "season": "string",
-  "seasonYear": "number",
-  "format": "string",
-  "duration": "number",
-  "averageScore": "number",
-  "popularity": "number",
-  "source": "string",
-  "studios": ["string"],
-  "startDate": {
-    "year": "number",
-    "month": "number",
-    "day": "number"
-  },
-  "endDate": {
-    "year": "number",
-    "month": "number",
-    "day": "number"
-  },
-  "relations": [
-    {
-      "id": "number",
-      "relationType": "string",
-      "anime": {
-        "id": "number",
-        "title": {
-          "romaji": "string",
-          "english": "string",
-          "native": "string"
-        },
-        "coverImage": {
-          "medium": "string"
-        }
-      }
-    }
-  ],
-  "trailer": {
-    "id": "string",
-    "site": "string",
-    "thumbnail": "string"
-  }
-}
-```
 </details>
 
 <details>
-<summary>Get Anime Recommendations</summary>
+<summary><h3>Get Anime Recommendations</h3></summary>
 
 **URL**: `/anime/info/:id/recommendations`  
 **Method**: `GET`  
 **Description**: Get anime recommendations based on an anime ID
 
+**Example**: `https://api.example.com/anime/info/1/recommendations?page=1&perPage=10`
+
 **Path Parameters**:
 ```
 id: number
@@ -150,46 +89,17 @@ id: number
 perPage?: number (default: 20)
 page?: number (default: 1)
 ```
-
-**Response Type**: `PaginatedAnimeRecommendations`
-
-**Response**:
-```json
-{
-  "data": [
-    {
-      "id": "number",
-      "title": {
-        "romaji": "string",
-        "english": "string",
-        "native": "string"
-      },
-      "coverImage": {
-        "extraLarge": "string",
-        "large": "string",
-        "medium": "string",
-        "color": "string"
-      }
-    }
-  ],
-  "pageInfo": {
-    "total": "number",
-    "perPage": "number",
-    "currentPage": "number",
-    "lastPage": "number",
-    "hasNextPage": "boolean"
-  }
-}
-```
 </details>
 
 <details>
-<summary>Get Anime Characters</summary>
+<summary><h3>Get Anime Characters</h3></summary>
 
 **URL**: `/anime/info/:id/characters`  
 **Method**: `GET`  
 **Description**: Get characters from an anime
 
+**Example**: `https://api.example.com/anime/info/1/characters?page=1&perPage=20`
+
 **Path Parameters**:
 ```
 id: number
@@ -200,58 +110,17 @@ id: number
 perPage?: number (default: 20)
 page?: number (default: 1)
 ```
-
-**Response Type**: `PaginatedCharacters`
-
-**Response**:
-```json
-{
-  "data": [
-    {
-      "id": "number",
-      "name": {
-        "full": "string",
-        "native": "string"
-      },
-      "image": {
-        "large": "string",
-        "medium": "string"
-      },
-      "role": "string",
-      "voiceActors": [
-        {
-          "id": "number",
-          "name": {
-            "full": "string",
-            "native": "string"
-          },
-          "image": {
-            "large": "string",
-            "medium": "string"
-          },
-          "language": "string"
-        }
-      ]
-    }
-  ],
-  "pageInfo": {
-    "total": "number",
-    "perPage": "number",
-    "currentPage": "number",
-    "lastPage": "number",
-    "hasNextPage": "boolean"
-  }
-}
-```
 </details>
 
 <details>
-<summary>Get Anime Chronology</summary>
+<summary><h3>Get Anime Chronology</h3></summary>
 
 **URL**: `/anime/info/:id/chronology`  
 **Method**: `GET`  
 **Description**: Get chronological order of related anime
 
+**Example**: `https://api.example.com/anime/info/1/chronology?page=1&perPage=10`
+
 **Path Parameters**:
 ```
 id: number
@@ -262,153 +131,78 @@ id: number
 perPage?: number (default: 20)
 page?: number (default: 1)
 ```
-
-**Response Type**: `PaginatedAnimeChronology`
-
-**Response**:
-```json
-{
-  "data": [
-    {
-      "id": "number",
-      "title": {
-        "romaji": "string",
-        "english": "string",
-        "native": "string"
-      },
-      "format": "string",
-      "type": "string",
-      "startDate": {
-        "year": "number",
-        "month": "number",
-        "day": "number"
-      }
-    }
-  ],
-  "pageInfo": {
-    "total": "number",
-    "perPage": "number",
-    "currentPage": "number",
-    "lastPage": "number",
-    "hasNextPage": "boolean"
-  }
-}
-```
 </details>
 
 <details>
-<summary>Get Anime Episodes</summary>
+<summary><h3>Get Anime Episodes</h3></summary>
 
 **URL**: `/anime/info/:id/episodes`  
 **Method**: `GET`  
 **Description**: Get episode list for an anime
 
+**Example**: `https://api.example.com/anime/info/1/episodes`
+
 **Path Parameters**:
 ```
 id: number
 ```
-
-**Response Type**: `AnimeEpisodeList`
-
-**Response**:
-```json
-{
-  "episodes": [
-    {
-      "id": "string",
-      "number": "number",
-      "title": "string",
-      "description": "string",
-      "image": "string",
-      "airDate": "string"
-    }
-  ]
-}
-```
 </details>
 
 <details>
-<summary>Get Specific Episode</summary>
+<summary><h3>Get Specific Episode</h3></summary>
 
 **URL**: `/anime/info/:id/episodes/:number`  
 **Method**: `GET`  
 **Description**: Get details of a specific episode
 
+**Example**: `https://api.example.com/anime/info/1/episodes/5`
+
 **Path Parameters**:
 ```
 id: number
 number: number
 ```
-
-**Response Type**: `Episode`
-
-**Response**:
-```json
-{
-  "id": "string",
-  "number": "number",
-  "title": "string",
-  "description": "string",
-  "image": "string",
-  "airDate": "string"
-}
-```
 </details>
 
 <details>
-<summary>Get Episode Providers</summary>
+<summary><h3>Get Episode Providers</h3></summary>
 
 **URL**: `/anime/info/:id/providers/:number`  
 **Method**: `GET`  
 **Description**: Get available streaming providers for a specific episode
 
+**Example**: `https://api.example.com/anime/info/1/providers/5`
+
 **Path Parameters**:
 ```
 id: number
 number: number
 ```
-
-**Response Type**: `ProvidersList`
-
-**Response**:
-```json
-{
-  "providers": ["string"]
-}
-```
 </details>
 
 <details>
-<summary>Get All Providers for Anime</summary>
+<summary><h3>Get All Providers for Anime</h3></summary>
 
 **URL**: `/anime/info/:id/providers`  
 **Method**: `GET`  
 **Description**: Get all available streaming providers for all episodes of an anime
 
+**Example**: `https://api.example.com/anime/info/1/providers`
+
 **Path Parameters**:
 ```
 id: number
 ```
-
-**Response Type**: `AllProviders`
-
-**Response**:
-```json
-{
-  "providers": {
-    "1": ["string"],
-    "2": ["string"]
-  }
-}
-```
 </details>
 
 <details>
-<summary>Get Streaming Sources</summary>
+<summary><h3>Get Streaming Sources</h3></summary>
 
 **URL**: `/anime/watch/:id/episodes/:number`  
 **Method**: `GET`  
 **Description**: Get streaming sources for a specific episode
+
+**Example**: `https://api.example.com/anime/watch/1/episodes/5?provider=ANIWATCH&dub=false`
 
 **Path Parameters**:
 ```
@@ -421,38 +215,16 @@ number: number
 provider?: string (default: "ANIWATCH")
 dub?: boolean (default: false)
 ```
-
-**Response Type**: `StreamingSources`
-
-**Response**:
-```json
-{
-  "sources": [
-    {
-      "url": "string",
-      "quality": "string",
-      "isM3U8": "boolean"
-    }
-  ],
-  "subtitles": [
-    {
-      "url": "string",
-      "lang": "string"
-    }
-  ],
-  "headers": {
-    "Referer": "string"
-  }
-}
-```
 </details>
 
 <details>
-<summary>Filter Anime List</summary>
+<summary><h3>Filter Anime List</h3></summary>
 
 **URL**: `/anime/filter`  
 **Method**: `GET`  
 **Description**: Filter anime list based on various criteria
+
+**Example**: `https://api.example.com/anime/filter?page=1&perPage=20&genre=action,romance&season=FALL&year=2023`
 
 **Query Parameters**:
 ```typescript
@@ -539,130 +311,41 @@ dub?: boolean (default: false)
   sort?: string[];          // Sort options
 }
 ```
-
-**Response Type**: `PaginatedAnimeList`
-
-**Response**:
-```json
-{
-  "data": [
-    {
-      "id": "number",
-      "title": {
-        "romaji": "string",
-        "english": "string",
-        "native": "string"
-      },
-      "coverImage": {
-        "extraLarge": "string",
-        "large": "string",
-        "medium": "string",
-        "color": "string"
-      },
-      "bannerImage": "string",
-      "format": "string",
-      "status": "string",
-      "episodes": "number",
-      "season": "string",
-      "seasonYear": "number",
-      "averageScore": "number",
-      "genres": ["string"]
-    }
-  ],
-  "pageInfo": {
-    "total": "number",
-    "perPage": "number",
-    "currentPage": "number",
-    "lastPage": "number",
-    "hasNextPage": "boolean"
-  }
-}
-```
 </details>
 
 <details>
-<summary>Search Anime</summary>
+<summary><h3>Search Anime</h3></summary>
 
 **URL**: `/anime/search/:q`  
 **Method**: `GET`  
 **Description**: Search for anime by query string
 
+**Example**: `https://api.example.com/anime/search/attack%20on%20titan`
+
 **Path Parameters**:
 ```
 q: string
 ```
-
-**Response Type**: `AnimeSearchResults`
-
-**Response**:
-```json
-{
-  "data": [
-    {
-      "id": "number",
-      "title": {
-        "romaji": "string",
-        "english": "string",
-        "native": "string"
-      },
-      "coverImage": {
-        "extraLarge": "string",
-        "large": "string",
-        "medium": "string",
-        "color": "string"
-      }
-    }
-  ]
-}
-```
 </details>
 
 <details>
-<summary>Get Anime Schedule</summary>
+<summary><h3>Get Anime Schedule</h3></summary>
 
 **URL**: `/anime/schedule`  
 **Method**: `GET`  
 **Description**: Get currently airing anime schedule
 
-**Response Type**: `AnimeSchedule`
-
-**Response**:
-```json
-{
-  "sunday": [
-    {
-      "id": "number",
-      "title": {
-        "romaji": "string",
-        "english": "string",
-        "native": "string"
-      },
-      "coverImage": {
-        "extraLarge": "string",
-        "large": "string",
-        "medium": "string",
-        "color": "string"
-      },
-      "airingAt": "string",
-      "episode": "number"
-    }
-  ],
-  "monday": [],
-  "tuesday": [],
-  "wednesday": [],
-  "thursday": [],
-  "friday": [],
-  "saturday": []
-}
-```
+**Example**: `https://api.example.com/anime/schedule`
 </details>
 
 <details>
-<summary>Get Franchise Info</summary>
+<summary><h3>Get Franchise Info</h3></summary>
 
 **URL**: `/anime/franchise/:franchise`  
 **Method**: `GET`  
 **Description**: Get information about an anime franchise
+
+**Example**: `https://api.example.com/anime/franchise/fate?page=1&perPage=20`
 
 **Path Parameters**:
 ```
@@ -674,383 +357,191 @@ franchise: string
 perPage?: number (default: 20)
 page?: number (default: 1)
 ```
-
-**Response Type**: `PaginatedFranchise`
-
-**Response**:
-```json
-{
-  "data": [
-    {
-      "id": "number",
-      "title": {
-        "romaji": "string",
-        "english": "string",
-        "native": "string"
-      },
-      "format": "string",
-      "startDate": {
-        "year": "number",
-        "month": "number",
-        "day": "number"
-      }
-    }
-  ],
-  "pageInfo": {
-    "total": "number",
-    "perPage": "number",
-    "currentPage": "number",
-    "lastPage": "number",
-    "hasNextPage": "boolean"
-  }
-}
-```
 </details>
 
 <details>
-<summary>Start Indexing</summary>
+<summary><h3>Start Indexing</h3></summary>
 
 **URL**: `/anime/index`  
 **Method**: `PUT`  
 **Description**: Start the anime indexing process
 
+**Example**: `https://api.example.com/anime/index?delay=10`
+
 **Query Parameters**:
 ```
 delay?: number (default: 10)
 ```
-
-**Response Type**: `IndexerStatus`
-
-**Response**:
-```json
-{
-  "status": "Indexing started"
-}
-```
 </details>
 
 <details>
-<summary>Stop Indexing</summary>
+<summary><h3>Stop Indexing</h3></summary>
 
 **URL**: `/anime/index/stop`  
 **Method**: `PUT`  
 **Description**: Stop the anime indexing process
 
-**Response Type**: `IndexerStatus`
+**Example**: `https://api.example.com/anime/index/stop`
+</details>
 
-**Response**:
-```json
-{
-  "status": "Indexing stopped"
-}
+<details>
+<summary><h3>Set Indexer Sleep Time</h3></summary>
+
+**URL**: `/anime/index/sleep/:sleep`  
+**Method**: `PUT`  
+**Description**: Set the sleep time between indexing operations
+
+**Example**: `https://api.example.com/anime/index/sleep/60`
+
+**Path Parameters**:
+```
+sleep: number
 ```
 </details>
 
 <details>
-<summary>Schedule Indexing</summary>
+<summary><h3>Schedule Indexing</h3></summary>
 
 **URL**: `/anime/index/schedule`  
 **Method**: `PUT`  
 **Description**: Schedule periodic indexing
 
-**Response Type**: `IndexerStatus`
-
-**Response**:
-```json
-{
-  "status": "Indexing scheduled"
-}
-```
+**Example**: `https://api.example.com/anime/index/schedule`
 </details>
 
 <details>
-<summary>Unschedule Indexing</summary>
+<summary><h3>Unschedule Indexing</h3></summary>
 
 **URL**: `/anime/index/unschedule`  
 **Method**: `PUT`  
 **Description**: Cancel scheduled indexing
 
-**Response Type**: `IndexerStatus`
-
-**Response**:
-```json
-{
-  "status": "Indexing unscheduled"
-}
-```
+**Example**: `https://api.example.com/anime/index/unschedule`
 </details>
 
-### Shikimori
+## Shikimori
 
 <details>
-<summary>Get Shikimori Anime Info</summary>
+<summary><h3>Get Shikimori Anime Info</h3></summary>
 
 **URL**: `/shikimori/info/:id`  
 **Method**: `GET`  
 **Description**: Get anime information from Shikimori
 
+**Example**: `https://api.example.com/shikimori/info/1`
+
 **Path Parameters**:
 ```
 id: number
 ```
-
-**Response Type**: `ShikimoriAnime`
-
-**Response**:
-```json
-{
-  "id": "number",
-  "name": "string",
-  "russian": "string",
-  "image": {
-    "original": "string",
-    "preview": "string",
-    "x96": "string",
-    "x48": "string"
-  },
-  "url": "string",
-  "kind": "string",
-  "score": "number",
-  "status": "string",
-  "episodes": "number",
-  "episodesAired": "number",
-  "aired_on": "string",
-  "released_on": "string",
-  "rating": "string",
-  "genres": [
-    {
-      "id": "number",
-      "name": "string",
-      "russian": "string"
-    }
-  ],
-  "studios": [
-    {
-      "id": "number",
-      "name": "string",
-      "filtered_name": "string"
-    }
-  ]
-}
-```
 </details>
 
 <details>
-<summary>Update Shikimori Anime Info</summary>
+<summary><h3>Update Shikimori Anime Info</h3></summary>
 
 **URL**: `/shikimori/info/:id`  
 **Method**: `PUT`  
 **Description**: Update anime information from Shikimori
 
+**Example**: `https://api.example.com/shikimori/info/1`
+
 **Path Parameters**:
 ```
 id: number
 ```
-
-**Response Type**: `ShikimoriUpdateResponse`
-
-**Response**:
-```json
-{
-  "id": "number",
-  "name": "string",
-  "russian": "string",
-  "image": {
-    "original": "string",
-    "preview": "string",
-    "x96": "string",
-    "x48": "string"
-  },
-  "updatedAt": "string"
-}
-```
 </details>
 
 <details>
-<summary>Get Shikimori Franchise</summary>
+<summary><h3>Get Shikimori Franchise</h3></summary>
 
 **URL**: `/shikimori/franchise/:franchise`  
 **Method**: `GET`  
 **Description**: Get franchise information from Shikimori
 
+**Example**: `https://api.example.com/shikimori/franchise/fate`
+
 **Path Parameters**:
 ```
 franchise: string
 ```
-
-**Response Type**: `ShikimoriFranchise`
-
-**Response**:
-```json
-{
-  "links": [
-    {
-      "id": "number",
-      "source_id": "number",
-      "target_id": "number",
-      "source": {
-        "id": "number",
-        "name": "string",
-        "russian": "string",
-        "image": {
-          "original": "string",
-          "preview": "string",
-          "x96": "string",
-          "x48": "string"
-        },
-        "kind": "string",
-        "status": "string"
-      },
-      "target": {
-        "id": "number",
-        "name": "string",
-        "russian": "string",
-        "image": {
-          "original": "string",
-          "preview": "string",
-          "x96": "string",
-          "x48": "string"
-        },
-        "kind": "string",
-        "status": "string"
-      },
-      "relation": "string",
-      "relation_russian": "string"
-    }
-  ]
-}
-```
 </details>
 
 <details>
-<summary>Get Franchise IDs</summary>
+<summary><h3>Get Franchise IDs</h3></summary>
 
 **URL**: `/shikimori/franchiseId/:franchise`  
 **Method**: `GET`  
 **Description**: Get list of IDs in a franchise
 
+**Example**: `https://api.example.com/shikimori/franchiseId/fate`
+
 **Path Parameters**:
 ```
 franchise: string
 ```
-
-**Response Type**: `FranchiseIDs`
-
-**Response**:
-```json
-{
-  "ids": ["number"]
-}
-```
 </details>
 
-### Streaming Sources
+## Streaming Sources
+
+> **Note**: The streaming providers share common endpoint patterns. Make sure to use the correct provider ID when making requests.
 
 #### AnimePahe
 
 <details>
-<summary>Get AnimePahe Anime Info</summary>
+<summary><h3>Get AnimePahe Anime Info</h3></summary>
 
-**URL**: `/anime/animepahe/info/:id`  
+**URL**: `/anime/info/:id/animepahe`  
 **Method**: `GET`  
 **Description**: Get anime information from AnimePahe
 
+**Example**: `https://api.example.com/anime/info/1/animepahe`
+
 **Path Parameters**:
 ```
-id: number
-```
-
-**Response Type**: `AnimePaheAnime`
-
-**Response**:
-```json
-{
-  "id": "string",
-  "title": "string",
-  "image": "string",
-  "episodes": [
-    {
-      "id": "string",
-      "number": "number",
-      "title": "string",
-      "created_at": "string"
-    }
-  ]
-}
+id: number (Anilist ID)
 ```
 </details>
 
 <details>
-<summary>Get AnimePahe Streaming Sources</summary>
+<summary><h3>Get AnimePahe Streaming Sources</h3></summary>
 
-**URL**: `/anime/animepahe/watch/:id`  
+**URL**: `/anime/watch/:id`  
 **Method**: `GET`  
 **Description**: Get streaming sources from AnimePahe
+
+**Example**: `https://api.example.com/anime/watch/ep_12345`
 
 **Path Parameters**:
 ```
 id: string (AnimePahe ID)
-```
-
-**Response Type**: `AnimePaheSources`
-
-**Response**:
-```json
-{
-  "sources": [
-    {
-      "url": "string",
-      "quality": "string",
-      "isM3U8": false
-    }
-  ],
-  "subtitles": [],
-  "headers": {
-    "Referer": "string"
-  }
-}
 ```
 </details>
 
 #### AnimeKai
 
 <details>
-<summary>Get AnimeKai Anime Info</summary>
+<summary><h3>Get AnimeKai Anime Info</h3></summary>
 
-**URL**: `/anime/animekai/info/:id`  
+**URL**: `/anime/info/:id/animekai`  
 **Method**: `GET`  
 **Description**: Get anime information from AnimeKai
 
+**Example**: `https://api.example.com/anime/info/1/animekai`
+
 **Path Parameters**:
 ```
-id: number
-```
-
-**Response Type**: `AnimeKaiAnime`
-
-**Response**:
-```json
-{
-  "id": "string",
-  "title": "string",
-  "image": "string",
-  "episodes": [
-    {
-      "id": "string",
-      "number": "number",
-      "title": "string"
-    }
-  ]
-}
+id: number (Anilist ID)
 ```
 </details>
 
 <details>
-<summary>Get AnimeKai Streaming Sources</summary>
+<summary><h3>Get AnimeKai Streaming Sources</h3></summary>
 
-**URL**: `/anime/animekai/watch/:id`  
+**URL**: `/anime/watch/:id`  
 **Method**: `GET`  
 **Description**: Get streaming sources from AnimeKai
+
+**Example**: `https://api.example.com/anime/watch/ep_12345?dub=false`
 
 **Path Parameters**:
 ```
@@ -1061,102 +552,33 @@ id: string (AnimeKai ID)
 ```
 dub?: boolean (default: false)
 ```
-
-**Response Type**: `AnimeKaiSources`
-
-**Response**:
-```json
-{
-  "sources": [
-    {
-      "url": "string",
-      "quality": "string",
-      "isM3U8": "boolean"
-    }
-  ],
-  "subtitles": [
-    {
-      "url": "string",
-      "lang": "string"
-    }
-  ],
-  "headers": {
-    "Referer": "string"
-  }
-}
-```
 </details>
 
 #### Zoro
 
 <details>
-<summary>Get Zoro Anime Info</summary>
+<summary><h3>Get Zoro Anime Info</h3></summary>
 
-**URL**: `/anime/zoro/info/:id`  
+**URL**: `/anime/info/:id/zoro`  
 **Method**: `GET`  
-**Description**: Get anime information from Zoro
+**Description**: Get anime information from Zoro using Anilist ID
+
+**Example**: `https://api.example.com/anime/info/1/zoro`
 
 **Path Parameters**:
 ```
-id: string (Zoro ID)
-```
-
-**Response Type**: `ZoroAnime`
-
-**Response**:
-```json
-{
-  "id": "string",
-  "title": "string",
-  "image": "string",
-  "episodes": [
-    {
-      "id": "string",
-      "number": "number",
-      "title": "string"
-    }
-  ]
-}
+id: number (Anilist ID)
 ```
 </details>
 
 <details>
-<summary>Get Zoro Info by Anilist ID</summary>
+<summary><h3>Get Zoro Streaming Sources</h3></summary>
 
-**URL**: `/anime/zoro/anilist/:id`  
-**Method**: `GET`  
-**Description**: Get Zoro anime information using Anilist ID
-
-**Path Parameters**:
-```
-id: number
-```
-
-**Response Type**: `ZoroAnime`
-
-**Response**:
-```json
-{
-  "id": "string",
-  "title": "string",
-  "image": "string",
-  "episodes": [
-    {
-      "id": "string",
-      "number": "number",
-      "title": "string"
-    }
-  ]
-}
-```
-</details>
-
-<details>
-<summary>Get Zoro Streaming Sources</summary>
-
-**URL**: `/anime/zoro/watch/:id`  
+**URL**: `/anime/watch/:id`  
 **Method**: `GET`  
 **Description**: Get streaming sources from Zoro
+
+**Example**: `https://api.example.com/anime/watch/ep_12345?dub=false`
 
 **Path Parameters**:
 ```
@@ -1167,40 +589,18 @@ id: string (Zoro ID)
 ```
 dub?: boolean (default: false)
 ```
-
-**Response Type**: `ZoroSources`
-
-**Response**:
-```json
-{
-  "sources": [
-    {
-      "url": "string",
-      "quality": "string",
-      "isM3U8": "boolean"
-    }
-  ],
-  "subtitles": [
-    {
-      "url": "string",
-      "lang": "string"
-    }
-  ],
-  "headers": {
-    "Referer": "string"
-  }
-}
-```
 </details>
 
-### Exceptions
+## Exceptions
 
 <details>
-<summary>Get All Exceptions</summary>
+<summary><h3>Get All Exceptions</h3></summary>
 
 **URL**: `/exceptions`  
 **Method**: `GET`  
 **Description**: Get all logged exceptions
+
+**Example**: `https://api.example.com/exceptions?page=1&perPage=20&statusCode=500`
 
 **Query Parameters**:
 ```typescript
@@ -1221,377 +621,143 @@ dub?: boolean (default: false)
   perPage?: number;        // Results per page (min: 1)
 }
 ```
-
-**Response Type**: `PaginatedExceptions`
-
-**Response**:
-```json
-{
-  "data": [
-    {
-      "id": "number",
-      "statusCode": "number",
-      "message": "string",
-      "path": "string",
-      "method": "string",
-      "timestamp": "string",
-      "stack": "string"
-    }
-  ],
-  "pageInfo": {
-    "total": "number",
-    "perPage": "number",
-    "currentPage": "number",
-    "lastPage": "number",
-    "hasNextPage": "boolean"
-  }
-}
-```
 </details>
 
 <details>
-<summary>Delete Exception</summary>
+<summary><h3>Delete Exception</h3></summary>
 
 **URL**: `/exceptions/delete/:id`  
 **Method**: `DELETE`  
 **Description**: Delete a logged exception
 
+**Example**: `https://api.example.com/exceptions/delete/1`
+
 **Path Parameters**:
 ```
 id: number
 ```
-
-**Response Type**: `DeleteExceptionResponse`
-
-**Response**:
-```json
-{
-  "deleted": true,
-  "id": "number"
-}
-```
 </details>
 
-### Console
+## Console
 
 <details>
-<summary>Get Console Logs</summary>
+<summary><h3>Get Console Logs</h3></summary>
 
 **URL**: `/console/logs`  
 **Method**: `GET`  
 **Description**: Get all console logs
 
-**Response Type**: `ConsoleLogEntry[]`
-
-**Response**:
-```json
-[
-  {
-    "message": "string",
-    "timestamp": "string"
-  }
-]
-```
+**Example**: `https://api.example.com/console/logs`
 </details>
 
 <details>
-<summary>Get Console Warnings</summary>
+<summary><h3>Get Console Warnings</h3></summary>
 
 **URL**: `/console/warns`  
 **Method**: `GET`  
 **Description**: Get all console warnings
 
-**Response Type**: `ConsoleWarnEntry[]`
-
-**Response**:
-```json
-[
-  {
-    "message": "string",
-    "timestamp": "string"
-  }
-]
-```
+**Example**: `https://api.example.com/console/warns`
 </details>
 
 <details>
-<summary>Get Console Errors</summary>
+<summary><h3>Get Console Errors</h3></summary>
 
 **URL**: `/console/errors`  
 **Method**: `GET`  
 **Description**: Get all console errors
 
-**Response Type**: `ConsoleErrorEntry[]`
-
-**Response**:
-```json
-[
-  {
-    "message": "string",
-    "timestamp": "string",
-    "stack": "string"
-  }
-]
-```
+**Example**: `https://api.example.com/console/errors`
 </details>
 
-### TMDB
+## Cloudinary
+
+Cloudinary functionality is available as an internal service for image handling. It's primarily used by other endpoints rather than exposing direct API endpoints.
+
+## TMDB
 
 <details>
-<summary>Get TMDB Info by Anilist ID</summary>
+<summary><h3>Get TMDB Info by Anilist ID</h3></summary>
 
 **URL**: `/anime/info/:id/tmdb`  
 **Method**: `GET`  
 **Description**: Get TMDB information using Anilist ID
 
+**Example**: `https://api.example.com/anime/info/1/tmdb`
+
 **Path Parameters**:
 ```
 id: number
 ```
-
-**Response Type**: `TMDBShow`
-
-**Response**:
-```json
-{
-  "id": "number",
-  "name": "string",
-  "original_name": "string",
-  "overview": "string",
-  "poster_path": "string",
-  "backdrop_path": "string",
-  "first_air_date": "string",
-  "seasons": [
-    {
-      "id": "number",
-      "name": "string",
-      "overview": "string",
-      "season_number": "number",
-      "episode_count": "number",
-      "poster_path": "string",
-      "air_date": "string"
-    }
-  ],
-  "genres": [
-    {
-      "id": "number",
-      "name": "string"
-    }
-  ],
-  "status": "string",
-  "vote_average": "number"
-}
-```
 </details>
 
 <details>
-<summary>Get TMDB Season Info</summary>
+<summary><h3>Get TMDB Season Info</h3></summary>
 
 **URL**: `/anime/info/:id/tmdb/season`  
 **Method**: `GET`  
-**Description**: Get TMDB season information
+**Description**: Get TMDB season information for an anime
+
+**Example**: `https://api.example.com/anime/info/1/tmdb/season`
 
 **Path Parameters**:
 ```
 id: number
 ```
-
-**Response Type**: `TMDBSeason`
-
-**Response**:
-```json
-{
-  "id": "number",
-  "name": "string",
-  "overview": "string",
-  "season_number": "number",
-  "air_date": "string",
-  "episodes": [
-    {
-      "id": "number",
-      "name": "string",
-      "overview": "string",
-      "episode_number": "number",
-      "still_path": "string",
-      "air_date": "string",
-      "vote_average": "number",
-      "runtime": "number"
-    }
-  ],
-  "poster_path": "string"
-}
-```
 </details>
 
-### TVDB
+## TVDB
 
 <details>
-<summary>Get TVDB Info by Anilist ID</summary>
+<summary><h3>Get TVDB Info by Anilist ID</h3></summary>
 
 **URL**: `/anime/info/:id/tvdb`  
 **Method**: `GET`  
 **Description**: Get TVDB information using Anilist ID
 
+**Example**: `https://api.example.com/anime/info/1/tvdb`
+
 **Path Parameters**:
 ```
 id: number
 ```
-
-**Response Type**: `TVDBShow`
-
-**Response**:
-```json
-{
-  "id": "number",
-  "name": "string",
-  "overview": "string",
-  "firstAired": "string",
-  "image": "string",
-  "network": "string",
-  "status": "string",
-  "seasons": [
-    {
-      "id": "number",
-      "name": "string",
-      "overview": "string",
-      "number": "number",
-      "imageUrl": "string",
-      "episodes": [
-        {
-          "id": "number",
-          "name": "string",
-          "overview": "string",
-          "number": "number",
-          "image": "string",
-          "firstAired": "string",
-          "directors": ["string"],
-          "writers": ["string"],
-          "runtime": "number"
-        }
-      ]
-    }
-  ],
-  "genres": ["string"]
-}
-```
 </details>
 
 <details>
-<summary>Get TVDB Translations</summary>
+<summary><h3>Get TVDB Translations</h3></summary>
 
 **URL**: `/anime/info/:id/tvdb/translations/:language`  
 **Method**: `GET`  
 **Description**: Get TVDB translations for a specific language
+
+**Example**: `https://api.example.com/anime/info/1/tvdb/translations/en`
 
 **Path Parameters**:
 ```
 id: number
 language: string
 ```
-
-**Response Type**: `TVDBTranslation`
-
-**Response**:
-```json
-{
-  "name": "string",
-  "overview": "string",
-  "language": "string"
-}
-```
 </details>
 
 <details>
-<summary>Get TVDB Available Languages</summary>
+<summary><h3>Get TVDB Available Languages</h3></summary>
 
 **URL**: `/anime/tvdb/languages`  
 **Method**: `GET`  
 **Description**: Get list of available languages in TVDB
 
-**Response Type**: `TVDBLanguage[]`
-
-**Response**:
-```json
-[
-  {
-    "id": "string",
-    "name": "string",
-    "shortCode": "string",
-    "englishName": "string"
-  }
-]
-```
+**Example**: `https://api.example.com/anime/tvdb/languages`
 </details>
 
 <details>
-<summary>Update TVDB Languages</summary>
+<summary><h3>Update TVDB Languages</h3></summary>
 
 **URL**: `/anime/tvdb/languages`  
 **Method**: `PUT`  
 **Description**: Update the list of available TVDB languages
 
-**Response Type**: `TVDBLanguageUpdateResponse`
-
-**Response**:
-```json
-{
-  "success": true,
-  "message": "Languages updated",
-  "count": "number"
-}
-```
+**Example**: `https://api.example.com/anime/tvdb/languages`
 </details>
-
-## Response Formats
-
-### Basic API Response
-```typescript
-interface ApiResponse<T> {
-  data: T;
-  pageInfo: {
-    total: number;
-    perPage: number;
-    currentPage: number;
-    lastPage: number;
-    hasNextPage: boolean;
-  };
-}
-```
-
-### Error Response
-```typescript
-{
-  statusCode: number;
-  message: string;
-  stack?: string; // Only in development mode
-}
-```
-
-## Development
-
-```bash
-# development
-$ yarn start
-
-# watch mode
-$ yarn start:dev
-
-# production mode
-$ yarn start:prod
-```
-
-## Testing
-
-```bash
-# unit tests
-$ yarn test
-
-# e2e tests
-$ yarn test:e2e
-
-# test coverage
-$ yarn test:cov
-```
 
 ## Contributing
 
@@ -1603,12 +769,13 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## License
-
-This project is [MIT licensed](LICENSE).
-
 ## Acknowledgments
 
 - [NestJS](https://nestjs.com/) - The framework used
 - [Prisma](https://www.prisma.io/) - ORM
+- [Consumet API](https://github.com/consumet/consumet.ts) - For anime scraping inspiration and utilities
 - Various anime API providers for their data
+
+## License
+
+This project is [MIT licensed](LICENSE).

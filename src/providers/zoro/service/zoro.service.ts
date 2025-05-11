@@ -11,6 +11,7 @@ import { Source } from '../../stream/model/Source'
 import { TmdbService } from '../../tmdb/service/tmdb.service'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
+import Config from '../../../configs/Config'
 
 export interface BasicZoro {
   id: string;
@@ -134,7 +135,7 @@ export class ZoroService {
       key, 
       JSON.stringify(zoro), 
       'EX', 
-      process.env.SOURCES_REDIS_TIME ? parseInt(process.env.SOURCES_REDIS_TIME) : 3600
+      Config.SOURCES_REDIS_TIME
     );
 
     return zoro as Source

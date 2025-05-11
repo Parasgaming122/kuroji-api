@@ -11,6 +11,7 @@ import { AnimePaheHelper } from '../utils/animepahe-helper';
 import { TmdbService } from '../../tmdb/service/tmdb.service'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
+import Config from '../../../configs/Config'
 
 export interface BasicAnimepahe {
   id: string;
@@ -72,7 +73,7 @@ export class AnimepaheService {
       key,
       JSON.stringify(animepahe),
       'EX',
-      process.env.SOURCES_REDIS_TIME ? parseInt(process.env.SOURCES_REDIS_TIME) : 3600
+      Config.SOURCES_REDIS_TIME
     );
 
     return animepahe as Source;

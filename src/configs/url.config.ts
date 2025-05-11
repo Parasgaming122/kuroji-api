@@ -10,11 +10,12 @@ export class UrlConfig {
   public static VERIFY_URL_BASE = `${UrlConfig.BASE}api/auth/verify`;
 
   // 🌐 API Base URLs
-  public static readonly CONSUMET_BASE = withTrailingSlash(Config.CONSUMET || 'https://anime-api-eight-tawny.vercel.app');
+  public static readonly CONSUMET_BASE = withTrailingSlash(Config.CONSUMET || '');
   public static readonly SHIKIMORI = withTrailingSlash(Config.SHIKIMORI || 'https://shikimori.one');
   public static readonly JIKAN = withTrailingSlash(Config.JIKAN || 'https://api.jikan.moe/v4');
-  public static readonly HIANIME = 'https://aniwatch-api-git.vercel.app/api/v2/hianime/';
   public static readonly ANILIST_GRAPHQL = Config.ANILIST || 'https://graphql.anilist.co';
+  public static readonly TMDB: string = Config.TMDB || 'https://api.themoviedb.org/3/';
+  public static readonly TVDB: string = Config.TVDB || 'https://api4.thetvdb.com/v4/';
 
   // 📡 External Links
   public static readonly MAL = 'https://myanimelist.net/anime/';

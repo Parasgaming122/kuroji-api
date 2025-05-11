@@ -1,35 +1,35 @@
 import Config from './Config';
+import { UrlConfig } from './url.config'
 
 export class TVDB {
   static readonly API_KEY: string =
-    Config.TVDB_API || '8327a9a3-c6bd-4a96-9527-e4c723b0041b';
-  static readonly URL: string = Config.TVDB || 'https://api4.thetvdb.com/v4/';
+    Config.TVDB_API || '';
 
   static getLoginUrl(): string {
-    return `${TVDB.URL}login`;
+    return `${UrlConfig.TVDB}login`;
   }
 
   static getRemoteId(id: string): string {
-    return `${TVDB.URL}search/remoteid/${id}`;
+    return `${UrlConfig.TVDB}search/remoteid/${id}`;
   }
 
   static getMovie(id: number): string {
-    return `${TVDB.URL}movies/${id}/extended`;
+    return `${UrlConfig.TVDB}movies/${id}/extended`;
   }
 
   static getSeries(id: number): string {
-    return `${TVDB.URL}series/${id}/extended`;
+    return `${UrlConfig.TVDB}series/${id}/extended`;
   }
 
   static getMovieTranslations(id: number, translations: string): string {
-    return `${TVDB.URL}movies/${id}/translations/${translations}`;
+    return `${UrlConfig.TVDB}movies/${id}/translations/${translations}`;
   }
 
   static getSeriesTranslations(id: number, translations: string): string {
-    return `${TVDB.URL}series/${id}/translations/${translations}`;
+    return `${UrlConfig.TVDB}series/${id}/translations/${translations}`;
   }
 
   static getLanguages(): string {
-    return `${TVDB.URL}languages`;
+    return `${UrlConfig.TVDB}languages`;
   }
 }
