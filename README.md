@@ -60,7 +60,7 @@ $ yarn start:dev
 **Method**: `GET`  
 **Description**: Get detailed information about an anime by ID
 
-**Example**: `https://api.example.com/anime/info/1`
+**Example**: `https://api.example.com/api/anime/info/1`
 
 **Path Parameters**:
 ```
@@ -75,7 +75,7 @@ id: number
 **Method**: `GET`  
 **Description**: Get anime recommendations based on an anime ID
 
-**Example**: `https://api.example.com/anime/info/1/recommendations?page=1&perPage=10`
+**Example**: `https://api.example.com/api/anime/info/1/recommendations?page=1&perPage=10`
 
 **Path Parameters**:
 ```
@@ -96,7 +96,7 @@ page?: number (default: 1)
 **Method**: `GET`  
 **Description**: Get characters from an anime
 
-**Example**: `https://api.example.com/anime/info/1/characters?page=1&perPage=20`
+**Example**: `https://api.example.com/api/anime/info/1/characters?page=1&perPage=20`
 
 **Path Parameters**:
 ```
@@ -117,7 +117,7 @@ page?: number (default: 1)
 **Method**: `GET`  
 **Description**: Get chronological order of related anime
 
-**Example**: `https://api.example.com/anime/info/1/chronology?page=1&perPage=10`
+**Example**: `https://api.example.com/api/anime/info/1/chronology?page=1&perPage=10`
 
 **Path Parameters**:
 ```
@@ -138,7 +138,7 @@ page?: number (default: 1)
 **Method**: `GET`  
 **Description**: Get episode list for an anime
 
-**Example**: `https://api.example.com/anime/info/1/episodes`
+**Example**: `https://api.example.com/api/anime/info/1/episodes`
 
 **Path Parameters**:
 ```
@@ -153,7 +153,7 @@ id: number
 **Method**: `GET`  
 **Description**: Get details of a specific episode
 
-**Example**: `https://api.example.com/anime/info/1/episodes/5`
+**Example**: `https://api.example.com/api/anime/info/1/episodes/5`
 
 **Path Parameters**:
 ```
@@ -169,7 +169,7 @@ number: number
 **Method**: `GET`  
 **Description**: Get available streaming providers for a specific episode
 
-**Example**: `https://api.example.com/anime/info/1/providers/5`
+**Example**: `https://api.example.com/api/anime/info/1/providers/5`
 
 **Path Parameters**:
 ```
@@ -185,7 +185,7 @@ number: number
 **Method**: `GET`  
 **Description**: Get all available streaming providers for all episodes of an anime
 
-**Example**: `https://api.example.com/anime/info/1/providers`
+**Example**: `https://api.example.com/api/anime/info/1/providers`
 
 **Path Parameters**:
 ```
@@ -200,7 +200,7 @@ id: number
 **Method**: `GET`  
 **Description**: Get streaming sources for a specific episode
 
-**Example**: `https://api.example.com/anime/watch/1/episodes/5?provider=ANIWATCH&dub=false`
+**Example**: `https://api.example.com/api/anime/watch/1/episodes/5?provider=ANIWATCH&dub=false`
 
 **Path Parameters**:
 ```
@@ -222,7 +222,7 @@ dub?: boolean (default: false)
 **Method**: `GET`  
 **Description**: Filter anime list based on various criteria
 
-**Example**: `https://api.example.com/anime/filter?page=1&perPage=20&genre=action,romance&season=FALL&year=2023`
+**Example**: `https://api.example.com/api/anime/filter?page=1&perPage=20&genre=action,romance&season=FALL&year=2023`
 
 **Query Parameters**:
 ```typescript
@@ -318,7 +318,7 @@ dub?: boolean (default: false)
 **Method**: `GET`  
 **Description**: Search for anime by query string
 
-**Example**: `https://api.example.com/anime/search/attack%20on%20titan`
+**Example**: `https://api.example.com/api/anime/search/attack%20on%20titan`
 
 **Path Parameters**:
 ```
@@ -333,7 +333,7 @@ q: string
 **Method**: `GET`  
 **Description**: Get currently airing anime schedule
 
-**Example**: `https://api.example.com/anime/schedule`
+**Example**: `https://api.example.com/api/anime/schedule`
 </details>
 
 <details>
@@ -343,7 +343,7 @@ q: string
 **Method**: `GET`  
 **Description**: Get information about an anime franchise
 
-**Example**: `https://api.example.com/anime/franchise/fate?page=1&perPage=20`
+**Example**: `https://api.example.com/api/anime/franchise/fate?page=1&perPage=20`
 
 **Path Parameters**:
 ```
@@ -364,7 +364,7 @@ page?: number (default: 1)
 **Method**: `PUT`  
 **Description**: Start the anime indexing process
 
-**Example**: `https://api.example.com/anime/index?delay=10`
+**Example**: `https://api.example.com/api/anime/index?delay=10`
 
 **Query Parameters**:
 ```
@@ -379,7 +379,7 @@ delay?: number (default: 10)
 **Method**: `PUT`  
 **Description**: Stop the anime indexing process
 
-**Example**: `https://api.example.com/anime/index/stop`
+**Example**: `https://api.example.com/api/anime/index/stop`
 </details>
 
 <details>
@@ -389,7 +389,7 @@ delay?: number (default: 10)
 **Method**: `PUT`  
 **Description**: Set the sleep time between indexing operations
 
-**Example**: `https://api.example.com/anime/index/sleep/60`
+**Example**: `https://api.example.com/api/anime/index/sleep/60`
 
 **Path Parameters**:
 ```
@@ -404,7 +404,7 @@ sleep: number
 **Method**: `PUT`  
 **Description**: Schedule periodic indexing
 
-**Example**: `https://api.example.com/anime/index/schedule`
+**Example**: `https://api.example.com/api/anime/index/schedule`
 </details>
 
 <details>
@@ -414,7 +414,7 @@ sleep: number
 **Method**: `PUT`  
 **Description**: Cancel scheduled indexing
 
-**Example**: `https://api.example.com/anime/index/unschedule`
+**Example**: `https://api.example.com/api/anime/index/unschedule`
 </details>
 
 ## Shikimori
@@ -426,7 +426,7 @@ sleep: number
 **Method**: `GET`  
 **Description**: Get anime information from Shikimori
 
-**Example**: `https://api.example.com/shikimori/info/1`
+**Example**: `https://api.example.com/api/shikimori/info/1`
 
 **Path Parameters**:
 ```
