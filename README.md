@@ -20,8 +20,6 @@ Kuroji API is a powerful and flexible API for accessing anime information, strea
 - 🔍 Search and retrieve detailed anime information
 - 🎬 Access multiple streaming sources (AnimePahe, AnimeKai, Zoro)
 - 📅 Get airing schedules and updates
-- 🔑 Secure authentication system
-- 🖼️ Cloudinary integration for image hosting
 - 🧐 Detailed exception handling and logging
 
 ## Installation
