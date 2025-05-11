@@ -1,3 +1,7 @@
+## [0.1.6](https://github.com/veaquer/kuroji-api/compare/v0.1.5...v0.1.6) (2025-05-11)
+
+
+
 ## [0.1.5](https://github.com/veaquer/kuroji-api/compare/v0.1.4...v0.1.5) (2025-05-11)
 
 
@@ -16,10 +20,6 @@
 
 
 ## [0.1.2](https://github.com/veaquer/kuroji-api/compare/v0.1.1...v0.1.2) (2025-05-11)
-
-
-
-## [0.1.1](https://github.com/veaquer/kuroji-api/compare/v0.1.0...v0.1.1) (2025-05-11)
 
 
 
