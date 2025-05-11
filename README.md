@@ -43,6 +43,17 @@ $ yarn start:dev
 
 > **Important**: This API requires PostgreSQL and Redis to be running. Make sure both services are properly configured in your `.env` file.
 
+### Quick Start
+
+You can quickly start both PostgreSQL and Redis using Docker:
+
+```bash
+# Start PostgreSQL and Redis in detached mode
+$ sudo docker-compose up -d
+```
+
+> **Note**: This requires Docker to be installed and running on your system. The above command will start PostgreSQL and Redis with the configuration specified in the docker-compose.yml file.
+
 ### Database Indexing
 
 Before you can retrieve anime data, you must first populate the database using one of these methods:
