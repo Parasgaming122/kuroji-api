@@ -26,7 +26,6 @@ Kuroji API is a powerful and flexible API for accessing anime information, strea
 
 ```bash
 # Install dependencies
-# Install dependencies
 $ yarn install
 
 # Set up environment variables
@@ -39,6 +38,27 @@ $ npx prisma migrate dev
 # Start the server
 $ yarn start:dev
 ```
+
+## Getting Started
+
+> **Important**: This API requires PostgreSQL and Redis to be running. Make sure both services are properly configured in your `.env` file.
+
+### Database Indexing
+
+Before you can retrieve anime data, you must first populate the database using one of these methods:
+
+1. **Automatic Indexing**: Trigger the database indexing process with:
+   ```
+   PUT /anime/index
+   ```
+   This will start populating your database with anime information.
+
+2. **Manual Addition**: Add specific anime to your database by fetching their details:
+   ```
+   GET /anime/info/:id
+   ```
+
+The API will only return information for anime that have been indexed in your database. If you're setting up the API for the first time, make sure to run the indexing process after installation.
 
 ## API Documentation
 
